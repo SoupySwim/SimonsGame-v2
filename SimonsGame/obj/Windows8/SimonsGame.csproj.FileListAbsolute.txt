@@ -1,0 +1,9 @@
+E:\Dropbox\SimonsGame\SImonsGame\SImonsGame\bin\Windows8\Content\Cursor\CursorStar.xnb
+E:\Dropbox\SimonsGame\SImonsGame\SImonsGame\bin\Windows8\SimonsGame.exe
+E:\Dropbox\SimonsGame\SImonsGame\SImonsGame\bin\Windows8\MonoGame.Framework.dll
+E:\Dropbox\SimonsGame\SImonsGame\SImonsGame\bin\Windows8\OpenTK.dll
+E:\Dropbox\SimonsGame\SImonsGame\SImonsGame\bin\Windows8\Tao.Sdl.dll
+E:\Dropbox\SimonsGame\SImonsGame\SImonsGame\bin\Windows8\Lidgren.Network.dll
+E:\Dropbox\SimonsGame\SImonsGame\SImonsGame\obj\Windows8\Microsoft.Xna.Framework.RuntimeProfile.txt
+E:\Dropbox\SimonsGame\SImonsGame\SImonsGame\obj\Windows8\SimonsGame.exe
+E:\Dropbox\SimonsGame\SImonsGame\SImonsGame\obj\Windows8\SimonsGame.csprojResolveAssemblyReference.cache

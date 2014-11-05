@@ -1,0 +1,2 @@
+E:\Dropbox\temp\SImonsGame\SImonsGame\SImonsGameContent\obj\Android\SImonsGameContent.contentprojResolveAssemblyReference.cache
+E:\Dropbox\SimonsGame\SImonsGame\SImonsGameContent\obj\Android\SimonsGameContent.contentprojResolveAssemblyReference.cache

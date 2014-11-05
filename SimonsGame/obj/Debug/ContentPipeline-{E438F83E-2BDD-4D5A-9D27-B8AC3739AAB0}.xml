@@ -1,0 +1,96 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<XnaContent xmlns:Pipeline="Microsoft.Xna.Framework.Content.Pipeline">
+  <Asset Type="Pipeline:BuildItemCollection">
+    <Item>
+      <Source>Cursor\CursorStar.png</Source>
+      <Name>Cursor\CursorStar</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>E:\Dropbox\SimonsGame\SImonsGame\SImonsGame\bin\Debug\Content\Cursor\CursorStar.xnb</Output>
+      <Time>2014-10-28T20:42:05-05:00</Time>
+    </Item>
+    <Item>
+      <Source>Test\fireball.png</Source>
+      <Name>Test\fireball</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>E:\Dropbox\SimonsGame\SImonsGame\SImonsGame\bin\Debug\Content\Test\fireball.xnb</Output>
+      <Time>2014-10-29T00:32:53-05:00</Time>
+    </Item>
+    <Item>
+      <Source>Test\bubble.png</Source>
+      <Name>Test\bubble</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>E:\Dropbox\SimonsGame\SImonsGame\SImonsGame\bin\Debug\Content\Test\bubble.xnb</Output>
+      <Time>2014-10-29T01:23:04-05:00</Time>
+    </Item>
+    <Item>
+      <Source>Test\splash.png</Source>
+      <Name>Test\splash</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>E:\Dropbox\SimonsGame\SImonsGame\SImonsGame\bin\Debug\Content\Test\splash.xnb</Output>
+      <Time>2014-10-29T11:53:30-05:00</Time>
+    </Item>
+    <Item>
+      <Source>Test\leaf.png</Source>
+      <Name>Test\leaf</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>E:\Dropbox\SimonsGame\SImonsGame\SImonsGame\bin\Debug\Content\Test\leaf.xnb</Output>
+      <Time>2014-11-03T20:51:45-06:00</Time>
+    </Item>
+    <BuildSuccessful>true</BuildSuccessful>
+    <Settings>
+      <ContentProjectGUID>{E438F83E-2BDD-4D5A-9D27-B8AC3739AAB0}</ContentProjectGUID>
+      <TargetPlatform>Windows</TargetPlatform>
+      <TargetProfile>HiDef</TargetProfile>
+      <BuildConfiguration>Debug</BuildConfiguration>
+      <CompressContent>false</CompressContent>
+      <RootDirectory>E:\Dropbox\SimonsGame\SImonsGame\SImonsGameContent\</RootDirectory>
+      <LoggerRootDirectory>E:\Dropbox\SimonsGame\SImonsGame\SImonsGame\</LoggerRootDirectory>
+      <IntermediateDirectory>E:\Dropbox\SimonsGame\SImonsGame\SImonsGame\obj\Debug\</IntermediateDirectory>
+      <OutputDirectory>E:\Dropbox\SimonsGame\SImonsGame\SImonsGame\bin\Debug\Content\</OutputDirectory>
+    </Settings>
+    <Assemblies>
+      <Assembly>
+        <Key>C:\Program Files (x86)\MSBuild\MonoGame\v3.0\MonoGameContentProcessors.dll</Key>
+        <Value>2014-04-05T16:56:18-05:00</Value>
+      </Assembly>
+      <Assembly>
+        <Key>C:\Program Files (x86)\Microsoft XNA\XNA Game Studio\v4.0\References\Windows\x86\Microsoft.Xna.Framework.Content.Pipeline.XImporter.dll</Key>
+        <Value>2011-09-01T16:22:30-05:00</Value>
+      </Assembly>
+      <Assembly>
+        <Key>C:\Program Files (x86)\Microsoft XNA\XNA Game Studio\v4.0\References\Windows\x86\Microsoft.Xna.Framework.Content.Pipeline.VideoImporters.dll</Key>
+        <Value>2011-09-01T16:22:30-05:00</Value>
+      </Assembly>
+      <Assembly>
+        <Key>C:\Program Files (x86)\Microsoft XNA\XNA Game Studio\v4.0\References\Windows\x86\Microsoft.Xna.Framework.Content.Pipeline.TextureImporter.dll</Key>
+        <Value>2011-09-01T16:22:30-05:00</Value>
+      </Assembly>
+      <Assembly>
+        <Key>C:\Program Files (x86)\Microsoft XNA\XNA Game Studio\v4.0\References\Windows\x86\Microsoft.Xna.Framework.Content.Pipeline.FBXImporter.dll</Key>
+        <Value>2011-09-01T16:22:30-05:00</Value>
+      </Assembly>
+      <Assembly>
+        <Key>C:\Program Files (x86)\Microsoft XNA\XNA Game Studio\v4.0\References\Windows\x86\Microsoft.Xna.Framework.Content.Pipeline.EffectImporter.dll</Key>
+        <Value>2011-09-01T16:22:30-05:00</Value>
+      </Assembly>
+      <Assembly>
+        <Key>C:\Program Files (x86)\Microsoft XNA\XNA Game Studio\v4.0\References\Windows\x86\Microsoft.Xna.Framework.Content.Pipeline.AudioImporters.dll</Key>
+        <Value>2011-09-01T16:22:30-05:00</Value>
+      </Assembly>
+      <Assembly>
+        <Key>C:\WINDOWS\Microsoft.Net\assembly\GAC_32\Microsoft.Xna.Framework.Content.Pipeline\v4.0_4.0.0.0__842cf8be1de50553\Microsoft.Xna.Framework.Content.Pipeline.dll</Key>
+        <Value>2014-05-14T20:32:57.8108402-05:00</Value>
+      </Assembly>
+    </Assemblies>
+  </Asset>
+</XnaContent>
