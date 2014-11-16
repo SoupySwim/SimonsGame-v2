@@ -34,11 +34,9 @@ namespace SimonsGame.GuiObjects.ElementalMagic
 			return 0;
 		}
 
-		public override void AddCustomModifiers(GameTime gameTime, ModifierBase modifyAdd) { }
-		public override void MultiplyCustomModifiers(GameTime gameTime, ModifierBase modifyMult) { }
-		public override void PreUpdate(GameTime gameTime) { }
 		public override void PostUpdate(GameTime gameTime)
 		{
+			base.PostUpdate(gameTime);
 			Size = new Vector2(Size.X + 1.2f, Size.Y + 1.2f);
 			Position = new Vector2(_surroundObject.Center.X - Size.X / 2, _surroundObject.Center.Y - Size.Y / 2);
 		}
@@ -48,14 +46,14 @@ namespace SimonsGame.GuiObjects.ElementalMagic
 			spriteBatch.Begin();
 			Rectangle destinationRect = new Rectangle((int)Position.X, (int)Position.Y, (int)Size.X, (int)Size.Y);
 
-			spriteBatch.Draw(_bubble, destinationRect,  Color.White);
+			spriteBatch.Draw(_bubble, destinationRect, Color.White);
 			spriteBatch.End();
 		}
 		public override void SetMovement(GameTime gameTime) { }
-		public override void PostPhysicsPreUpdate(GameTime gameTime) { }
 		protected override bool ShowHitBox()
 		{
 			return false;
 		}
+		public override void HitByObject(MainGuiObject mgo, ModifierBase mb) { }
 	}
 }

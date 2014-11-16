@@ -27,7 +27,7 @@ namespace SimonsGame.Modifiers.Abilities
 			_player = p;
 			isExpiredFunction = IsExpiredFunc;
 
-			Movement = new Vector2(1.15f, 1.75f);
+			Movement = new Vector2(1.5f, 1f);
 		}
 
 		public bool IsExpiredFunc(GameTime gameTime)

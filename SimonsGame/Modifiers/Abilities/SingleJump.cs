@@ -33,9 +33,14 @@ namespace SimonsGame.Modifiers.Abilities
 			_player = p;
 			_powerBase = pow;
 			//_power = pow;
-			_power = (((.85f * _player.MaxSpeed.Y) * _tickTotal) + ((p.Level.PlatformDifference + 10) * pow)) /
-				((_tickTotal * (_tickTotal + 1)) / 2);
-			Movement = new Vector2(0, (-_power * (_tickTotal - _tickCount)) + (.85f * _player.MaxSpeed.Y));
+			var numberOfUnitsTravelling = ((_tickTotal + 1) * _tickTotal) / 2;
+			var distanceAffectedByGravity = _tickTotal * _player.MaxSpeed.Y;
+			var totalDistanceNeededToCover = (_powerBase * p.Level.PlatformDifference) + Math.Abs(distanceAffectedByGravity);
+			_power = totalDistanceNeededToCover / numberOfUnitsTravelling;
+
+			//_power = (( _player.MaxSpeed.Y * _tickTotal) + (p.Level.PlatformDifference* pow + 10)) /
+			//	((_tickTotal * _tickTotal) / 2);
+			Movement = new Vector2(0, (-_power * (_tickTotal - _tickCount)) + _player.MaxSpeed.Y);
 			_checkStopped = checkStopped;
 			_forceStop = forceStop;
 			isExpiredFunction = IsExpiredFunc;
@@ -52,12 +57,12 @@ namespace SimonsGame.Modifiers.Abilities
 			if (_tickCount == _tickTotal)
 				_hasReachedEnd = true;
 
-			_tickCount = Math.Min(_tickCount + 1, _tickTotal);
 			if (_hasStopped || _tickCount == _tickTotal || _player.CurrentMovement.Y > 0)
 			{
 				StopGravity = false;
 			}
-			Movement = new Vector2(0, (-_power * (_tickTotal - _tickCount)) + (StopGravity ? (.85f * _player.MaxSpeed.Y) : 0f));
+			Movement = new Vector2(0, (-_power * (_tickTotal - _tickCount)) + (StopGravity ? _player.MaxSpeed.Y : 0f));
+			_tickCount = Math.Min(_tickCount + 1, _tickTotal);
 			return _forceStop() || (_hasStopped && _tickCount >= _tickTotal && _player.IsLanded);
 		}
 		public override void Reset()

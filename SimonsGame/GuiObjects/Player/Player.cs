@@ -11,7 +11,7 @@ namespace SimonsGame.GuiObjects
 {
 	public class Player : PhysicsObject
 	{
-
+		public static float Sprint3TestScore = 0;
 		public Player(Guid guid, Vector2 position, Vector2 hitbox, Group group, Level level)
 			: base(position, hitbox, group, level)
 		{
@@ -47,21 +47,24 @@ namespace SimonsGame.GuiObjects
 		}
 		public override float GetYMovement()
 		{
-			return StopGravity ? 0f : CurrentMovement.Y;
+			return StopGravity ? 0f : AverageSpeed.Y; // Add gravity at a different time...
 		}
-		public override void PostPhysicsPreUpdate(GameTime gameTime)
+		public override void PreUpdate(GameTime gameTime)
 		{
+			base.PreUpdate(gameTime);
 			VerticalPass = GameStateManager.AllControls[_guid].YMovement > .5;
 		}
 		// If there are player specific modifiers, I will add these.
 		//public override void AddCustomModifiers(GameTime gameTime, Modifiers.ModifierBase modifyAdd) { }
 		//public override void MultiplyCustomModifiers(GameTime gameTime, Modifiers.ModifierBase modifyMult) { }
-		public override void PostUpdate(GameTime gameTime) { }
 		public override void PreDraw(GameTime gameTime, Microsoft.Xna.Framework.Graphics.SpriteBatch spriteBatch) { }
 		public override void PostDraw(GameTime gameTime, Microsoft.Xna.Framework.Graphics.SpriteBatch spriteBatch) { }
 		public override void SetMovement(GameTime gameTime)
 		{
 			Movement = new Vector2(GameStateManager.AllControls[_guid].XMovement, GameStateManager.AllControls[_guid].YMovement);
+		}
+		public override void HitByObject(MainGuiObject mgo, ModifierBase mb)
+		{
 		}
 	}
 }

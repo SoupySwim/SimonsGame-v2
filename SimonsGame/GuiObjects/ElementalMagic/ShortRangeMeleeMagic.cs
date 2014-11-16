@@ -31,10 +31,6 @@ namespace SimonsGame.GuiObjects.ElementalMagic
 			return 0;
 		}
 
-		public override void AddCustomModifiers(GameTime gameTime, ModifierBase modifyAdd) { }
-		public override void MultiplyCustomModifiers(GameTime gameTime, ModifierBase modifyMult) { }
-		public override void PreUpdate(GameTime gameTime) { }
-		public override void PostUpdate(GameTime gameTime) { }
 		public override void PreDraw(GameTime gameTime, Microsoft.Xna.Framework.Graphics.SpriteBatch spriteBatch) { }
 		public override void PostDraw(GameTime gameTime, Microsoft.Xna.Framework.Graphics.SpriteBatch spriteBatch)
 		{
@@ -44,10 +40,10 @@ namespace SimonsGame.GuiObjects.ElementalMagic
 			spriteBatch.End();
 		}
 		public override void SetMovement(GameTime gameTime) { }
-		public override void PostPhysicsPreUpdate(GameTime gameTime) { }
 		protected override bool ShowHitBox()
 		{
 			return false;
 		}
+		public override void HitByObject(MainGuiObject mgo, ModifierBase mb) { }
 	}
 }

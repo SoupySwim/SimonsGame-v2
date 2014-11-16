@@ -28,13 +28,13 @@ namespace SimonsGame
 		public static PlayerManager PlayerManager { get { return _playerManager; } }
 
 		public MainGame()
-			: base()
 		{
 			CurrentWindowSize = new Vector2(1580, 1080);
 
 			graphics = new GraphicsDeviceManager(this);
 			graphics.PreferredBackBufferWidth = (int)CurrentWindowSize.X;
 			graphics.PreferredBackBufferHeight = (int)CurrentWindowSize.Y;
+			graphics.IsFullScreen = true;
 
 			//graphics.GraphicsDevice.Viewport.X;
 			Content.RootDirectory = "Content";

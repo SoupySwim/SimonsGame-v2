@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using SimonsGame.Modifiers;
 using SimonsGame.Utility;
 using System;
 using System.Collections.Generic;
@@ -22,12 +23,13 @@ namespace SimonsGame.GuiObjects
 		{
 			return 0;
 		}
-		public override void AddCustomModifiers(GameTime gameTime, Modifiers.ModifierBase modifyAdd){ }
-		public override void MultiplyCustomModifiers(GameTime gameTime, Modifiers.ModifierBase modifyMult){ }
-		public override void PreUpdate(GameTime gameTime){ }
-		public override void PostUpdate(GameTime gameTime){ }
-		public override void PreDraw(GameTime gameTime, Microsoft.Xna.Framework.Graphics.SpriteBatch spriteBatch){ }
-		public override void PostDraw(GameTime gameTime, Microsoft.Xna.Framework.Graphics.SpriteBatch spriteBatch){ }
-		public override void SetMovement(GameTime gameTime){ }
+		public override void AddCustomModifiers(GameTime gameTime, Modifiers.ModifierBase modifyAdd) { }
+		public override void MultiplyCustomModifiers(GameTime gameTime, Modifiers.ModifierBase modifyMult) { }
+		public override void PreUpdate(GameTime gameTime) { }
+		public override void PostUpdate(GameTime gameTime) { }
+		public override void PreDraw(GameTime gameTime, Microsoft.Xna.Framework.Graphics.SpriteBatch spriteBatch) { }
+		public override void PostDraw(GameTime gameTime, Microsoft.Xna.Framework.Graphics.SpriteBatch spriteBatch) { }
+		public override void SetMovement(GameTime gameTime) { }
+		public override void HitByObject(MainGuiObject mgo, ModifierBase mb) { }
 	}
 }

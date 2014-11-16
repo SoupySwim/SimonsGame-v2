@@ -48,11 +48,12 @@ namespace SimonsGame.Modifiers
 
 	public class AbilityManager
 	{
-		private Player _player;
+		private PhysicsObject _player;
 
 		// Abilities that will be added when a Player is created.
 		// Later, these lists can be expanded/Modified when the game is played.
 		Dictionary<KnownAbility, List<PlayerAbilityInfo>> _knownAbilities;
+		List<Guid> _knownAbilityIds;
 
 		// Cooldowns for specific Abilities
 		private Dictionary<Guid, TimeSpan> _coolDownCounter;
@@ -61,13 +62,28 @@ namespace SimonsGame.Modifiers
 		// These are the abilities that are currently active on the user.
 		private Dictionary<Guid, ModifierBase> _currentAbilities = new Dictionary<Guid, ModifierBase>();
 		public Dictionary<Guid, ModifierBase> CurrentAbilities { get { return _currentAbilities; } }
-		public AbilityManager(Player player, Dictionary<KnownAbility, List<PlayerAbilityInfo>> knownAbilities)
+		public AbilityManager(PhysicsObject player, Dictionary<KnownAbility, List<PlayerAbilityInfo>> knownAbilities)
 		{
 			_player = player;
 			_coolDownCounter = new Dictionary<Guid, TimeSpan>();
 			_layoverCounter = new Dictionary<Guid, int>();
 			_knownAbilities = knownAbilities;
+			_knownAbilityIds = _knownAbilities.Values.SelectMany(ps => ps).Select(pi => pi.Id).ToList();
 		}
+
+		public void AddKnownAbility(KnownAbility type, PlayerAbilityInfo abilityInfo)
+		{
+			// If it's already added, then don't add again.
+			if (_knownAbilityIds.Contains(abilityInfo.Id))
+				return;
+			List<PlayerAbilityInfo> abilityInfos;
+			if (_knownAbilities.TryGetValue(type, out abilityInfos))
+			{
+				abilityInfos.Add(abilityInfo);
+				_knownAbilityIds.Add(abilityInfo.Id);
+			}
+		}
+
 		public void CheckKnownAbilities(GameTime gameTime)
 		{
 
@@ -83,29 +99,27 @@ namespace SimonsGame.Modifiers
 					if (CanUseAbility(playerAbilityInfo.Id, playerAbilityInfo))
 					{
 						ModifierBase currentModifier = playerAbilityInfo.Modifier.Clone();
-						currentModifier.Reset();
+						//currentModifier.Reset();
 						_currentAbilities.Add(playerAbilityInfo.Id, currentModifier);
 						_player.UseMana(playerAbilityInfo.CastAmount);
 					}
+
+					// Check abilities that are on cooldown.
 					TimeSpan coolDownTime;
 					if (_coolDownCounter.TryGetValue(playerAbilityInfo.Id, out coolDownTime) && coolDownTime > TimeSpan.Zero)
 					{
 						if (coolDownTime >= playerAbilityInfo.Cooldown)
-						{
 							_coolDownCounter.Remove(playerAbilityInfo.Id);
-						}
 						else
-						{
 							_coolDownCounter[playerAbilityInfo.Id] += gameTime.ElapsedGameTime;
-						}
 					}
+
+					// Check if abilities are done with their layover.
 					if (_layoverCounter.ContainsKey(playerAbilityInfo.Id))
 					{
 						_layoverCounter[playerAbilityInfo.Id]++;
 						if (_layoverCounter[playerAbilityInfo.Id] > playerAbilityInfo.LayoverTickCount)
-						{
 							_layoverCounter.Remove(playerAbilityInfo.Id);
-						}
 					}
 				}
 			}
@@ -131,9 +145,17 @@ namespace SimonsGame.Modifiers
 		public void HasExpired(Guid id)
 		{
 			_currentAbilities.Remove(id);
-			_coolDownCounter.Add(id, new TimeSpan(1));
-			_layoverCounter.Add(id, 1);
+			if (_knownAbilityIds.Contains(id))
+			{
+				_coolDownCounter.Add(id, new TimeSpan(1));
+				_layoverCounter.Add(id, 1);
+			}
 		}
 
+
+		internal void AddAbility(ModifierBase mb)
+		{
+			_currentAbilities.Add(mb.Id, mb);
+		}
 	}
 }

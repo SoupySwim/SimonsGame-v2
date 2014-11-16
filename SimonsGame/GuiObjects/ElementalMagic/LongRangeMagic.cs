@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using SimonsGame.GuiObjects;
+using SimonsGame.GuiObjects.Utility;
 using SimonsGame.Modifiers;
 using SimonsGame.Utility;
 using System;
@@ -17,12 +18,18 @@ namespace SimonsGame.GuiObjects.ElementalMagic
 		// the temp-est of textures...
 		private Texture2D _fireball;
 		private float radians = 0;
+		private Player _player;
 
-		public LongRangeMagic(Vector2 position, Vector2 hitbox, Group group, Level level, Vector2 speed)
+		private ModifierBase _damageDoneOnDetonate;
+
+		public LongRangeMagic(Vector2 position, Vector2 hitbox, Group group, Level level, Vector2 speed, Player player)
 			: base(position, hitbox, group, level)
 		{
 			MaxSpeedBase = speed;
 			_fireball = level.Content.Load<Texture2D>("Test/Fireball");
+			_damageDoneOnDetonate = new TickModifier(1, ModifyType.Add);
+			_damageDoneOnDetonate.SetHealthTotal(-4);
+			_player = player;
 		}
 		public override float GetXMovement()
 		{
@@ -33,10 +40,6 @@ namespace SimonsGame.GuiObjects.ElementalMagic
 			return MaxSpeed.Y;
 		}
 
-		public override void AddCustomModifiers(GameTime gameTime, ModifierBase modifyAdd) { }
-		public override void MultiplyCustomModifiers(GameTime gameTime, ModifierBase modifyMult) { }
-		public override void PreUpdate(GameTime gameTime) { }
-		public override void PostUpdate(GameTime gameTime) { }
 		public override void PreDraw(GameTime gameTime, Microsoft.Xna.Framework.Graphics.SpriteBatch spriteBatch) { }
 		public override void PostDraw(GameTime gameTime, Microsoft.Xna.Framework.Graphics.SpriteBatch spriteBatch)
 		{
@@ -49,10 +52,40 @@ namespace SimonsGame.GuiObjects.ElementalMagic
 			spriteBatch.End();
 		}
 		public override void SetMovement(GameTime gameTime) { }
-		public override void PostPhysicsPreUpdate(GameTime gameTime) { }
 		protected override bool ShowHitBox()
 		{
 			return false;
+		}
+		public override void HitByObject(MainGuiObject mgo, ModifierBase mb) { }
+		public override void PostUpdate(GameTime gameTime)
+		{
+			base.PostUpdate(gameTime);
+			// If it hit something it can't pass through, detonate it!
+			if (PrimaryOverlapObjects.Any())
+				Detonate();
+		}
+		public void Detonate()
+		{
+			Dictionary<Group, List<MainGuiObject>> guiObjects = Level.GetAllGuiObjects().Where(kv => kv.Key != Group.Passable).ToDictionary(kv => kv.Key, kv => kv.Value);
+			Vector4 bounds = new Vector4(this.Position.X - 5, this.Position.Y - 5, this.Size.X + 10, this.Size.Y + 10);
+			IEnumerable<Tuple<DoubleVector2, MainGuiObject>> hitPlatforms = MainGuiObject.GetHitObjects(guiObjects, this._previousPosition, bounds, (mgo) => mgo.Id == _player.Id);
+			if (hitPlatforms.Any()) // Probably apply any effects it would have.
+			{
+				foreach (MainGuiObject mgo in hitPlatforms.Select(hp => hp.Item2))
+				{
+					//MainGuiObject mgo = hitPlatforms.First().Item2;
+					mgo.HitByObject(this, _damageDoneOnDetonate);
+				}
+				Level.RemoveGuiObject(this);
+			}
+		}
+		protected override Dictionary<Group, List<MainGuiObject>> GetAllVerticalPassableGroups(Dictionary<Group, List<MainGuiObject>> guiObjects)
+		{
+			return guiObjects.Where(g => g.Key == Group.ImpassableIncludingMagic).ToDictionary(o => o.Key, o => o.Value);
+		}
+		protected override Dictionary<Group, List<MainGuiObject>> GetAllHorizontalPassableGroups(Dictionary<Group, List<MainGuiObject>> guiObjects)
+		{
+			return guiObjects.Where(g => g.Key == Group.ImpassableIncludingMagic).ToDictionary(o => o.Key, o => o.Value);
 		}
 	}
 }

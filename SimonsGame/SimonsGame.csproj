@@ -8,7 +8,7 @@
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ContentBuilder</RootNamespace>
+    <RootNamespace>SimonsGame</RootNamespace>
     <AssemblyName>SimonsGame</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <TargetFrameworkProfile>Client</TargetFrameworkProfile>
@@ -20,6 +20,7 @@
     <XnaOutputType>Library</XnaOutputType>
     <PlatformTarget>x86</PlatformTarget>
     <UseVSHostingProcess>false</UseVSHostingProcess>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -32,7 +33,6 @@
     <MapFileExtensions>true</MapFileExtensions>
     <ApplicationRevision>0</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
@@ -76,7 +76,7 @@
     <PlatformTarget>x86</PlatformTarget>
     <UseVSHostingProcess>false</UseVSHostingProcess>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <DefineConstants>TRACE;DEBUG</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;WINDOWS</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />
@@ -98,10 +98,13 @@
     <Compile Include="GuiObjects\ElementalMagic\LongRangeMagic.cs" />
     <Compile Include="GuiObjects\ElementalMagic\ShortRangeMeleeMagic.cs" />
     <Compile Include="GuiObjects\Level.cs" />
+    <Compile Include="GuiObjects\OtherCharacters\SingleCoop\MovingCharacter.cs" />
+    <Compile Include="GuiObjects\OtherCharacters\SingleCoop\WallRunner.cs" />
     <Compile Include="GuiObjects\Player\Player.cs" />
     <Compile Include="GuiObjects\Terrain\MovingPlatform.cs" />
     <Compile Include="GuiObjects\Terrain\Platform.cs" />
     <Compile Include="GuiObjects\Utility\Animator.cs" />
+    <Compile Include="GuiObjects\Utility\GraphicsUtility.cs" />
     <Compile Include="MainFiles\Controls.cs" />
     <Compile Include="MainFiles\GameStateManager.cs" />
     <Compile Include="MainFiles\MainGame.cs" />
@@ -154,6 +157,7 @@
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\XNA Game Studio\Microsoft.Xna.GameStudio.targets" />
   <Import Project="..\..\packages\MonoGame.Binaries.3.2.0\build\net40\MonoGame.Binaries.targets" Condition="Exists('..\..\packages\MonoGame.Binaries.3.2.0\build\net40\MonoGame.Binaries.targets')" />

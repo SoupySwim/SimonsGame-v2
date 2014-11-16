@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using SimonsGame.GuiObjects;
+using SimonsGame.GuiObjects.Utility;
 using SimonsGame.Modifiers;
 using SimonsGame.Utility;
 using System;
@@ -17,6 +18,7 @@ namespace SimonsGame.GuiObjects.ElementalMagic
 		private Texture2D _leaf;
 		private float radians = 0;
 		private Player _player;
+		private ModifierBase _damageDoneOnCollide;
 
 
 		public ShortRangeProjectileMagic(Vector2 position, Vector2 hitbox, Group group, Level level, Vector2 speed, Player player)
@@ -25,6 +27,8 @@ namespace SimonsGame.GuiObjects.ElementalMagic
 			_player = player;
 			MaxSpeedBase = speed;
 			_leaf = level.Content.Load<Texture2D>("Test/leaf");
+			_damageDoneOnCollide = new TickModifier(1, ModifyType.Add);
+			_damageDoneOnCollide.SetHealthTotal(-2);
 		}
 
 		public override float GetXMovement()
@@ -38,17 +42,18 @@ namespace SimonsGame.GuiObjects.ElementalMagic
 		}
 		public override void PostUpdate(GameTime gameTime)
 		{
-			Dictionary<Group, List<MainGuiObject>> guiObjects = Level.GetAllUnPassableGuiObjects();
-			IEnumerable<Tuple<Vector2, MainGuiObject>> hitPlatforms = MainGuiObject.GetHitPlatforms(guiObjects, this.Bounds, (mgo) => mgo.Id == _player.Id);
+			base.PostUpdate(gameTime);
+			Dictionary<Group, List<MainGuiObject>> guiObjects = Level.GetAllGuiObjects().Where(kv => kv.Key != Group.Passable).ToDictionary(kv => kv.Key, kv => kv.Value);
+			IEnumerable<Tuple<DoubleVector2, MainGuiObject>> hitPlatforms = MainGuiObject.GetHitObjects(guiObjects, this._previousPosition, this.HitBoxBounds, (mgo) => mgo.Id == _player.Id);
 			if (hitPlatforms.Any()) // Probably apply any effects it would have.
 			{
+				MainGuiObject mgo = hitPlatforms.First().Item2;
+				mgo.HitByObject(this, _damageDoneOnCollide);
 				Level.RemoveGuiObject(this);
 			}
 		}
 
 		public override void PreDraw(GameTime gameTime, Microsoft.Xna.Framework.Graphics.SpriteBatch spriteBatch) { }
-		public override void AddCustomModifiers(GameTime gameTime, ModifierBase modifyAdd) { }
-		public override void MultiplyCustomModifiers(GameTime gameTime, ModifierBase modifyMult) { }
 		public override void PreUpdate(GameTime gameTime) { }
 		public override void PostDraw(GameTime gameTime, Microsoft.Xna.Framework.Graphics.SpriteBatch spriteBatch)
 		{
@@ -62,10 +67,10 @@ namespace SimonsGame.GuiObjects.ElementalMagic
 			spriteBatch.End();
 		}
 		public override void SetMovement(GameTime gameTime) { }
-		public override void PostPhysicsPreUpdate(GameTime gameTime) { }
 		protected override bool ShowHitBox()
 		{
 			return false;
 		}
+		public override void HitByObject(MainGuiObject mgo, ModifierBase mb) { }
 	}
 }

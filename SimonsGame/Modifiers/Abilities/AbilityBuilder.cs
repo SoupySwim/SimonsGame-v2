@@ -27,7 +27,11 @@ namespace SimonsGame.Modifiers
 				Cooldown = TimeSpan.Zero,
 				LayoverTickCount = 0,
 				ReChargeAmount = 0,
-				Modifier = new SingleJump(player, power, () => player.Movement.Y >= 0, () => false)
+				Modifier = new SingleJump(player, power, () => player.Movement.Y >= 0, () =>
+				{
+
+					return false;
+				})
 			};
 
 			//SingleJump ability = new SingleJump(player, power, () => player.Movement.Y >= 0, () => false); // new Jump(player, pow, checkStopped, forceStop, isSuperJump);
@@ -91,8 +95,7 @@ namespace SimonsGame.Modifiers
 					// If we already have a jump active, don't jump again.
 					if (manager.CurrentAbilities.ContainsKey(id)) // May want to do something with this.  Double Jump stuff.  Combos?
 						return false;
-					bool isDown = Controls.IsDown(player.Id, AvailableButtons.LeftBumper);
-					return isDown;
+					return Controls.IsDown(player.Id, AvailableButtons.LeftBumper);
 				},
 				CastAmount = castAmount,
 				Cooldown = new TimeSpan(0, 0, 0, 0, 100),
@@ -115,8 +118,7 @@ namespace SimonsGame.Modifiers
 					// If we already have a jump active, don't jump again.
 					if (manager.CurrentAbilities.ContainsKey(id)) // May want to do something with this.  Double Jump stuff.  Combos?
 						return false;
-					bool isDown = Controls.IsDown(player.Id, AvailableButtons.RightTrigger);
-					return isDown;
+					return Controls.IsDown(player.Id, AvailableButtons.RightTrigger);
 				},
 				CastAmount = castAmount,
 				Cooldown = new TimeSpan(0, 0, 0, 0, 1000),

@@ -12,6 +12,8 @@ namespace SimonsGame.GuiObjects
 	/// </summary>
 	public abstract class GuiVariables
 	{
+		protected Guid _guid;
+		public Guid Id { get { return _guid; } }
 
 		// Will base all other speeds to this.  Y direction is gravity.
 		private static Vector2 _averageSpeed = new Vector2(4.2f, 5.5f);
@@ -30,6 +32,14 @@ namespace SimonsGame.GuiObjects
 
 		// Speed at which the object is currently moving.
 		public Vector2 CurrentMovement { get; set; }
+
+		// How much mana you have total (used for certain magic)
+		protected float _manaTotal;
+		public float ManaTotal { get { return _manaTotal; } }
+
+		// How much health you have total
+		protected float _healthTotal;
+		public float HealthTotal { get { return _healthTotal; } }
 		#endregion
 	}
 }

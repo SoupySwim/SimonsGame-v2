@@ -58,5 +58,6 @@ namespace SimonsGame.GuiObjects
 		public override void PreDraw(GameTime gameTime, Microsoft.Xna.Framework.Graphics.SpriteBatch spriteBatch) { }
 		public override void PostDraw(GameTime gameTime, Microsoft.Xna.Framework.Graphics.SpriteBatch spriteBatch) { }
 		public override void SetMovement(GameTime gameTime) { }
+		public override void HitByObject(MainGuiObject mgo, ModifierBase mb) { }
 	}
 }

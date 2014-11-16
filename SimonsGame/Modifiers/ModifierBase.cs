@@ -30,6 +30,7 @@ namespace SimonsGame.Modifiers
 		public ModifierBase(ModifyType type)
 			: base()
 		{
+			_guid = Guid.NewGuid();
 			Type = type;
 			StopGravity = false;
 			if (type == ModifyType.Multiply)
@@ -38,7 +39,12 @@ namespace SimonsGame.Modifiers
 				Acceleration = new Vector2(1, 1);
 				MaxSpeed = new Vector2(1, 1);
 				CurrentMovement = new Vector2(1, 1);
+				_healthTotal = 1;
 			}
+		}
+		public void SetHealthTotal(float newHealth)
+		{
+			_healthTotal = newHealth;
 		}
 		public static ModifierBase operator +(ModifierBase a, ModifierBase b)
 		{
@@ -49,6 +55,7 @@ namespace SimonsGame.Modifiers
 			a.MaxSpeed = new Vector2(a.MaxSpeed.X + b.MaxSpeed.X, a.MaxSpeed.Y + b.MaxSpeed.Y);
 			a.CurrentMovement = new Vector2(a.CurrentMovement.X + b.CurrentMovement.X, a.CurrentMovement.Y + b.CurrentMovement.Y);
 			a.StopGravity = a.StopGravity || b.StopGravity;
+			a.SetHealthTotal(a.HealthTotal + b.HealthTotal);
 			return a;
 		}
 		public static ModifierBase operator *(ModifierBase a, ModifierBase b)
@@ -60,6 +67,7 @@ namespace SimonsGame.Modifiers
 			a.MaxSpeed = new Vector2(a.MaxSpeed.X * b.MaxSpeed.X, a.MaxSpeed.Y * b.MaxSpeed.Y);
 			a.CurrentMovement = new Vector2(a.CurrentMovement.X * b.CurrentMovement.X, a.CurrentMovement.Y * b.CurrentMovement.Y);
 			a.StopGravity = a.StopGravity || b.StopGravity;
+			a.SetHealthTotal(a.HealthTotal * b.HealthTotal);
 			return a;
 		}
 	}

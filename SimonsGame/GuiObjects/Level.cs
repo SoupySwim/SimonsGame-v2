@@ -19,7 +19,8 @@ namespace SimonsGame.GuiObjects
 	{
 
 		// This will store the objects that make up the environment.
-		private Dictionary<Group, List<MainGuiObject>> _guiObjects;
+		private Dictionary<Group, List<MainGuiObject>> _environmentObjects;
+		private Dictionary<Group, List<MainGuiObject>> _characterObjects;
 
 		// This will store what players are currently in the environment.
 		private Dictionary<Guid, Player> _players;
@@ -47,7 +48,8 @@ namespace SimonsGame.GuiObjects
 		/// <param name="Size"> Determines the viewport of the Level (What is displayed on the screen). </param>
 		public Level(IServiceProvider serviceProvider, Vector2 Size, GameStateManager gameStateManager)
 		{
-			_guiObjects = new Dictionary<Group, List<MainGuiObject>>();
+			_environmentObjects = new Dictionary<Group, List<MainGuiObject>>();
+			_characterObjects = new Dictionary<Group, List<MainGuiObject>>();
 			_players = new Dictionary<Guid, Player>();
 
 			_gameStateManager = gameStateManager;
@@ -62,13 +64,31 @@ namespace SimonsGame.GuiObjects
 		}
 		public void AddGuiObject(MainGuiObject guiObject)
 		{
-			if (_guiObjects.ContainsKey(guiObject.Group))
+			if (guiObject.ObjectType == GuiObjectType.Environment)
+				AddEnvironmentObject(guiObject);
+			else
+				AddCharacterObject(guiObject);
+		}
+		private void AddEnvironmentObject(MainGuiObject guiObject)
+		{
+			if (_environmentObjects.ContainsKey(guiObject.Group))
 			{
-				_guiObjects[guiObject.Group].Add(guiObject);
+				_environmentObjects[guiObject.Group].Add(guiObject);
 			}
 			else
 			{
-				_guiObjects.Add(guiObject.Group, new List<MainGuiObject>() { guiObject });
+				_environmentObjects.Add(guiObject.Group, new List<MainGuiObject>() { guiObject });
+			}
+		}
+		private void AddCharacterObject(MainGuiObject guiObject)
+		{
+			if (_characterObjects.ContainsKey(guiObject.Group))
+			{
+				_characterObjects[guiObject.Group].Add(guiObject);
+			}
+			else
+			{
+				_characterObjects.Add(guiObject.Group, new List<MainGuiObject>() { guiObject });
 			}
 		}
 
@@ -76,7 +96,12 @@ namespace SimonsGame.GuiObjects
 		public void Update(GameTime gameTime)
 		{
 			// Update all the platforms
-			foreach (var kv in _guiObjects)
+			foreach (var kv in _environmentObjects)
+			{
+				kv.Value.ForEach(p => p.Update(gameTime));
+			}
+			// Update all the platforms
+			foreach (var kv in _characterObjects)
 			{
 				kv.Value.ForEach(p => p.Update(gameTime));
 			}
@@ -91,7 +116,11 @@ namespace SimonsGame.GuiObjects
 			Players.Values.ToList().ForEach(p => p.Draw(gameTime, spriteBatch));
 
 			// Draw all the platforms
-			foreach (var kv in _guiObjects)
+			foreach (var kv in _environmentObjects)
+			{
+				kv.Value.ForEach(p => p.Draw(gameTime, spriteBatch));
+			}
+			foreach (var kv in _characterObjects)
 			{
 				kv.Value.ForEach(p => p.Draw(gameTime, spriteBatch));
 			}
@@ -102,25 +131,53 @@ namespace SimonsGame.GuiObjects
 
 		}
 
-		public Dictionary<Group, List<MainGuiObject>> GetAllUnPassableGuiObjects()
+		public Dictionary<Group, List<MainGuiObject>> GetAllUnPassableEnvironmentObjects()
 		{
-			return _guiObjects.Where(kv => kv.Key != Group.Passable).ToDictionary(kv => kv.Key, kv => kv.Value);
+			return _environmentObjects.Where(kv => kv.Key != Group.Passable).ToDictionary(kv => kv.Key, kv => kv.Value);
 		}
 
-		public List<MainGuiObject> GetAllGuiObjects(Group group)
+		public Dictionary<Group, List<MainGuiObject>> GetAllUnPassableCharacterObjects()
 		{
-			List<MainGuiObject> objects = new List<MainGuiObject>();
-			_guiObjects.TryGetValue(group, out objects);
-			return objects;
+			return _characterObjects.Where(kv => kv.Key != Group.Passable).ToDictionary(kv => kv.Key, kv => kv.Value);
+		}
+		public Dictionary<Group, List<MainGuiObject>> GetAllGuiObjects()
+		{
+			Dictionary<Group, List<MainGuiObject>> returnMap = new Dictionary<Group, List<MainGuiObject>>();
+			var gb = _environmentObjects.GroupBy(kv => kv.Key); // new place in memory... so dumb
+			foreach (var kv in gb)
+				returnMap.Add(kv.Key, kv.SelectMany(v => v.Value).ToList());
+
+			foreach (Group key in _characterObjects.Keys)
+			{
+				List<MainGuiObject> outList;
+				if (returnMap.TryGetValue(key, out outList))
+					outList.AddRange(_characterObjects[key]);
+				else
+					returnMap[key] = _characterObjects[key];
+			}
+			return returnMap;
 		}
 
 		public void RemoveGuiObject(MainGuiObject guiObject)
 		{
+			if (guiObject.ObjectType == GuiObjectType.Environment)
+				RemoveEnvironmentObject(guiObject);
+			else
+				RemoveCharacterObject(guiObject);
+		}
+
+		private void RemoveEnvironmentObject(MainGuiObject guiObject)
+		{
 			List<MainGuiObject> groupGuiObjects;
-			if (_guiObjects.TryGetValue(guiObject.Group, out groupGuiObjects))
-			{
+			if (_environmentObjects.TryGetValue(guiObject.Group, out groupGuiObjects))
 				groupGuiObjects.Remove(guiObject);
-			}
+		}
+
+		private void RemoveCharacterObject(MainGuiObject guiObject)
+		{
+			List<MainGuiObject> groupGuiObjects;
+			if (_characterObjects.TryGetValue(guiObject.Group, out groupGuiObjects))
+				groupGuiObjects.Remove(guiObject);
 		}
 	}
 }

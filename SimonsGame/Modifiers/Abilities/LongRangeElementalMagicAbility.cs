@@ -41,7 +41,7 @@ namespace SimonsGame.Modifiers.Abilities
 				Vector2 speed = playerAim * 9.5f;
 				// For now, a lot of things are hard coded...
 				Vector2 projectileHitbox = new Vector2(45, 45);
-				_testMagic = new LongRangeMagic(_player.Center - (projectileHitbox / 2), projectileHitbox, Group.Passable, _player.Level, speed);
+				_testMagic = new LongRangeMagic(_player.Center - (projectileHitbox / 2), projectileHitbox, Group.Passable, _player.Level, speed, _player);
 				_player.Level.AddGuiObject(_testMagic);
 			}
 			if (_checkStopped() || _tickCount == _tickTotal)
@@ -55,6 +55,7 @@ namespace SimonsGame.Modifiers.Abilities
 
 			if (isExpired)
 			{
+				_testMagic.Detonate();
 				_player.Level.RemoveGuiObject(_testMagic);
 			}
 

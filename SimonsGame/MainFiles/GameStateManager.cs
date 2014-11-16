@@ -14,6 +14,7 @@ namespace SimonsGame
 
 		#region DegubArea
 		public static bool ShowHitBoxes { get; set; }
+		public static TimeSpan GameTimer = TimeSpan.Zero;
 		#endregion
 
 		public static Dictionary<Guid, PlayerControls> AllControls { get; set; }
@@ -27,11 +28,19 @@ namespace SimonsGame
 		{
 			//TODO change obviously
 			ShowHitBoxes = false;
-			Level = Test.LevelBuilder.BuildLevel(serviceProvider, size, this);
+			Level = Test.LevelBuilder.BuildLevel2(serviceProvider, size, this);
 			_mousePosition = Vector2.Zero;
 		}
 		public void Update(GameTime gameTime, Dictionary<Guid, PlayerControls> allControls, Vector2 newMousePosition)
 		{
+			if (allControls.Values.First().XMovement > 0)
+			{
+				GameTimer += new TimeSpan(1);
+			}
+			if (GameTimer > TimeSpan.Zero)
+			{
+				GameTimer += gameTime.ElapsedGameTime;
+			}
 			// Update Controls
 			PreviousControls = AllControls;
 			AllControls = allControls;
