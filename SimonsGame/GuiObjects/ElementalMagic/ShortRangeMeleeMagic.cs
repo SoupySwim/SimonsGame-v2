@@ -16,11 +16,12 @@ namespace SimonsGame.GuiObjects.ElementalMagic
 	{
 		private bool _isFlippeed;
 		private Texture2D _splash;
-		public ShortRangeMeleeMagic(Vector2 position, Vector2 hitbox, Group group, Level level, bool isFlipped)
+		public ShortRangeMeleeMagic(Vector2 position, Player player, Vector2 hitbox, Group group, Level level, bool isFlipped)
 			: base(position, hitbox, group, level)
 		{
 			_splash = level.Content.Load<Texture2D>("Test/splash");
 			_isFlippeed = isFlipped;
+			Parent = player;
 		}
 		public override float GetXMovement()
 		{

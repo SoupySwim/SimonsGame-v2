@@ -49,6 +49,8 @@ namespace SimonsGame
 		protected override void Initialize()
 		{
 			_playerManager.AddPlayer(TempControls.GetPlayerInput(0));
+			_playerManager.AddPlayer(new UsableInputMap() { IsAi = true });
+			_playerManager.AddPlayer(new UsableInputMap() { IsAi = true });
 
 			base.Initialize();
 		}

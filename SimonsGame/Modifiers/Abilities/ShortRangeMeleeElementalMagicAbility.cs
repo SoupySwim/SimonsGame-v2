@@ -40,7 +40,7 @@ namespace SimonsGame.Modifiers.Abilities
 				// For now, a lot of things are hard coded...
 				float posY = _player.Center.Y - 20;
 				float posX = playerAim.X > 0 ? _player.Center.X : _player.Center.X - 80;
-				_testMagic = new ShortRangeMeleeMagic(new Vector2(posX, posY), new Vector2(80, 40), Group.Passable, _player.Level, playerAim.X > 0);
+				_testMagic = new ShortRangeMeleeMagic(new Vector2(posX, posY), _player, new Vector2(80, 40), Group.Passable, _player.Level, playerAim.X > 0);
 				_player.Level.AddGuiObject(_testMagic);
 			}
 			if (_tickCount == _tickTotal)

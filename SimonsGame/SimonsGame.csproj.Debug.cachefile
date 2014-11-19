@@ -3,3 +3,6 @@ Content\Test\fireball.xnb
 Content\Test\bubble.xnb
 Content\Test\splash.xnb
 Content\Test\leaf.xnb
+Content\Fonts\PlainFont.xnb
+Content\Sprites\PlayerSprites\TempPlayer\IdleFull.xnb
+Content\Sprites\PlayerSprites\TempPlayer\RunFull.xnb

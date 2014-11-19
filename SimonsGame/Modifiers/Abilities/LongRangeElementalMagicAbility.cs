@@ -20,6 +20,7 @@ namespace SimonsGame.Modifiers.Abilities
 		public bool HasStopped { get { return _hasStopped; } }
 		private Func<bool> _checkStopped;
 		private LongRangeMagic _testMagic;
+		public LongRangeMagic TestMagic { get { return _testMagic; } }
 
 		// This type of modification MAY not do anything to the player.  In the future, it is set up to be possible :D
 		public LongRangeElementalMagicAbility(Player p, Func<bool> checkStopped)

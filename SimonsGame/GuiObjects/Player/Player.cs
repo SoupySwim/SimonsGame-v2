@@ -6,17 +6,29 @@ using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework.Input;
 using SimonsGame.Modifiers;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace SimonsGame.GuiObjects
 {
 	public class Player : PhysicsObject
 	{
+		protected Animation _idleAnimation;
+		protected Animation _runAnimation;
+
+
 		public static float Sprint3TestScore = 0;
-		public Player(Guid guid, Vector2 position, Vector2 hitbox, Group group, Level level)
+
+		private bool _isAi;
+		public bool IsAi { get { return _isAi; } }
+
+		public Player(Guid guid, Vector2 position, Vector2 hitbox, Group group, Level level, bool isAi = false)
 			: base(position, hitbox, group, level)
 		{
 			_guid = guid;
+			_isAi = isAi;
 			MaxSpeedBase = new Vector2(AverageSpeed.X, AverageSpeed.Y);
+
+			_objectType = GuiObjectType.Player;
 
 			Dictionary<KnownAbility, List<PlayerAbilityInfo>> abilities = new Dictionary<KnownAbility, List<PlayerAbilityInfo>>();
 			// Jumps.
@@ -40,6 +52,16 @@ namespace SimonsGame.GuiObjects
 			abilities.Add(KnownAbility.Miscellaneous, miscellaneousInfos);
 
 			_abilityManager = new AbilityManager(this, abilities);
+
+			_healthTotal = 10;
+			_healthCurrent = _healthTotal;
+
+			// Temp Animations
+			_idleAnimation = new Animation(Level.Content.Load<Texture2D>("Sprites/PlayerSprites/TempPlayer/IdleFull"), 0.15f, true, 100, 200, (Size.X / 100));
+			_runAnimation = new Animation(Level.Content.Load<Texture2D>("Sprites//PlayerSprites/TempPlayer/RunFull"), 0.1f, true, 100, 200, (Size.X / 100));
+
+			_animator.Color = Color.Black;
+
 		}
 		public override float GetXMovement()
 		{
@@ -57,14 +79,31 @@ namespace SimonsGame.GuiObjects
 		// If there are player specific modifiers, I will add these.
 		//public override void AddCustomModifiers(GameTime gameTime, Modifiers.ModifierBase modifyAdd) { }
 		//public override void MultiplyCustomModifiers(GameTime gameTime, Modifiers.ModifierBase modifyMult) { }
-		public override void PreDraw(GameTime gameTime, Microsoft.Xna.Framework.Graphics.SpriteBatch spriteBatch) { }
+		public override void PreDraw(GameTime gameTime, Microsoft.Xna.Framework.Graphics.SpriteBatch spriteBatch)
+		{
+			if (GameStateManager.AllControls != null)
+			{
+				PlayerControls controls = GameStateManager.AllControls[_guid];
+				if (controls.XMovement == 0)
+					_animator.PlayAnimation(_idleAnimation);
+				else
+					_animator.PlayAnimation(_runAnimation);
+			}
+		}
 		public override void PostDraw(GameTime gameTime, Microsoft.Xna.Framework.Graphics.SpriteBatch spriteBatch) { }
 		public override void SetMovement(GameTime gameTime)
 		{
 			Movement = new Vector2(GameStateManager.AllControls[_guid].XMovement, GameStateManager.AllControls[_guid].YMovement);
 		}
+
 		public override void HitByObject(MainGuiObject mgo, ModifierBase mb)
 		{
+			_abilityManager.AddAbility(mb);
+		}
+
+		protected override bool ShowHitBox()
+		{
+			return false;
 		}
 	}
 }

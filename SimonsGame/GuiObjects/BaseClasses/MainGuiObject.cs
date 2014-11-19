@@ -15,6 +15,7 @@ namespace SimonsGame.GuiObjects
 	{
 		Environment,
 		Character,
+		Player,
 		Attack
 	}
 
@@ -41,6 +42,7 @@ namespace SimonsGame.GuiObjects
 		#region Graphics
 		public Vector2 Position { get; set; }
 		protected Vector2 _previousPosition;
+		public Vector2 PreviousPosition { get { return _previousPosition; } }
 
 		//  _____
 		// |     |
@@ -82,6 +84,9 @@ namespace SimonsGame.GuiObjects
 		public Level Level { get; set; }
 
 
+		// A projectile may have a parent object.
+		public MainGuiObject Parent { get; set; }
+
 
 		#region Abstract Functions
 		public abstract void PreUpdate(GameTime gameTime);
@@ -121,19 +126,19 @@ namespace SimonsGame.GuiObjects
 
 		public void Update(GameTime gameTime)
 		{
+			Level.AddLevelAnimation(new TextAnimation("score = " + (Player.Sprint3TestScore / 1000) + "\r\n" + "Time = " + GameStateManager.GameTimer.TotalSeconds,
+				Color.Black, Level, new Vector2(10, 3), 1, false));
 			if (_healthCurrent <= 0)
 			{
-				if (!(this is Player))
+				if (this is MovingCharacter || this is WallRunner)
 				{
 					Player.Sprint3TestScore += (float)GameStateManager.GameTimer.TotalMilliseconds;
 				}
-				if (_objectType == GuiObjectType.Environment)
-					Level.RemoveGuiObject(this);
-				else
-					Level.RemoveGuiObject(this);
+				Level.RemoveGuiObject(this);
 
-				if (!Level.GetAllUnPassableCharacterObjects().Values.SelectMany(l => l).Any(g => g is MovingCharacter))
+				if (!Level.GetAllUnPassableCharacterObjects().Values.SelectMany(l => l).Any(g => g is MovingCharacter || g is WallRunner) && Level.Players.Count() == 1)
 				{
+					GameStateManager.GameTimerRunning = false;
 					Console.WriteLine("score = " + (Player.Sprint3TestScore / 1000));
 					Console.WriteLine("Time = " + GameStateManager.GameTimer.TotalSeconds);
 				}
@@ -149,7 +154,13 @@ namespace SimonsGame.GuiObjects
 			Acceleration = AccelerationBase;
 			MaxSpeed = MaxSpeedBase;
 			CurrentMovement = CurrentMovementBase;
+			float healthPrior = _healthCurrent;
+
 			_healthCurrent = MathHelper.Clamp(0, (_healthCurrent + modifyAdd.HealthTotal) * modifyMult.HealthTotal, HealthTotal);
+			if (healthPrior > _healthCurrent)
+				Level.AddLevelAnimation(new TextAnimation("" + (healthPrior - _healthCurrent), Color.Red, Level, new Vector2(Center.X, Position.Y - 30)));
+			else if (healthPrior < _healthCurrent)
+				Level.AddLevelAnimation(new TextAnimation("" + (_healthCurrent - healthPrior), Color.Green, Level, new Vector2(Center.X, Position.Y - 30)));
 
 			PreUpdate(gameTime);
 			_previousPosition = Position;
@@ -166,14 +177,16 @@ namespace SimonsGame.GuiObjects
 		public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
 		{
 			PreDraw(gameTime, spriteBatch);
+			spriteBatch.Begin();
 			if (ShowHitBox())
 			{
-				spriteBatch.Begin();
 				Rectangle destinationRect = new Rectangle((int)Math.Round(Position.X), (int)Math.Round(Position.Y),
 					(int)Math.Round(Size.X), (int)Math.Round(Size.Y)); //casting to int takes the floor
 				spriteBatch.Draw(HitboxImage, destinationRect, _hitBoxColor);
-				spriteBatch.End();
 			}
+
+			_animator.Draw(gameTime, spriteBatch, Position, CurrentMovement.X >= 0 ? SpriteEffects.None : SpriteEffects.FlipHorizontally);
+			spriteBatch.End();
 
 			PostDraw(gameTime, spriteBatch);
 		}
@@ -194,9 +207,9 @@ namespace SimonsGame.GuiObjects
 
 		#region Static Intersection
 
-		public static IEnumerable<Tuple<DoubleVector2, MainGuiObject>> GetHitPlatforms(Dictionary<Group, List<MainGuiObject>> guiObjects, Vector2 prevPosition, Vector4 nextBounds, bool? isVertical = null)
+		public IEnumerable<Tuple<DoubleVector2, MainGuiObject>> GetHitPlatforms(Dictionary<Group, List<MainGuiObject>> guiObjects, Vector4 nextBounds, bool? isVertical = null)
 		{
-			return GetHitObjects(guiObjects, prevPosition, nextBounds, (p) => false, isVertical);
+			return GetHitObjects(guiObjects, nextBounds, (p) => false, isVertical);
 		}
 
 		protected static List<Group> _IgnoredVerticalUpGroups = new List<Group>()
@@ -222,7 +235,7 @@ namespace SimonsGame.GuiObjects
 		};
 
 		// if optional parameter isVertical is null, then 
-		public static IEnumerable<Tuple<DoubleVector2, MainGuiObject>> GetHitObjects(Dictionary<Group, List<MainGuiObject>> guiObjects, Vector2 prevPosition, Vector4 nextBounds, Func<MainGuiObject, bool> shouldSkip, bool? isVertical = null)
+		public IEnumerable<Tuple<DoubleVector2, MainGuiObject>> GetHitObjects(Dictionary<Group, List<MainGuiObject>> guiObjects, Vector4 nextBounds, Func<MainGuiObject, bool> shouldSkip, bool? isVertical = null)
 		{
 			return guiObjects.SelectMany(kv => kv.Value).Select(mgo =>
 			{
@@ -237,7 +250,7 @@ namespace SimonsGame.GuiObjects
 					{
 						float platHeight = mgo.Size.Y;
 						// We need to figure out if we are landing on something (which has exceptions), or we ar hitting the ceiling.
-						bool movingDown = prevPosition.Y < nextBounds.Y; // if this is the case, we only care about the bottom part of the object given
+						bool movingDown = _previousPosition.Y < nextBounds.Y; // if this is the case, we only care about the bottom part of the object given
 						if (movingDown)
 						{
 							nextBounds.Y = nextBounds.Y + nextBounds.Z / 2;
@@ -248,12 +261,12 @@ namespace SimonsGame.GuiObjects
 						//select = bounds != Vector2.Zero && bounds.Y <= 0 && bounds.Y >= -platHeight; // <- old
 
 						select = (bounds != DoubleVector2.Zero && Math.Abs(bounds.Y) > 0 /*&& Math.Abs(bounds.Y) <= platHeight*/)
-							&& (movingDown || !_IgnoredVerticalUpGroups.Contains(mgo.Group));
+							&& (movingDown || !GetIgnoredVerticalGroups(_IgnoredVerticalUpGroups).Contains(mgo.Group));
 					}
 					else // !isVertical, aka isHorizontal
 					{
 						float platWidth = mgo.Size.X;
-						bool movingLeft = prevPosition.X > nextBounds.X;
+						bool movingLeft = _previousPosition.X > nextBounds.X;
 						select = bounds != DoubleVector2.Zero && Math.Abs(bounds.X) > 0 && Math.Abs(bounds.X) <= platWidth;
 					}
 				}
@@ -299,6 +312,20 @@ namespace SimonsGame.GuiObjects
 			double depthY = distanceY > 0 ? minDistanceY - distanceY : -minDistanceY - distanceY;
 			//return new Vector2((float)Math.Round(depthX, 2), (float)Math.Round(depthY, 2));
 			return new DoubleVector2(depthX, depthY);
+		}
+		protected virtual Dictionary<Group, List<MainGuiObject>> GetAllVerticalPassableGroups(Dictionary<Group, List<MainGuiObject>> guiObjects)
+		{
+			return guiObjects;
+		}
+
+		protected virtual List<Group> GetIgnoredHorizontalGroups(List<Group> suggestedGroups)
+		{
+			return suggestedGroups;
+		}
+
+		protected virtual List<Group> GetIgnoredVerticalGroups(List<Group> suggestedGroups)
+		{
+			return suggestedGroups;
 		}
 		#endregion
 	}

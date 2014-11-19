@@ -24,11 +24,12 @@ namespace SimonsGame.GuiObjects.ElementalMagic
 		public ShortRangeProjectileMagic(Vector2 position, Vector2 hitbox, Group group, Level level, Vector2 speed, Player player)
 			: base(position, hitbox, group, level)
 		{
-			_player = player;
 			MaxSpeedBase = speed;
 			_leaf = level.Content.Load<Texture2D>("Test/leaf");
 			_damageDoneOnCollide = new TickModifier(1, ModifyType.Add);
 			_damageDoneOnCollide.SetHealthTotal(-2);
+			_player = player;
+			Parent = player;
 		}
 
 		public override float GetXMovement()
@@ -44,7 +45,7 @@ namespace SimonsGame.GuiObjects.ElementalMagic
 		{
 			base.PostUpdate(gameTime);
 			Dictionary<Group, List<MainGuiObject>> guiObjects = Level.GetAllGuiObjects().Where(kv => kv.Key != Group.Passable).ToDictionary(kv => kv.Key, kv => kv.Value);
-			IEnumerable<Tuple<DoubleVector2, MainGuiObject>> hitPlatforms = MainGuiObject.GetHitObjects(guiObjects, this._previousPosition, this.HitBoxBounds, (mgo) => mgo.Id == _player.Id);
+			IEnumerable<Tuple<DoubleVector2, MainGuiObject>> hitPlatforms = GetHitObjects(guiObjects, this.HitBoxBounds, (mgo) => mgo.Id == _player.Id);
 			if (hitPlatforms.Any()) // Probably apply any effects it would have.
 			{
 				MainGuiObject mgo = hitPlatforms.First().Item2;

@@ -26,6 +26,8 @@ namespace SimonsGame.GuiObjects
 		private Dictionary<Guid, Player> _players;
 		public Dictionary<Guid, Player> Players { get { return _players; } }
 
+		private List<LevelAnimation> _levelAnimations;
+
 		// Used to tell how far "one" block in the level is.
 		public float PlatformDifference { get; set; }
 
@@ -41,22 +43,27 @@ namespace SimonsGame.GuiObjects
 
 		private GameStateManager _gameStateManager;
 		public GameStateManager GameStateManager { get { return _gameStateManager; } }
+		private Vector2 _size;
+		public Vector2 Size { get { return _size; } }
 
 		/// <summary>
 		/// Constructor
 		/// </summary>
-		/// <param name="Size"> Determines the viewport of the Level (What is displayed on the screen). </param>
-		public Level(IServiceProvider serviceProvider, Vector2 Size, GameStateManager gameStateManager)
+		/// <param name="size"> Determines the viewport of the Level (What is displayed on the screen). </param>
+		public Level(IServiceProvider serviceProvider, Vector2 size, GameStateManager gameStateManager)
 		{
 			_environmentObjects = new Dictionary<Group, List<MainGuiObject>>();
 			_characterObjects = new Dictionary<Group, List<MainGuiObject>>();
 			_players = new Dictionary<Guid, Player>();
+
+			_size = size;
 
 			_gameStateManager = gameStateManager;
 
 			// Create a new content manager to load content used just by this level.
 			_content = new ContentManager(serviceProvider, "Content");
 			_cursor = Content.Load<Texture2D>("Cursor/CursorStar");
+			_levelAnimations = new List<LevelAnimation>();
 		}
 		public void AddPlayer(Player player)
 		{
@@ -124,6 +131,10 @@ namespace SimonsGame.GuiObjects
 			{
 				kv.Value.ForEach(p => p.Draw(gameTime, spriteBatch));
 			}
+			foreach (LevelAnimation la in _levelAnimations.ToList())
+			{
+				la.Draw(gameTime, spriteBatch);
+			}
 
 			spriteBatch.Begin();
 			spriteBatch.Draw(_cursor, _gameStateManager.MousePosition - new Vector2(10, 10), Color.Red);
@@ -143,9 +154,22 @@ namespace SimonsGame.GuiObjects
 		public Dictionary<Group, List<MainGuiObject>> GetAllGuiObjects()
 		{
 			Dictionary<Group, List<MainGuiObject>> returnMap = new Dictionary<Group, List<MainGuiObject>>();
-			var gb = _environmentObjects.GroupBy(kv => kv.Key); // new place in memory... so dumb
-			foreach (var kv in gb)
+			var gbenv = _environmentObjects.GroupBy(kv => kv.Key); // new place in memory... so dumb
+			var gbplayers = _players.GroupBy(kv => kv.Key); // new place in memory... so dumb
+			foreach (var kv in gbenv)
 				returnMap.Add(kv.Key, kv.SelectMany(v => v.Value).ToList());
+			foreach (Player p in _players.Select(pl => pl.Value))
+			{
+				List<MainGuiObject> mgoList;
+				if (returnMap.TryGetValue(p.Group, out mgoList))
+				{
+					mgoList.Add(p);
+				}
+				else
+				{
+					returnMap.Add(p.Group, new List<MainGuiObject>() { p });
+				}
+			}
 
 			foreach (Group key in _characterObjects.Keys)
 			{
@@ -162,8 +186,12 @@ namespace SimonsGame.GuiObjects
 		{
 			if (guiObject.ObjectType == GuiObjectType.Environment)
 				RemoveEnvironmentObject(guiObject);
-			else
+			else if (guiObject.ObjectType == GuiObjectType.Character)
 				RemoveCharacterObject(guiObject);
+			else if (guiObject.ObjectType == GuiObjectType.Player)
+				_players.Remove(guiObject.Id);
+			else
+				throw new Exception("Level::RemoveGuiObject, what do I do with this type of object?!");
 		}
 
 		private void RemoveEnvironmentObject(MainGuiObject guiObject)
@@ -178,6 +206,15 @@ namespace SimonsGame.GuiObjects
 			List<MainGuiObject> groupGuiObjects;
 			if (_characterObjects.TryGetValue(guiObject.Group, out groupGuiObjects))
 				groupGuiObjects.Remove(guiObject);
+		}
+		public void AddLevelAnimation(LevelAnimation la)
+		{
+			_levelAnimations.Add(la);
+		}
+
+		public void RemoveLevelAnimation(TextAnimation textAnimation)
+		{
+			_levelAnimations.Remove(textAnimation);
 		}
 	}
 }

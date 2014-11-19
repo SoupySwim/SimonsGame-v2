@@ -39,7 +39,7 @@ namespace SimonsGame.Modifiers.Abilities
 				Vector2 playerAim = playerControls.GetAim(_player);
 				Vector2 speed = new Vector2(9 * playerAim.X, 9 * playerAim.Y);
 				// For now, a lot of things are hard coded...
-				_testMagic = new SurroundRangeMagic(_player.Center - new Vector2(40, 40), new Vector2(80, 80), Group.Passable, _player.Level, _player);
+				_testMagic = new SurroundRangeMagic(_player.Center - new Vector2(40, 40), _player, new Vector2(80, 80), Group.Passable, _player.Level, _player);
 				_player.Level.AddGuiObject(_testMagic);
 			}
 			if (_tickCount == _tickTotal)

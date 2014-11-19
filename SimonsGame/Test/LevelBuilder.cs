@@ -18,12 +18,18 @@ namespace SimonsGame.Test
 			Level level = new Level(serviceProvider, levelSize, gameStateManager);
 			level.PlatformDifference = baseHeight; // for now.
 
+			int notFirstOne = 0;
 
 			MainGame.PlayerManager.PlayerInputMap.ToList().ForEach(kv =>
 			{
 				Guid guid = kv.Key;
-				//level.AddPlayer(new Player(guid, new Vector2(50, levelSize.Y - 150), new Vector2(50, 70), Group.BothPassable, level));
+				level.AddPlayer(new Player(guid, new Vector2(50, levelSize.Y - 150), new Vector2(40, 80), Group.BothPassable, level, notFirstOne++ > 0));
 			});
+
+			level.AddGuiObject(new WallRunner(new Vector2(levelSize.X / 2 - 25, levelSize.Y - 100), new Vector2(50, 50), Group.BothPassable, level, true));
+			level.AddGuiObject(new WallRunner(new Vector2(levelSize.X / 2 - 25, levelSize.Y - 100), new Vector2(50, 50), Group.BothPassable, level, false));
+			level.AddGuiObject(new HealthCreep(new Vector2(levelSize.X / 2 - 25, levelSize.Y - 100), new Vector2(36, 20), Group.BothPassable, level, false, 200, (int)(level.Size.X - 200)));
+			level.AddGuiObject(new HealthCreep(new Vector2(levelSize.X / 2 - 25, levelSize.Y - 100), new Vector2(36, 20), Group.BothPassable, level, true, 200, (int)(level.Size.X - 200)));
 
 			Platform bottomPlatform = new Platform(new Vector2(0, levelSize.Y - 50), new Vector2(levelSize.X, 50), Group.ImpassableIncludingMagic, level);
 			level.AddGuiObject(bottomPlatform);
@@ -36,29 +42,27 @@ namespace SimonsGame.Test
 			//Platform middleBarrior = new Platform(new Vector2(levelSize.X / 2 - 25, levelSize.Y - 300), new Vector2(50, 300), Group.ImpassableIncludingMagic, level);
 			//level.AddGuiObject(middleBarrior);
 			bool isEven = false;
-			bool testOne = true;
+
 			for (var currentY = levelSize.Y - (50 + baseHeight); currentY > baseHeight; currentY = currentY - baseHeight)
 			{
 				if (isEven)
 				{
 					Platform leftSidePlatform = new Platform(new Vector2(50, currentY), new Vector2(500, 20), Group.BothPassable, level);
 					level.AddGuiObject(leftSidePlatform);
-					MovingCharacter p = new MovingCharacter(new Vector2(50, currentY - 90), new Vector2(50, 90), Group.BothPassable, level, true);
-					//level.AddGuiObject(p);
+					MovingCharacter p = new MovingCharacter(new Vector2(50, currentY - 90), new Vector2(40, 80), Group.BothPassable, level, true);
+					level.AddGuiObject(p);
 
 					Platform rightSidePlatform = new Platform(new Vector2(levelSize.X - 550, currentY), new Vector2(500, 20), Group.BothPassable, level);
 					level.AddGuiObject(rightSidePlatform);
-					MovingCharacter p2 = new MovingCharacter(new Vector2(levelSize.X - 550, currentY - 90), new Vector2(50, 90), Group.BothPassable, level, true);
-					//level.AddGuiObject(p2);
+					MovingCharacter p2 = new MovingCharacter(new Vector2(levelSize.X - 550, currentY - 90), new Vector2(40, 80), Group.BothPassable, level, true);
+					level.AddGuiObject(p2);
 				}
 				else
 				{
-					if (testOne)
-					{
-						WallRunner p = new WallRunner(new Vector2(levelSize.X / 2 - 25, currentY + 50), new Vector2(50, 50), Group.BothPassable, level, false);
-						level.AddGuiObject(p);
-						testOne = false;
-					}
+					WallRunner p = new WallRunner(new Vector2(levelSize.X / 2 - 25, currentY - 50), new Vector2(50, 50), Group.BothPassable, level, false);
+					level.AddGuiObject(p);
+					level.Players.Last().Value.Position = new Vector2(levelSize.X / 2 - 20, currentY - 80);
+
 					Platform middlePlatform = new Platform(new Vector2(levelSize.X / 2 - 250, currentY), new Vector2(500, 20), Group.Impassable, level);
 					level.AddGuiObject(middlePlatform);
 				}
@@ -77,7 +81,6 @@ namespace SimonsGame.Test
 			//level.AddGuiObject(horizontalLeftPlatform);
 			//MovingPlatform horizontalRightPlatform = new MovingPlatform(new Vector2(levelSize.X / 2 + 50 + topPlatformMoving, 400), new Vector2(150, 50), Group.VerticalPassable, level, false, topPlatformMoving, false);
 			//level.AddGuiObject(horizontalRightPlatform);
-
 
 			return level;
 		}

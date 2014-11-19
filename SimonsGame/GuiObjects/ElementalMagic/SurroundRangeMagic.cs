@@ -19,11 +19,12 @@ namespace SimonsGame.GuiObjects.ElementalMagic
 		private Texture2D _bubble;
 
 		private MainGuiObject _surroundObject;
-		public SurroundRangeMagic(Vector2 position, Vector2 hitbox, Group group, Level level, MainGuiObject o)
+		public SurroundRangeMagic(Vector2 position, Player player, Vector2 hitbox, Group group, Level level, MainGuiObject o)
 			: base(position, hitbox, group, level)
 		{
 			_surroundObject = o;
 			_bubble = level.Content.Load<Texture2D>("Test/Bubble");
+			Parent = player;
 		}
 		public override float GetXMovement()
 		{

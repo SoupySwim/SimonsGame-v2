@@ -64,11 +64,11 @@ namespace SimonsGame.Modifiers
 		public Dictionary<Guid, ModifierBase> CurrentAbilities { get { return _currentAbilities; } }
 		public AbilityManager(PhysicsObject player, Dictionary<KnownAbility, List<PlayerAbilityInfo>> knownAbilities)
 		{
-			_player = player;
 			_coolDownCounter = new Dictionary<Guid, TimeSpan>();
 			_layoverCounter = new Dictionary<Guid, int>();
 			_knownAbilities = knownAbilities;
 			_knownAbilityIds = _knownAbilities.Values.SelectMany(ps => ps).Select(pi => pi.Id).ToList();
+			_player = player;
 		}
 
 		public void AddKnownAbility(KnownAbility type, PlayerAbilityInfo abilityInfo)
@@ -155,7 +155,8 @@ namespace SimonsGame.Modifiers
 
 		internal void AddAbility(ModifierBase mb)
 		{
-			_currentAbilities.Add(mb.Id, mb);
+			if (!_currentAbilities.ContainsKey(mb.Id))
+				_currentAbilities.Add(mb.Id, mb);
 		}
 	}
 }

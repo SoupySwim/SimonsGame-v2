@@ -98,11 +98,13 @@
     <Compile Include="GuiObjects\ElementalMagic\LongRangeMagic.cs" />
     <Compile Include="GuiObjects\ElementalMagic\ShortRangeMeleeMagic.cs" />
     <Compile Include="GuiObjects\Level.cs" />
+    <Compile Include="GuiObjects\OtherCharacters\Global\HealthCreep.cs" />
     <Compile Include="GuiObjects\OtherCharacters\SingleCoop\MovingCharacter.cs" />
     <Compile Include="GuiObjects\OtherCharacters\SingleCoop\WallRunner.cs" />
     <Compile Include="GuiObjects\Player\Player.cs" />
     <Compile Include="GuiObjects\Terrain\MovingPlatform.cs" />
     <Compile Include="GuiObjects\Terrain\Platform.cs" />
+    <Compile Include="GuiObjects\Utility\AI\AIUtility.cs" />
     <Compile Include="GuiObjects\Utility\Animator.cs" />
     <Compile Include="GuiObjects\Utility\GraphicsUtility.cs" />
     <Compile Include="MainFiles\Controls.cs" />
@@ -125,9 +127,12 @@
     <Compile Include="Modifiers\TimeModifier.cs" />
     <Compile Include="Test\LevelBuilder.cs" />
     <Compile Include="Test\TempControls.cs" />
-    <Compile Include="Utility\AnimationUtility.cs" />
+    <Compile Include="Utility\ObjectAnimations\Animation.cs" />
+    <Compile Include="Utility\ObjectAnimations\AnimationUtility.cs" />
     <Compile Include="Utility\Elements.cs" />
     <Compile Include="Utility\GroupHandler.cs" />
+    <Compile Include="Utility\LevelAnimations\LevelAnimation.cs" />
+    <Compile Include="Utility\LevelAnimations\TextAnimation.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

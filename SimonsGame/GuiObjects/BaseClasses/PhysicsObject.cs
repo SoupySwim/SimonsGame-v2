@@ -20,7 +20,7 @@ namespace SimonsGame.GuiObjects
 		public AbilityManager AbilityManager { get { return _abilityManager; } }
 		public bool IsLanded { get { return PrimaryOverlapObjects.ContainsKey(Orientation.Vertical); } }
 		private Dictionary<Orientation, MainGuiObject> _primaryOverlapObjects;
-		protected Dictionary<Orientation, MainGuiObject> PrimaryOverlapObjects { get { return _primaryOverlapObjects; } }
+		public Dictionary<Orientation, MainGuiObject> PrimaryOverlapObjects { get { return _primaryOverlapObjects; } }
 		protected bool StopGravity { get; set; }
 		protected bool VerticalPass { get; set; }
 
@@ -43,88 +43,6 @@ namespace SimonsGame.GuiObjects
 		// This is where all the physics logic gets set.
 		public override void PreUpdate(GameTime gameTime)
 		{
-			//////_primaryOverlapObjects = new Dictionary<Orientation, MainGuiObject>();
-			// projectedVerticalSpeed is assumed to be gravity unless otherwise determined.
-			//////float projectedVerticalSpeed = AverageSpeed.Y;
-
-			// Assume not moving in a direction horizontally.
-			//////float projectedHorizontalSpeed = 0;
-
-			//////Vector4 nextBounds = this.Bounds;
-			//////nextBounds.Y += AverageSpeed.Y;
-			//////Dictionary<Group, List<MainGuiObject>> guiObjects = Level.GetAllUnPassableEnvironmentObjects();
-
-			// WARNING DUPLICATE CODE COMING UP, WILL FIX IN NEXT SPRINT.
-
-
-			// Vertical.
-			//////IEnumerable<Tuple<Vector2, MainGuiObject>> verticallyHitPlatforms = MainGuiObject.GetHitObjects(GetAllVerticalPassableGroups(guiObjects), nextBounds, (p) => VerticalPass && p.Group == Group.VerticalPassable, true);
-			//guiObjects.SelectMany(kv => kv.Value).Select(p =>
-			//{
-			//	if (VerticalPass && p.Group == Group.VerticalPassable)
-			//		return new { bounds = Vector2.Zero, select = false, obj = MainGuiObject.EmptyVessel };
-			//	var bounds = MainGuiObject.GetIntersectionDepth(nextBounds, p.Bounds);
-			//	float platHeight = p.Size.Y;
-			//	//return bounds != Vector2.Zero && bounds.Y <= 0 && bounds.Y >= -platHeight;
-
-			//	return new { bounds = bounds, select = bounds != Vector2.Zero && bounds.Y <= 0 && bounds.Y >= -platHeight, obj = p };
-			//}).Where(o => o.select).Select(o => new Tuple<Vector2, MainGuiObject>(o.bounds, o.obj));
-
-			// Pick shortest depth as that's the one we care about presumably.
-			//////Tuple<Vector2, MainGuiObject> verticallyHitPlatformTuple = verticallyHitPlatforms.OrderBy(p => Math.Abs(p.Item1.Y)).FirstOrDefault(); // Will unfortunately have to do some better logic later.
-
-			//////if (verticallyHitPlatformTuple != null)
-			//////{
-			//////	MainGuiObject verticallyHitPlatform = verticallyHitPlatformTuple.Item2;
-			//////	float platHeight = verticallyHitPlatform.Size.Y;
-			//////	float bumpLeeway = Position.Y + Size.Y - platHeight;
-			//////	Vector2 bounds = GetIntersectionDepth(verticallyHitPlatform);
-			//////	// If the object is moving downwards, and is below the top of the platform, push it back up.
-			//////	if (!StopGravity && bounds.Y <= 0 && bounds.Y >= -AverageSpeed.Y * 2)
-			//////	{
-			//////		// fix offset
-			//////		Position = new Vector2(Position.X, Position.Y + bounds.Y + 1);
-			//////		projectedVerticalSpeed = 0;
-			//////		_primaryOverlapObjects.Add(Orientation.Vertical, verticallyHitPlatform);
-			//////	}
-			//////}
-
-
-			// Horizontal
-
-			// Make this check more groups... in an elegant way.
-			//////IEnumerable<Tuple<Vector2, MainGuiObject>> horizontallyHitPlatforms = MainGuiObject.GetHitObjects(GetAllHorizontalPassableGroups(guiObjects), nextBounds, (p) => false, false);
-
-			//IEnumerable<Tuple<Vector2, MainGuiObject>> horizontallyHitPlatforms = guiObjects.Where(g => g.Key == Group.ImpassableIncludingMagic).SelectMany(kv => kv.Value).Select(p =>
-			//{
-			//	var bounds = MainGuiObject.GetIntersectionDepth(nextBounds, p.Bounds);
-			//	float platWidth = p.Size.X;
-			//	return new { bounds = bounds, select = bounds != Vector2.Zero && Math.Abs(bounds.X) > 0 && Math.Abs(bounds.X) <= platWidth, obj = p };
-			//})
-			//.Where(o => o.select).Select(o => new Tuple<Vector2, MainGuiObject>(o.bounds, o.obj));
-
-
-			//Pick shortest depth as that's the one we care about presumably.
-			//////Tuple<Vector2, MainGuiObject> horizontallyHitPlatformTuple = horizontallyHitPlatforms.OrderBy(p => Math.Abs(p.Item1.X)).FirstOrDefault(); // Will unfortunately have to do some better logic later.
-			//////if (horizontallyHitPlatformTuple != null)
-			//////{
-			//////	MainGuiObject horizontallyHitPlatform = horizontallyHitPlatformTuple.Item2;
-			//////	float platWidth = horizontallyHitPlatform.Size.X;
-			//////	float bumpLeeway = Position.X + Size.X - platWidth;
-			//////	Vector2 bounds = GetIntersectionDepth(horizontallyHitPlatform);
-			//////	// If the object is moving downwards, and is below the top of the platform, push it back up.
-			//////	if (Math.Abs(bounds.X) > 0 && Math.Abs(bounds.X) <= MaxSpeed.X + .001f /* some arbitrary number to alleviate rounding */)
-			//////	{
-			//////		// fix offset
-			//////		Position = new Vector2(Position.X + bounds.X, Position.Y);
-			//////		projectedHorizontalSpeed = 0;
-			//////		_primaryOverlapObjects.Add(Orientation.Horizontal, horizontallyHitPlatform);
-			//////	}
-			//////}
-
-			// Move object if needed.
-			//////CurrentMovement = new Vector2(projectedHorizontalSpeed, projectedVerticalSpeed);
-
 			_abilityManager.CheckKnownAbilities(gameTime);
 		}
 		public override void PostUpdate(GameTime gameTime)
@@ -134,7 +52,7 @@ namespace SimonsGame.GuiObjects
 			/////////////////////////////////////////////
 			_primaryOverlapObjects = new Dictionary<Orientation, MainGuiObject>();
 			Dictionary<Group, List<MainGuiObject>> guiObjects = Level.GetAllUnPassableEnvironmentObjects();
-			IEnumerable<Tuple<DoubleVector2, MainGuiObject>> verticallyHitPlatforms = MainGuiObject.GetHitObjects(GetAllVerticalPassableGroups(guiObjects), this._previousPosition, this.Bounds, (p) => VerticalPass && _IgnoredVerticalDownGroups.Contains(p.Group), true);
+			IEnumerable<Tuple<DoubleVector2, MainGuiObject>> verticallyHitPlatforms = GetHitObjects(GetAllVerticalPassableGroups(guiObjects), this.Bounds, (p) => VerticalPass && _IgnoredVerticalDownGroups.Contains(p.Group), true);
 			Tuple<DoubleVector2, MainGuiObject> verticallyHitPlatformTuple = verticallyHitPlatforms.OrderBy(p => Math.Abs(p.Item1.Y)).FirstOrDefault(); // Will unfortunately have to do some better logic later.
 			if (verticallyHitPlatformTuple != null)
 			{
@@ -149,7 +67,7 @@ namespace SimonsGame.GuiObjects
 				}
 			}
 
-			IEnumerable<Tuple<DoubleVector2, MainGuiObject>> horizontallyHitPlatforms = MainGuiObject.GetHitObjects(GetAllHorizontalPassableGroups(guiObjects), this._previousPosition, this.Bounds, (p) => false, false);
+			IEnumerable<Tuple<DoubleVector2, MainGuiObject>> horizontallyHitPlatforms = GetHitObjects(GetAllHorizontalPassableGroups(guiObjects), this.Bounds, (p) => false, false);
 			Tuple<DoubleVector2, MainGuiObject> horizontallyHitPlatformTuple = horizontallyHitPlatforms.OrderBy(p => Math.Abs(p.Item1.X)).FirstOrDefault(); // Will unfortunately have to do some better logic later.
 			if (horizontallyHitPlatformTuple != null)
 			{
@@ -173,7 +91,7 @@ namespace SimonsGame.GuiObjects
 
 		protected virtual Dictionary<Group, List<MainGuiObject>> GetAllHorizontalPassableGroups(Dictionary<Group, List<MainGuiObject>> guiObjects)
 		{
-			return guiObjects.Where(g => !_IgnoredHorizontalGroups.Contains(g.Key)).ToDictionary(o => o.Key, o => o.Value);
+			return guiObjects.Where(g => !GetIgnoredHorizontalGroups(_IgnoredHorizontalGroups).Contains(g.Key)).ToDictionary(o => o.Key, o => o.Value);
 		}
 
 		// Add custom modifiers from the ability manager.

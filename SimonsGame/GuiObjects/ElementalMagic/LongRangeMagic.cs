@@ -30,6 +30,7 @@ namespace SimonsGame.GuiObjects.ElementalMagic
 			_damageDoneOnDetonate = new TickModifier(1, ModifyType.Add);
 			_damageDoneOnDetonate.SetHealthTotal(-4);
 			_player = player;
+			Parent = player;
 		}
 		public override float GetXMovement()
 		{
@@ -68,7 +69,7 @@ namespace SimonsGame.GuiObjects.ElementalMagic
 		{
 			Dictionary<Group, List<MainGuiObject>> guiObjects = Level.GetAllGuiObjects().Where(kv => kv.Key != Group.Passable).ToDictionary(kv => kv.Key, kv => kv.Value);
 			Vector4 bounds = new Vector4(this.Position.X - 5, this.Position.Y - 5, this.Size.X + 10, this.Size.Y + 10);
-			IEnumerable<Tuple<DoubleVector2, MainGuiObject>> hitPlatforms = MainGuiObject.GetHitObjects(guiObjects, this._previousPosition, bounds, (mgo) => mgo.Id == _player.Id);
+			IEnumerable<Tuple<DoubleVector2, MainGuiObject>> hitPlatforms = GetHitObjects(guiObjects, this.HitBoxBounds, (mgo) => mgo.Id == _player.Id);
 			if (hitPlatforms.Any()) // Probably apply any effects it would have.
 			{
 				foreach (MainGuiObject mgo in hitPlatforms.Select(hp => hp.Item2))
