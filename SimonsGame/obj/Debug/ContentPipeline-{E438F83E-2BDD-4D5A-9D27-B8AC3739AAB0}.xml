@@ -7,7 +7,7 @@
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
       <Options>None</Options>
-      <Output>E:\Dropbox\SimonsGame\SImonsGame\SImonsGame\bin\Debug\Content\Cursor\CursorStar.xnb</Output>
+      <Output>E:\Dropbox\SimonsGame-v2\SImonsGame\bin\Debug\Content\Cursor\CursorStar.xnb</Output>
       <Time>2014-10-28T20:42:05-05:00</Time>
     </Item>
     <Item>
@@ -16,7 +16,7 @@
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
       <Options>None</Options>
-      <Output>E:\Dropbox\SimonsGame\SImonsGame\SImonsGame\bin\Debug\Content\Test\fireball.xnb</Output>
+      <Output>E:\Dropbox\SimonsGame-v2\SImonsGame\bin\Debug\Content\Test\fireball.xnb</Output>
       <Time>2014-10-29T00:32:53-05:00</Time>
     </Item>
     <Item>
@@ -25,7 +25,7 @@
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
       <Options>None</Options>
-      <Output>E:\Dropbox\SimonsGame\SImonsGame\SImonsGame\bin\Debug\Content\Test\bubble.xnb</Output>
+      <Output>E:\Dropbox\SimonsGame-v2\SImonsGame\bin\Debug\Content\Test\bubble.xnb</Output>
       <Time>2014-10-29T01:23:04-05:00</Time>
     </Item>
     <Item>
@@ -34,7 +34,7 @@
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
       <Options>None</Options>
-      <Output>E:\Dropbox\SimonsGame\SImonsGame\SImonsGame\bin\Debug\Content\Test\splash.xnb</Output>
+      <Output>E:\Dropbox\SimonsGame-v2\SImonsGame\bin\Debug\Content\Test\splash.xnb</Output>
       <Time>2014-10-29T11:53:30-05:00</Time>
     </Item>
     <Item>
@@ -43,8 +43,35 @@
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
       <Options>None</Options>
-      <Output>E:\Dropbox\SimonsGame\SImonsGame\SImonsGame\bin\Debug\Content\Test\leaf.xnb</Output>
+      <Output>E:\Dropbox\SimonsGame-v2\SImonsGame\bin\Debug\Content\Test\leaf.xnb</Output>
       <Time>2014-11-03T20:51:45-06:00</Time>
+    </Item>
+    <Item>
+      <Source>Sprites\PlayerSprites\TempPlayer\IdleFull.png</Source>
+      <Name>Sprites\PlayerSprites\TempPlayer\IdleFull</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>E:\Dropbox\SimonsGame-v2\SImonsGame\bin\Debug\Content\Sprites\PlayerSprites\TempPlayer\IdleFull.xnb</Output>
+      <Time>2014-09-05T00:06:39-05:00</Time>
+    </Item>
+    <Item>
+      <Source>Sprites\PlayerSprites\TempPlayer\RunFull.png</Source>
+      <Name>Sprites\PlayerSprites\TempPlayer\RunFull</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>E:\Dropbox\SimonsGame-v2\SImonsGame\bin\Debug\Content\Sprites\PlayerSprites\TempPlayer\RunFull.xnb</Output>
+      <Time>2014-09-05T00:10:11-05:00</Time>
+    </Item>
+    <Item>
+      <Source>Fonts\PlainFont.spritefont</Source>
+      <Name>Fonts\PlainFont</Name>
+      <Importer>FontDescriptionImporter</Importer>
+      <Processor>FontDescriptionProcessor</Processor>
+      <Options>None</Options>
+      <Output>E:\Dropbox\SimonsGame-v2\SImonsGame\bin\Debug\Content\Fonts\PlainFont.xnb</Output>
+      <Time>2014-06-07T18:48:58.2501155-05:00</Time>
     </Item>
     <BuildSuccessful>true</BuildSuccessful>
     <Settings>
@@ -53,10 +80,10 @@
       <TargetProfile>HiDef</TargetProfile>
       <BuildConfiguration>Debug</BuildConfiguration>
       <CompressContent>false</CompressContent>
-      <RootDirectory>E:\Dropbox\SimonsGame\SImonsGame\SImonsGameContent\</RootDirectory>
-      <LoggerRootDirectory>E:\Dropbox\SimonsGame\SImonsGame\SImonsGame\</LoggerRootDirectory>
-      <IntermediateDirectory>E:\Dropbox\SimonsGame\SImonsGame\SImonsGame\obj\Debug\</IntermediateDirectory>
-      <OutputDirectory>E:\Dropbox\SimonsGame\SImonsGame\SImonsGame\bin\Debug\Content\</OutputDirectory>
+      <RootDirectory>E:\Dropbox\SimonsGame-v2\SImonsGameContent\</RootDirectory>
+      <LoggerRootDirectory>E:\Dropbox\SimonsGame-v2\SImonsGame\</LoggerRootDirectory>
+      <IntermediateDirectory>E:\Dropbox\SimonsGame-v2\SImonsGame\obj\Debug\</IntermediateDirectory>
+      <OutputDirectory>E:\Dropbox\SimonsGame-v2\SImonsGame\bin\Debug\Content\</OutputDirectory>
     </Settings>
     <Assemblies>
       <Assembly>
