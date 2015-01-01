@@ -79,12 +79,15 @@
     <DefineConstants>TRACE;DEBUG;WINDOWS</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="MonoGame.Framework, Version=3.1.2.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\MonoGame.Binaries.3.2.0\build\net40\MonoGame.Framework.dll</HintPath>
-    </Reference>
+    <Reference Include="Microsoft.CSharp" />
     <Reference Include="mscorlib" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
     <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SImonsGameContent\SimonsGameContent.contentproj">
@@ -113,9 +116,28 @@
     <Compile Include="GuiObjects\Utility\GraphicsUtility.cs" />
     <Compile Include="MainFiles\Controls.cs" />
     <Compile Include="MainFiles\GameStateManager.cs" />
+    <Compile Include="MainFiles\InGame\GameSettings.cs" />
+    <Compile Include="MainFiles\InGame\GameStatistics.cs" />
+    <Compile Include="MainFiles\InGame\PlayerHUD.cs" />
     <Compile Include="MainFiles\MainGame.cs" />
     <Compile Include="MainFiles\PlayerManager.cs" />
     <Compile Include="MainFiles\Program.cs" />
+    <Compile Include="Menu\ImageMenuItem.cs" />
+    <Compile Include="Menu\InGame\InGameMenu.cs" />
+    <Compile Include="Menu\InGame\InGameMenuScreens\MainInGameMenu.cs" />
+    <Compile Include="Menu\InGame\InGameOverlay.cs" />
+    <Compile Include="Menu\InGame\MainMenuScreen.cs" />
+    <Compile Include="Menu\MenuScreens\MainMenuScreen.cs" />
+    <Compile Include="Menu\MenuItem.cs" />
+    <Compile Include="Menu\MenuScreen.cs" />
+    <Compile Include="Menu\MenuScreens\MapEditorMenu.cs" />
+    <Compile Include="Menu\MenuScreens\MultiPlayerMenu.cs" />
+    <Compile Include="Menu\MenuScreens\SinglePlayerMenu.cs" />
+    <Compile Include="Menu\MenuScreens\MainGameMenu.cs" />
+    <Compile Include="Menu\MenuScreens\GameStatisticsMenu.cs" />
+    <Compile Include="Menu\MenuScreens\StartScreen.cs" />
+    <Compile Include="Menu\MenuStateManager.cs" />
+    <Compile Include="Menu\TextMenuItem.cs" />
     <Compile Include="Modifiers\Abilities\AbilityBuilder.cs" />
     <Compile Include="Modifiers\Abilities\AbilityManager.cs" />
     <Compile Include="Modifiers\Abilities\LongRangeElementalMagicAbility.cs" />
@@ -131,14 +153,20 @@
     <Compile Include="Modifiers\TimeModifier.cs" />
     <Compile Include="Test\LevelBuilder.cs" />
     <Compile Include="Test\TempControls.cs" />
+    <Compile Include="Utility\Extensions\GuiExtensions.cs" />
     <Compile Include="Utility\ObjectAnimations\Animation.cs" />
     <Compile Include="Utility\ObjectAnimations\AnimationUtility.cs" />
     <Compile Include="Utility\Elements.cs" />
     <Compile Include="Utility\GroupHandler.cs" />
     <Compile Include="Utility\LevelAnimations\LevelAnimation.cs" />
     <Compile Include="Utility\LevelAnimations\TextAnimation.cs" />
+    <Compile Include="MainFiles\InGame\PlayerViewports.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Diagrams\GuiObjects.cd" />
+    <None Include="Diagrams\MainGuiObject_Update.sequencediagram" />
+    <None Include="Diagrams\PhysicsObject_PostUpdate.sequencediagram" />
+    <None Include="Diagrams\WallRunner_PreUpdate.sequencediagram" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
@@ -165,6 +193,17 @@
       <ProductName>Windows Installer 4.5</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Diagrams\MainGuiObject_Update.sequencediagram.layout">
+      <DependentUpon>MainGuiObject_Update.sequencediagram</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Diagrams\PhysicsObject_PostUpdate.sequencediagram.layout">
+      <DependentUpon>PhysicsObject_PostUpdate.sequencediagram</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Diagrams\WallRunner_PreUpdate.sequencediagram.layout">
+      <DependentUpon>WallRunner_PreUpdate.sequencediagram</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

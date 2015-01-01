@@ -8,6 +8,7 @@ using SimonsGame.Modifiers;
 using Microsoft.Xna.Framework.Content;
 using SimonsGame.GuiObjects.Utility;
 using SimonsGame.Utility;
+using SimonsGame.MainFiles.InGame;
 
 namespace SimonsGame.GuiObjects
 {
@@ -21,6 +22,7 @@ namespace SimonsGame.GuiObjects
 
 	public abstract class MainGuiObject : GuiVariables
 	{
+		public string Name { get; set; }
 		// Return an empty MainGuiObject, void of any important data.  It's a placeholder.
 		public static MainGuiObject EmptyVessel { get { return null; } }
 
@@ -101,7 +103,7 @@ namespace SimonsGame.GuiObjects
 		public abstract void HitByObject(MainGuiObject mgo, ModifierBase mb);
 		#endregion
 
-		public MainGuiObject(Vector2 position, Vector2 hitbox, Group group, Level level)
+		public MainGuiObject(Vector2 position, Vector2 hitbox, Group group, Level level, string name)
 		{
 			_guid = Guid.NewGuid();
 			Position = position;
@@ -122,25 +124,37 @@ namespace SimonsGame.GuiObjects
 			_healthTotal = 1;
 			_healthCurrent = _healthTotal;
 			_objectType = GuiObjectType.Environment;
+			Name = name;
 		}
 
 		public void Update(GameTime gameTime)
 		{
-			Level.AddLevelAnimation(new TextAnimation("score = " + (Player.Sprint3TestScore / 1000) + "\r\n" + "Time = " + GameStateManager.GameTimer.TotalSeconds,
-				Color.Black, Level, new Vector2(10, 3), 1, false));
 			if (_healthCurrent <= 0)
 			{
 				if (this is MovingCharacter || this is WallRunner)
 				{
+					if (Player.Sprint3TestScore == 0)
+					{
+						Level.GameStateManager.AddHighLight(new GameHighlight()
+						{
+							Description = "First Death",
+							Character = this,
+							TimeOccured = GameStateManager.GameTimer
+						});
+					}
 					Player.Sprint3TestScore += (float)GameStateManager.GameTimer.TotalMilliseconds;
 				}
 				Level.RemoveGuiObject(this);
 
-				if (!Level.GetAllUnPassableCharacterObjects().Values.SelectMany(l => l).Any(g => g is MovingCharacter || g is WallRunner) && Level.Players.Count() == 1)
+				if (!Level.GetAllUnPassableCharacterObjects().Values.SelectMany(l => l).Any(g => g is MovingCharacter || g is WallRunner))
 				{
 					GameStateManager.GameTimerRunning = false;
-					Console.WriteLine("score = " + (Player.Sprint3TestScore / 1000));
-					Console.WriteLine("Time = " + GameStateManager.GameTimer.TotalSeconds);
+					Level.GameStateManager.AddHighLight(new GameHighlight()
+					{
+						Description = string.Format("Finished with Score = {0}", Player.Sprint3TestScore),
+						Character = this,
+						TimeOccured = GameStateManager.GameTimer
+					});
 				}
 				return;
 			}
@@ -166,10 +180,12 @@ namespace SimonsGame.GuiObjects
 			_previousPosition = Position;
 
 			SetMovement(gameTime);
-			float xCurMove = (GetXMovement() + modifyAdd.Movement.X) * modifyMult.Movement.X;
-			float yCurMove = (GetYMovement() + modifyAdd.Movement.Y) * modifyMult.Movement.Y;
-			CurrentMovement = new Vector2(xCurMove, yCurMove);
+			double xCurMove = (GetXMovement() + modifyAdd.Movement.X) * modifyMult.Movement.X;
+			double yCurMove = (GetYMovement() + modifyAdd.Movement.Y) * modifyMult.Movement.Y;
+			CurrentMovement = new Vector2((float)xCurMove, (float)yCurMove);
 			Position = new Vector2(Position.X + CurrentMovement.X, Position.Y + CurrentMovement.Y);
+
+			_animator.Update(gameTime);
 
 			PostUpdate(gameTime);
 		}
@@ -177,7 +193,7 @@ namespace SimonsGame.GuiObjects
 		public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
 		{
 			PreDraw(gameTime, spriteBatch);
-			spriteBatch.Begin();
+			//spriteBatch.Begin();
 			if (ShowHitBox())
 			{
 				Rectangle destinationRect = new Rectangle((int)Math.Round(Position.X), (int)Math.Round(Position.Y),
@@ -186,7 +202,7 @@ namespace SimonsGame.GuiObjects
 			}
 
 			_animator.Draw(gameTime, spriteBatch, Position, CurrentMovement.X >= 0 ? SpriteEffects.None : SpriteEffects.FlipHorizontally);
-			spriteBatch.End();
+			//spriteBatch.End();
 
 			PostDraw(gameTime, spriteBatch);
 		}
@@ -253,8 +269,8 @@ namespace SimonsGame.GuiObjects
 						bool movingDown = _previousPosition.Y < nextBounds.Y; // if this is the case, we only care about the bottom part of the object given
 						if (movingDown)
 						{
-							nextBounds.Y = nextBounds.Y + nextBounds.Z / 2;
-							nextBounds.Z = nextBounds.Z / 2;
+							//nextBounds.Y = nextBounds.Y + nextBounds.Z / 2;
+							//nextBounds.Z = nextBounds.Z / 2;
 							bounds = MainGuiObject.GetIntersectionDepth(nextBounds, mgo.Bounds);
 						}
 						// If we are moving down, then we want to land (unless otherwise told), otherwise we are going to move through the groups we are allowed to pass.
@@ -328,5 +344,6 @@ namespace SimonsGame.GuiObjects
 			return suggestedGroups;
 		}
 		#endregion
+
 	}
 }

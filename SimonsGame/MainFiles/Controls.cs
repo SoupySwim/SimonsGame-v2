@@ -5,6 +5,7 @@ using System.Text;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework;
 using SimonsGame.GuiObjects;
+using SimonsGame.Utility;
 
 namespace SimonsGame
 {
@@ -43,6 +44,13 @@ namespace SimonsGame
 		RightBumper = 128,
 		Start = 256,
 		Select = 512
+	}
+	public enum Direction
+	{
+		Up = 1,
+		Left = 2,
+		Down = 4,
+		Right = 8
 	}
 	public class Controls
 	{
@@ -86,7 +94,13 @@ namespace SimonsGame
 
 						playerControls.GetAim = (p) =>
 						{
-							Vector2 mousePosition = mouseProperties.MousePosition - p.Center;
+							Vector2 mouseOffset = Vector2.Zero;
+							if (p.Level != null && p.Level.GameStateManager != null)
+							{
+								PlayerViewport viewport = p.Level.GameStateManager.GetPlayerViewport(p);
+								mouseOffset = viewport.CameraPosition;
+							}
+							Vector2 mousePosition = mouseProperties.MousePosition + mouseOffset - p.Center;
 							float normalizer = (float)Math.Sqrt(Math.Pow((double)mousePosition.X, 2) + Math.Pow((double)mousePosition.Y, 2));
 							return new Vector2(mousePosition.X / normalizer, mousePosition.Y / normalizer);
 						};
@@ -178,6 +192,29 @@ namespace SimonsGame
 		{
 			return (((previousControls.PressedButtons & button) != button)
 				&& ((controls.PressedButtons & button) == button));
+		}
+		public static bool PressedDirectionDown(PlayerControls controls, PlayerControls previousControls, Direction controlDirection, double threshold = .5)
+		{
+			bool goingThatDirection = true;
+			if (controlDirection.HasFlag(Direction.Up))
+			{
+				goingThatDirection &= controls.YMovement < -threshold && previousControls.YMovement >= -threshold;
+			}
+			if (controlDirection.HasFlag(Direction.Down))
+			{
+				goingThatDirection &= controls.YMovement > threshold && previousControls.YMovement <= threshold;
+			}
+			if (controlDirection.HasFlag(Direction.Left))
+			{
+				goingThatDirection &= controls.XMovement < -threshold && previousControls.XMovement >= -threshold;
+			}
+			if (controlDirection.HasFlag(Direction.Right))
+			{
+				goingThatDirection &= controls.XMovement > threshold && previousControls.XMovement <= threshold;
+			}
+
+
+			return goingThatDirection;
 		}
 
 

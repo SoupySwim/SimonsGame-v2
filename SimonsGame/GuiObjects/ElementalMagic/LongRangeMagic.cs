@@ -23,7 +23,7 @@ namespace SimonsGame.GuiObjects.ElementalMagic
 		private ModifierBase _damageDoneOnDetonate;
 
 		public LongRangeMagic(Vector2 position, Vector2 hitbox, Group group, Level level, Vector2 speed, Player player)
-			: base(position, hitbox, group, level)
+			: base(position, hitbox, group, level, "LongRangeMagic")
 		{
 			MaxSpeedBase = speed;
 			_fireball = level.Content.Load<Texture2D>("Test/Fireball");
@@ -44,13 +44,13 @@ namespace SimonsGame.GuiObjects.ElementalMagic
 		public override void PreDraw(GameTime gameTime, Microsoft.Xna.Framework.Graphics.SpriteBatch spriteBatch) { }
 		public override void PostDraw(GameTime gameTime, Microsoft.Xna.Framework.Graphics.SpriteBatch spriteBatch)
 		{
-			spriteBatch.Begin();
+			//spriteBatch.Begin();
 
 			float scale = Size.Y / _fireball.Height;
 			spriteBatch.Draw(_fireball, Position + (Size / 2), null, Color.White, radians, new Vector2(_fireball.Width / 2, _fireball.Height / 2), scale, SpriteEffects.None, 0);
 
 			radians += (float)(Math.PI / 22.5f);
-			spriteBatch.End();
+			//spriteBatch.End();
 		}
 		public override void SetMovement(GameTime gameTime) { }
 		protected override bool ShowHitBox()

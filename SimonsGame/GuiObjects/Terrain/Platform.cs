@@ -11,7 +11,7 @@ namespace SimonsGame.GuiObjects
 	public class Platform : MainGuiObject
 	{
 		public Platform(Vector2 position, Vector2 hitbox, Group group, Level level)
-			: base(position, hitbox, group, level)
+			: base(position, hitbox, group, level, "Platform")
 		{
 
 		}

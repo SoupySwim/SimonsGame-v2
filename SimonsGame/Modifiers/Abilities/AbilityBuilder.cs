@@ -1,7 +1,6 @@
 ﻿using SimonsGame.Modifiers.Abilities;
 using Microsoft.Xna.Framework;
 using SimonsGame.GuiObjects;
-using SimonsGame.Modifiers.Abilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -51,7 +50,7 @@ namespace SimonsGame.Modifiers
 					return Controls.PressedDown(player.Id, AvailableButtons.RightBumper);
 				},
 				CastAmount = castAmount,
-				Cooldown = TimeSpan.Zero, // OP!!!!! ;)
+				Cooldown = new TimeSpan(0, 0, 0, 3, 0),
 				LayoverTickCount = 0,
 				ReChargeAmount = 0,
 				Modifier = new LongRangeElementalMagicAbility(player, () => Controls.PressedDown(player.Id, AvailableButtons.RightBumper))

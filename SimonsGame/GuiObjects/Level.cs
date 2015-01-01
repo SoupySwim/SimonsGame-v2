@@ -1,6 +1,8 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using SimonsGame.Extensions;
+using SimonsGame.GuiObjects.Utility;
 using SimonsGame.Utility;
 using System;
 using System.Collections.Generic;
@@ -24,15 +26,12 @@ namespace SimonsGame.GuiObjects
 
 		// This will store what players are currently in the environment.
 		private Dictionary<Guid, Player> _players;
-		public Dictionary<Guid, Player> Players { get { return _players; } }
+		public Dictionary<Guid, Player> Players { get { return _players; } set { _players = value; } }
 
 		private List<LevelAnimation> _levelAnimations;
 
 		// Used to tell how far "one" block in the level is.
 		public float PlatformDifference { get; set; }
-
-
-		private Texture2D _cursor;
 
 		// Level content.        
 		public ContentManager Content
@@ -62,7 +61,6 @@ namespace SimonsGame.GuiObjects
 
 			// Create a new content manager to load content used just by this level.
 			_content = new ContentManager(serviceProvider, "Content");
-			_cursor = Content.Load<Texture2D>("Cursor/CursorStar");
 			_levelAnimations = new List<LevelAnimation>();
 		}
 		public void AddPlayer(Player player)
@@ -113,33 +111,61 @@ namespace SimonsGame.GuiObjects
 				kv.Value.ForEach(p => p.Update(gameTime));
 			}
 			// Update all the players.
-			Players.Values.ToList().ForEach(p => p.Update(gameTime));
+			Players.Values.Where(p => !p.NotAcceptingControls).ToList().ForEach(p => p.Update(gameTime));
 		}
 
 		// Draw will call Draw on all of the objects within the level.
-		public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
+		//public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
+		//{
+		//	// Draw all the players.
+		//	Players.Values.ToList().ForEach(p => p.Draw(gameTime, spriteBatch));
+
+		//	// Draw all the platforms
+		//	foreach (var kv in _environmentObjects)
+		//	{
+		//		kv.Value.ForEach(p => p.Draw(gameTime, spriteBatch));
+		//	}
+		//	foreach (var kv in _characterObjects)
+		//	{
+		//		kv.Value.ForEach(p => p.Draw(gameTime, spriteBatch));
+		//	}
+		//	foreach (LevelAnimation la in _levelAnimations.ToList())
+		//	{
+		//		la.Draw(gameTime, spriteBatch);
+		//	}
+
+		//	spriteBatch.Begin();
+		//	spriteBatch.Draw(_cursor, _gameStateManager.MousePosition - new Vector2(10, 10), Color.Red);
+		//	spriteBatch.End();
+
+		//}
+		public void DrawInViewport(GameTime gameTime, SpriteBatch spriteBatch, Vector4 viewport, Vector2 cameraPosition, Player currentPlayer)
 		{
+			Vector4 cameraViewport = viewport;
+			cameraViewport.X = cameraPosition.X;
+			cameraViewport.Y = cameraPosition.Y;
+
 			// Draw all the players.
-			Players.Values.ToList().ForEach(p => p.Draw(gameTime, spriteBatch));
+			Players.Values.Where(go => MainGuiObject.GetIntersectionDepth(cameraViewport, go.Bounds) != DoubleVector2.Zero).ToList().ForEach(p => p.Draw(gameTime, spriteBatch));
 
 			// Draw all the platforms
 			foreach (var kv in _environmentObjects)
 			{
-				kv.Value.ForEach(p => p.Draw(gameTime, spriteBatch));
+				kv.Value.Where(go => MainGuiObject.GetIntersectionDepth(cameraViewport, go.Bounds) != DoubleVector2.Zero).ToList().ForEach(p => p.Draw(gameTime, spriteBatch));
 			}
 			foreach (var kv in _characterObjects)
 			{
-				kv.Value.ForEach(p => p.Draw(gameTime, spriteBatch));
+				kv.Value.Where(go => MainGuiObject.GetIntersectionDepth(cameraViewport, go.Bounds) != DoubleVector2.Zero).ToList().ForEach(p => p.Draw(gameTime, spriteBatch));
 			}
 			foreach (LevelAnimation la in _levelAnimations.ToList())
 			{
 				la.Draw(gameTime, spriteBatch);
 			}
 
-			spriteBatch.Begin();
-			spriteBatch.Draw(_cursor, _gameStateManager.MousePosition - new Vector2(10, 10), Color.Red);
-			spriteBatch.End();
-
+			//spriteBatch.Begin();
+			//spriteBatch.Draw(_cursor, _gameStateManager.MousePosition - new Vector2(10, 10), Color.Red);
+			if (currentPlayer.UsesMouseAndKeyboard) spriteBatch.Draw(MainGame.Cursor, _gameStateManager.MousePosition + cameraPosition - new Vector2(10, 10), Color.Red);
+			//spriteBatch.End();
 		}
 
 		public Dictionary<Group, List<MainGuiObject>> GetAllUnPassableEnvironmentObjects()

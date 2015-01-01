@@ -89,7 +89,13 @@
       <Processor>FontDescriptionProcessor</Processor>
     </Compile>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Compile Include="Test\cog.png">
+      <Name>cog</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+  </ItemGroup>
   <ItemGroup>
     <Compile Include="Sprites\PlayerSprites\TempPlayer\IdleFull.png">
       <Name>IdleFull</Name>
@@ -98,6 +104,28 @@
     </Compile>
     <Compile Include="Sprites\PlayerSprites\TempPlayer\RunFull.png">
       <Name>RunFull</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Test\Menu\MapEditor.png">
+      <Name>MapEditor</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Test\Menu\Multiplayer.png">
+      <Name>Multiplayer</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Test\Menu\QuickMatch.png">
+      <Name>QuickMatch</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Test\Menu\SinglePlayer.png">
+      <Name>SinglePlayer</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>

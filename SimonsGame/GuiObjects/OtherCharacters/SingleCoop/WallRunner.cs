@@ -34,7 +34,7 @@ namespace SimonsGame.GuiObjects
 
 
 		public WallRunner(Vector2 position, Vector2 hitbox, Group group, Level level, bool movePositive)
-			: base(position, hitbox, group, level)
+			: base(position, hitbox, group, level, "WallRunner")
 		{
 			MaxSpeedBase = new Vector2(AverageSpeed.Y, AverageSpeed.Y);
 			AIStateDirection = movePositive ? WallRunnerDirection.MovePositive : WallRunnerDirection.MoveNegative;

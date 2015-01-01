@@ -68,6 +68,18 @@ namespace SimonsGame.GuiObjects.Utility
 			if (Animation == null)
 				return; //throw new NotSupportedException("No animation is currently playing.");
 
+			// Calculate the source rectangle of the current frame.
+			Rectangle source = new Rectangle(FrameIndex * Animation.FrameWidth, 0, Animation.FrameWidth, Animation.FrameHeight);
+			Rectangle destination = new Rectangle((int)position.X, (int)position.Y, (int)(Animation.FrameWidth * Animation.Scale), (int)(Animation.FrameHeight * Animation.Scale));
+
+			// Draw the current frame.
+			//spriteBatch.Draw(Animation.Texture, position, source, Color, 0.0f, Origin, scale * Animation.Scale, spriteEffects, 0.0f);
+			spriteBatch.Draw(Animation.Texture, destination, source, Color, 0.0f, new Vector2(0f, 0f), spriteEffects, 0.0f);
+		}
+		public void Update(GameTime gameTime)
+		{
+			if (Animation == null)
+				return;
 			// Process passing time.
 			_time += (float)gameTime.ElapsedGameTime.TotalSeconds;
 			while (_time > Animation.FrameTime)
@@ -80,14 +92,6 @@ namespace SimonsGame.GuiObjects.Utility
 				else
 					_frameIndex = Math.Min(_frameIndex + 1, Animation.FrameCount - 1);
 			}
-
-			// Calculate the source rectangle of the current frame.
-			Rectangle source = new Rectangle(FrameIndex * Animation.FrameWidth, 0, Animation.FrameWidth, Animation.FrameHeight);
-			Rectangle destination = new Rectangle((int)position.X, (int)position.Y, (int)(Animation.FrameWidth * Animation.Scale), (int)(Animation.FrameHeight * Animation.Scale));
-
-			// Draw the current frame.
-			//spriteBatch.Draw(Animation.Texture, position, source, Color, 0.0f, Origin, scale * Animation.Scale, spriteEffects, 0.0f);
-			spriteBatch.Draw(Animation.Texture, destination, source, Color, 0.0f, new Vector2(0f, 0f), spriteEffects, 0.0f);
 		}
 
 	}

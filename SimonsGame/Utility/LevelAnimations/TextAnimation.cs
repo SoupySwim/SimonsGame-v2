@@ -26,9 +26,9 @@ namespace SimonsGame.Utility
 		public override void Draw(Microsoft.Xna.Framework.GameTime gameTime, Microsoft.Xna.Framework.Graphics.SpriteBatch spriteBatch)
 		{
 			_tickCount++;
-			spriteBatch.Begin();
-			spriteBatch.DrawString(GameStateManager.PlainFont, Text, Position, TextColor);
-			spriteBatch.End();
+			//spriteBatch.Begin();
+			spriteBatch.DrawString(MainGame.PlainFont, Text, Position, TextColor);
+			//spriteBatch.End();
 			if (_tickCount >= _tickTotal)
 			{
 				Level.RemoveLevelAnimation(this);

@@ -52,7 +52,8 @@ namespace SimonsGame.Modifiers
 
 		// Abilities that will be added when a Player is created.
 		// Later, these lists can be expanded/Modified when the game is played.
-		Dictionary<KnownAbility, List<PlayerAbilityInfo>> _knownAbilities;
+		public Dictionary<KnownAbility, List<PlayerAbilityInfo>> KnownAbilities { get { return _knownAbilities; } }
+		private Dictionary<KnownAbility, List<PlayerAbilityInfo>> _knownAbilities;
 		List<Guid> _knownAbilityIds;
 
 		// Cooldowns for specific Abilities
@@ -157,6 +158,13 @@ namespace SimonsGame.Modifiers
 		{
 			if (!_currentAbilities.ContainsKey(mb.Id))
 				_currentAbilities.Add(mb.Id, mb);
+		}
+		public float CoolDownTimer(PlayerAbilityInfo abilityInfo)
+		{
+			TimeSpan timeInCooldown;
+			if (_coolDownCounter.TryGetValue(abilityInfo.Id, out timeInCooldown))
+				return (float)(abilityInfo.Cooldown.TotalMilliseconds - timeInCooldown.TotalMilliseconds);
+			return 0;
 		}
 	}
 }

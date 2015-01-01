@@ -17,7 +17,7 @@ namespace SimonsGame.GuiObjects
 		}
 		private MoveCharacterAIState AIState;
 		public MovingCharacter(Vector2 position, Vector2 hitbox, Group group, Level level, bool moveRight)
-			: base(position, hitbox, group, level)
+			: base(position, hitbox, group, level, "MovingCharacter")
 		{
 			MaxSpeedBase = new Vector2(AverageSpeed.X, AverageSpeed.Y);
 			AIState = moveRight ? MoveCharacterAIState.MoveRight : MoveCharacterAIState.MoveLeft;

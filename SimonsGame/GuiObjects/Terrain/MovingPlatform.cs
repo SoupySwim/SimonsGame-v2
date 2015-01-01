@@ -20,7 +20,7 @@ namespace SimonsGame.GuiObjects
 
 		public MovingPlatform(Vector2 position, Vector2 hitbox, Group group, Level level,
 			bool isVerticalMoving = false, int maxTravelDistance = 600, bool goingPositiveDirection = true)
-			: base(position, hitbox, group, level)
+			: base(position, hitbox, group, level, "MovingPlatform")
 		{
 			_verticalMoving = isVerticalMoving;
 			if (goingPositiveDirection == false)

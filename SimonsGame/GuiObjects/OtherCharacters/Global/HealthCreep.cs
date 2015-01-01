@@ -23,7 +23,7 @@ namespace SimonsGame.GuiObjects
 		private ModifierBase _healModifier;
 
 		public HealthCreep(Vector2 position, Vector2 hitbox, Group group, Level level, bool moveRight, int leftBounds, int rightBounds)
-			: base(position, hitbox, group, level)
+			: base(position, hitbox, group, level, "HealthCreep")
 		{
 			MaxSpeedBase = new Vector2(AverageSpeed.X / 3, AverageSpeed.Y);
 			AIState = moveRight ? CreepCharacterAIState.MoveRight : CreepCharacterAIState.MoveLeft;

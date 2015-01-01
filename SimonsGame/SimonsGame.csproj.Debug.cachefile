@@ -3,6 +3,11 @@ Content\Test\fireball.xnb
 Content\Test\bubble.xnb
 Content\Test\splash.xnb
 Content\Test\leaf.xnb
+Content\Test\cog.xnb
 Content\Sprites\PlayerSprites\TempPlayer\IdleFull.xnb
 Content\Sprites\PlayerSprites\TempPlayer\RunFull.xnb
+Content\Test\Menu\MapEditor.xnb
+Content\Test\Menu\Multiplayer.xnb
+Content\Test\Menu\QuickMatch.xnb
+Content\Test\Menu\SinglePlayer.xnb
 Content\Fonts\PlainFont.xnb

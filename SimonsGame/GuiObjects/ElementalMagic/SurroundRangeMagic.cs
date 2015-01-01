@@ -20,7 +20,7 @@ namespace SimonsGame.GuiObjects.ElementalMagic
 
 		private MainGuiObject _surroundObject;
 		public SurroundRangeMagic(Vector2 position, Player player, Vector2 hitbox, Group group, Level level, MainGuiObject o)
-			: base(position, hitbox, group, level)
+			: base(position, hitbox, group, level, "SurroundRangeMagic")
 		{
 			_surroundObject = o;
 			_bubble = level.Content.Load<Texture2D>("Test/Bubble");
@@ -44,11 +44,11 @@ namespace SimonsGame.GuiObjects.ElementalMagic
 		public override void PreDraw(GameTime gameTime, Microsoft.Xna.Framework.Graphics.SpriteBatch spriteBatch) { }
 		public override void PostDraw(GameTime gameTime, Microsoft.Xna.Framework.Graphics.SpriteBatch spriteBatch)
 		{
-			spriteBatch.Begin();
+			//spriteBatch.Begin();
 			Rectangle destinationRect = new Rectangle((int)Position.X, (int)Position.Y, (int)Size.X, (int)Size.Y);
 
 			spriteBatch.Draw(_bubble, destinationRect, Color.White);
-			spriteBatch.End();
+			//spriteBatch.End();
 		}
 		public override void SetMovement(GameTime gameTime) { }
 		protected override bool ShowHitBox()

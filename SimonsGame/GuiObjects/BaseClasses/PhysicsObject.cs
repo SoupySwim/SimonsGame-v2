@@ -30,8 +30,8 @@ namespace SimonsGame.GuiObjects
 		// |__*__|   <--- Base Position
 		public Vector2 BasePosition { get { return new Vector2(Position.X + Size.X / 2, Position.Y + Size.Y); } }
 
-		public PhysicsObject(Vector2 position, Vector2 hitbox, Group group, Level level)
-			: base(position, hitbox, group, level)
+		public PhysicsObject(Vector2 position, Vector2 hitbox, Group group, Level level, string name)
+			: base(position, hitbox, group, level, name)
 		{
 			StopGravity = false;
 			VerticalPass = false;
@@ -58,8 +58,9 @@ namespace SimonsGame.GuiObjects
 			{
 				MainGuiObject verticallyHitPlatform = verticallyHitPlatformTuple.Item2;
 				DoubleVector2 bounds = verticallyHitPlatformTuple.Item1; // GetIntersectionDepth(verticallyHitPlatform);
+
 				// If the object is moving downwards, and is below the top of the platform, push it back up.
-				if (!StopGravity && Math.Abs(bounds.Y) > 0 && Math.Abs(bounds.Y) <= Math.Abs(_previousPosition.Y - Position.Y))
+				if (!StopGravity && Math.Abs(bounds.Y) > 0 && Math.Abs(bounds.Y) - .00005 <= Math.Abs(_previousPosition.Y - Position.Y))
 				{
 					// fix offset
 					Position = new Vector2(Position.X, Position.Y + (float)bounds.Y);

@@ -9,6 +9,9 @@ using Microsoft.Xna.Framework.Storage;
 using Microsoft.Xna.Framework.GamerServices;
 using SimonsGame.GuiObjects;
 using SimonsGame.Test;
+using SimonsGame.Menu;
+using SimonsGame.MainFiles;
+using SimonsGame.MainFiles.InGame;
 #endregion
 
 namespace SimonsGame
@@ -18,14 +21,32 @@ namespace SimonsGame
 	/// </summary>
 	public class MainGame : Game
 	{
-		GraphicsDeviceManager graphics;
-		private SpriteBatch _spriteBatch;
-		private Vector2 CurrentWindowSize { get; set; }
+		public enum MainGameState
+		{
+			Menu,
+			Game
+		}
+
 		GameStateManager _gameStateManager;
 		GameStateManager GameStateManager { get { return _gameStateManager; } }
+		MenuStateManager _menuStateManager;
+		MenuStateManager MenuStateManager { get { return _menuStateManager; } }
 
 		private static PlayerManager _playerManager = new PlayerManager();
 		public static PlayerManager PlayerManager { get { return _playerManager; } }
+
+		#region Graphics
+		public static SpriteFont PlainFont;
+		GraphicsDeviceManager graphics;
+		private SpriteBatch _spriteBatch;
+		public static Vector2 CurrentWindowSize { get; set; }
+
+		public static Texture2D SingleColor;
+
+		public static Texture2D Cursor;
+		#endregion
+
+		private MainGameState _gameState = MainGameState.Menu;
 
 		public MainGame()
 		{
@@ -35,9 +56,6 @@ namespace SimonsGame
 			graphics.PreferredBackBufferWidth = (int)CurrentWindowSize.X;
 			graphics.PreferredBackBufferHeight = (int)CurrentWindowSize.Y;
 			graphics.IsFullScreen = true;
-
-			//graphics.GraphicsDevice.Viewport.X;
-			Content.RootDirectory = "Content";
 		}
 
 		/// <summary>
@@ -63,7 +81,15 @@ namespace SimonsGame
 		{
 			// Create a new SpriteBatch, which can be used to draw textures.
 			_spriteBatch = new SpriteBatch(GraphicsDevice);
-			_gameStateManager = new GameStateManager(Services, CurrentWindowSize);
+			Content.RootDirectory = "Content";
+			PlainFont = Content.Load<SpriteFont>("Fonts/PlainFont");
+			_gameStateManager = new GameStateManager(Services, this, GraphicsDevice.Viewport);
+			_menuStateManager = new MenuStateManager(this, Content);
+
+			IGraphicsDeviceService graphicsService = (IGraphicsDeviceService)Services.GetService(typeof(IGraphicsDeviceService));
+			SingleColor = new Texture2D(graphicsService.GraphicsDevice, 1, 1);
+			SingleColor.SetData(new[] { Color.White });
+			Cursor = Content.Load<Texture2D>("Cursor/CursorStar");
 		}
 
 		/// <summary>
@@ -82,8 +108,14 @@ namespace SimonsGame
 		/// <param name="gameTime">Provides a snapshot of timing values.</param>
 		protected override void Update(GameTime gameTime)
 		{
+			// Get all the controls of the players
 			Tuple<MouseProperties, Dictionary<Guid, PlayerControls>> AllControlsTuple = Controls.GetControls(_playerManager);
-			_gameStateManager.Update(gameTime, AllControlsTuple.Item2, AllControlsTuple.Item1.MousePosition);
+
+			if (_gameState == MainGameState.Menu)
+				_menuStateManager.Update(gameTime, AllControlsTuple.Item2, AllControlsTuple.Item1.MousePosition);
+			else // (_gameState == MainGameState.Game)
+				_gameStateManager.Update(gameTime, AllControlsTuple.Item2, AllControlsTuple.Item1.MousePosition);
+
 			base.Update(gameTime);
 		}
 
@@ -93,11 +125,30 @@ namespace SimonsGame
 		/// <param name="gameTime">Provides a snapshot of timing values.</param>
 		protected override void Draw(GameTime gameTime)
 		{
-			GraphicsDevice.Clear(Color.CornflowerBlue);
-
-			_gameStateManager.Draw(gameTime, _spriteBatch);
+			if (_gameState == MainGameState.Menu)
+			{
+				GraphicsDevice.Clear(Color.CornflowerBlue);
+				_menuStateManager.Draw(gameTime, _spriteBatch);
+			}
+			else // (_gameState == MainGameState.Game)
+			{
+				GraphicsDevice.Clear(Color.Black);
+				_gameStateManager.Draw(gameTime, _spriteBatch);
+			}
 
 			base.Draw(gameTime);
+		}
+
+		public void StartGame(GameSettings gameSettings)
+		{
+			_gameState = MainGameState.Game;
+			_gameStateManager.StartNewGame(gameSettings);
+		}
+
+		public void EndGame(GameStatistics gameStatistics)
+		{
+			_gameState = MainGameState.Menu;
+			_menuStateManager.ShowGameStatistics(gameStatistics);
 		}
 	}
 }

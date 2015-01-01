@@ -20,12 +20,18 @@ namespace SimonsGame.GuiObjects
 
 		private bool _isAi;
 		public bool IsAi { get { return _isAi; } }
+		public bool UsesMouseAndKeyboard { get; set; }
 
-		public Player(Guid guid, Vector2 position, Vector2 hitbox, Group group, Level level, bool isAi = false)
-			: base(position, hitbox, group, level)
+		public bool NotAcceptingControls { get; set; } // Used when viewing In-Game Menus.
+
+		public Player(Guid guid, Vector2 position, Vector2 hitbox, Group group, Level level, string name, bool isAi = false)
+			: base(position, hitbox, group, level, name)
 		{
 			_guid = guid;
 			_isAi = isAi;
+
+			NotAcceptingControls = false;
+
 			MaxSpeedBase = new Vector2(AverageSpeed.X, AverageSpeed.Y);
 
 			_objectType = GuiObjectType.Player;
@@ -40,8 +46,8 @@ namespace SimonsGame.GuiObjects
 			// Elemental Magic
 			List<PlayerAbilityInfo> elementalInfos = new List<PlayerAbilityInfo>();
 			elementalInfos.Add(AbilityBuilder.GetLongRangeElementalAbility1(this));
-			//elementalInfos.Add(AbilityBuilder.GetShortRangeMeleeElementalAbility1(this));
-			elementalInfos.Add(AbilityBuilder.GetShortRangeProjectileElementalAbility1(this));
+			elementalInfos.Add(AbilityBuilder.GetShortRangeMeleeElementalAbility1(this));
+			//elementalInfos.Add(AbilityBuilder.GetShortRangeProjectileElementalAbility1(this));
 			elementalInfos.Add(AbilityBuilder.GetSurroundRangeElementalAbility1(this));
 
 			abilities.Add(KnownAbility.Elemental, elementalInfos);
@@ -62,6 +68,7 @@ namespace SimonsGame.GuiObjects
 
 			_animator.Color = Color.Black;
 
+			UsesMouseAndKeyboard = MainGame.PlayerManager.PlayerInputMap[guid] is KeyboardUsableInputMap;
 		}
 		public override float GetXMovement()
 		{

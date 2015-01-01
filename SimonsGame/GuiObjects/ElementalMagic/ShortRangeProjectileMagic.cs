@@ -22,7 +22,7 @@ namespace SimonsGame.GuiObjects.ElementalMagic
 
 
 		public ShortRangeProjectileMagic(Vector2 position, Vector2 hitbox, Group group, Level level, Vector2 speed, Player player)
-			: base(position, hitbox, group, level)
+			: base(position, hitbox, group, level, "ShortRangeProjectileMagic")
 		{
 			MaxSpeedBase = speed;
 			_leaf = level.Content.Load<Texture2D>("Test/leaf");
@@ -58,14 +58,14 @@ namespace SimonsGame.GuiObjects.ElementalMagic
 		public override void PreUpdate(GameTime gameTime) { }
 		public override void PostDraw(GameTime gameTime, Microsoft.Xna.Framework.Graphics.SpriteBatch spriteBatch)
 		{
-			spriteBatch.Begin();
+			//spriteBatch.Begin();
 			Rectangle destinationRect = new Rectangle((int)Position.X, (int)Position.Y, (int)Size.X, (int)Size.Y);
 
 			float scale = Size.Y / _leaf.Height;
 			spriteBatch.Draw(_leaf, Position + (Size / 2), null, Color.White, radians, new Vector2(_leaf.Width / 2, _leaf.Height / 2), scale, SpriteEffects.None, 0);
 
 			radians += (float)(Math.PI / 30f);
-			spriteBatch.End();
+			//spriteBatch.End();
 		}
 		public override void SetMovement(GameTime gameTime) { }
 		protected override bool ShowHitBox()

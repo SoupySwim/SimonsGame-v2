@@ -35,7 +35,7 @@ namespace SimonsGame.Modifiers.Abilities
 			// When we just start, make the object!
 			if (_tickCount == 0)
 			{
-				var playerControls = GameStateManager.GetControlsForPlayer(_player.Id);
+				PlayerControls playerControls = GameStateManager.GetControlsForPlayer(_player);
 				Vector2 playerAim = playerControls.GetAim(_player);
 				Vector2 speed = new Vector2(9 * playerAim.X, 9 * playerAim.Y);
 				// For now, a lot of things are hard coded...
