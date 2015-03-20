@@ -1,0 +1,17 @@
+E:\Dropbox\temp\SImonsGame\SImonsGame\SImonsGame\obj\Android\SImonsGame.csprojResolveAssemblyReference.cache
+E:\Dropbox\temp\SImonsGame\SImonsGame\SImonsGame\obj\Android\Microsoft.Xna.Framework.RuntimeProfile.txt
+E:\Dropbox\temp\SImonsGame\SImonsGame\SImonsGame\bin\Android\MonoGame.Framework.dll
+E:\Dropbox\temp\SImonsGame\SImonsGame\SImonsGame\bin\Android\OpenTK.dll
+E:\Dropbox\temp\SImonsGame\SImonsGame\SImonsGame\bin\Android\Tao.Sdl.dll
+E:\Dropbox\temp\SImonsGame\SImonsGame\SImonsGame\bin\Android\Lidgren.Network.dll
+E:\Dropbox\temp\SImonsGame\SImonsGame\SImonsGame\bin\Android\SimonsGame.exe
+E:\Dropbox\temp\SImonsGame\SImonsGame\SImonsGame\obj\Android\SimonsGame.exe
+E:\Dropbox\SimonsGame\SImonsGame\SImonsGame\obj\Android\SimonsGame.csprojResolveAssemblyReference.cache
+E:\Dropbox\SimonsGame\SImonsGame\SImonsGame\obj\Android\Microsoft.Xna.Framework.RuntimeProfile.txt
+E:\Dropbox\SimonsGame\SImonsGame\SImonsGame\obj\Android\SimonsGame.exe
+E:\Dropbox\SimonsGame\SImonsGame\SImonsGame\bin\Android\Content\Cursor\CursorStar.xnb
+E:\Dropbox\SimonsGame\SImonsGame\SImonsGame\bin\Android\SimonsGame.exe
+E:\Dropbox\SimonsGame\SImonsGame\SImonsGame\bin\Android\MonoGame.Framework.dll
+E:\Dropbox\SimonsGame\SImonsGame\SImonsGame\bin\Android\OpenTK.dll
+E:\Dropbox\SimonsGame\SImonsGame\SImonsGame\bin\Android\Tao.Sdl.dll
+E:\Dropbox\SimonsGame\SImonsGame\SImonsGame\bin\Android\Lidgren.Network.dll

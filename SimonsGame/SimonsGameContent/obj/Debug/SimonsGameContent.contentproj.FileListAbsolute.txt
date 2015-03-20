@@ -1,0 +1,2 @@
+E:\Dropbox\SimonsGame\SImonsGame\SImonsGameContent\obj\Debug\SimonsGameContent.contentprojResolveAssemblyReference.cache
+E:\Dropbox\SimonsGame_copy\SImonsGame\SImonsGameContent\obj\Debug\SimonsGameContent.contentprojResolveAssemblyReference.cache

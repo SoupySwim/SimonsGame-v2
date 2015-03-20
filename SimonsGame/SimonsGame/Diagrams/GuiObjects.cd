@@ -1,0 +1,121 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="SimonsGame.GuiObjects.GuiVariables">
+    <Position X="0.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAECAAAAAAAAAAAABIAEAEBEAAIAAAAAAAAEAAAAIAA=</HashCode>
+      <FileName>GuiObjects\BaseClasses\GuiVariables.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SimonsGame.GuiObjects.MainGuiObject">
+    <Position X="2.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>QAwBAdQEAIkAikAgIAhAQAAAAUCCwwABKKBEIgkIBhQ=</HashCode>
+      <FileName>GuiObjects\BaseClasses\MainGuiObject.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SimonsGame.GuiObjects.PhysicsObject">
+    <Position X="13" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAABAEAAAAABAAAAxACAAAASAIQAAAAAAEAAkAAgA=</HashCode>
+      <FileName>GuiObjects\BaseClasses\PhysicsObject.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SimonsGame.GuiObjects.HealthCreep">
+    <Position X="7.25" Y="8.5" Width="1.5" />
+    <NestedTypes>
+      <Enum Name="SimonsGame.GuiObjects.HealthCreep.CreepCharacterAIState" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>GuiObjects\OtherCharacters\Global\HealthCreep.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Enum>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>AAAAAMAAAIgAAQAAAAAAQAAAQQAAAABAEAAAAAkAIAA=</HashCode>
+      <FileName>GuiObjects\OtherCharacters\Global\HealthCreep.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SimonsGame.GuiObjects.MovingCharacter">
+    <Position X="9.5" Y="8.5" Width="1.5" />
+    <NestedTypes>
+      <Enum Name="SimonsGame.GuiObjects.MovingCharacter.MoveCharacterAIState" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>GuiObjects\OtherCharacters\SingleCoop\MovingCharacter.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Enum>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>AAAAAMAAAIgAAAAAAAAAQAAAQQAAAAAAAAAAAAkAAAA=</HashCode>
+      <FileName>GuiObjects\OtherCharacters\SingleCoop\MovingCharacter.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SimonsGame.GuiObjects.WallRunner">
+    <Position X="14" Y="8.5" Width="1.5" />
+    <NestedTypes>
+      <Enum Name="SimonsGame.GuiObjects.WallRunner.WallRunnerDirection" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>GuiObjects\OtherCharacters\SingleCoop\WallRunner.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Enum>
+      <Enum Name="SimonsGame.GuiObjects.WallRunner.WallRunnerFace" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>GuiObjects\OtherCharacters\SingleCoop\WallRunner.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Enum>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>AAAAANAAAIgAAAAAAARAQAAAARCAAAAAAAAIAAkAAAA=</HashCode>
+      <FileName>GuiObjects\OtherCharacters\SingleCoop\WallRunner.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SimonsGame.GuiObjects.Player">
+    <Position X="18.5" Y="8.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAQAMAAAIgAAQAAAAAAwAAgAQAAAAAAAAAAIAkAAAA=</HashCode>
+      <FileName>GuiObjects\Player\Player.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SimonsGame.GuiObjects.MovingPlatform">
+    <Position X="6.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAMAAAIgAgAAAAABAQAAAAAAAAAAAIAAEAAlAAgA=</HashCode>
+      <FileName>GuiObjects\Terrain\MovingPlatform.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SimonsGame.GuiObjects.Platform">
+    <Position X="5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAMAAAIgAAAAAAABAQAAAAAAAAAAAAAAEAAkAAgA=</HashCode>
+      <FileName>GuiObjects\Terrain\Platform.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SimonsGame.GuiObjects.ElementalMagic.LongRangeMagic">
+    <Position X="11.75" Y="8.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>IAAAANAAAIgAAAAAAABASEAAAQAAAAIACAAAAAgAAAA=</HashCode>
+      <FileName>GuiObjects\ElementalMagic\LongRangeMagic.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SimonsGame.GuiObjects.ElementalMagic.ShortRangeMeleeMagic">
+    <Position X="16.25" Y="8.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAMAAAIgAAAAAAAAAQAAAAQAAAAAAAAAAAAggAgA=</HashCode>
+      <FileName>GuiObjects\ElementalMagic\ShortRangeMeleeMagic.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SimonsGame.GuiObjects.ElementalMagic.ShortRangeProjectileMagic">
+    <Position X="20.75" Y="8.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAMAAAIwAAAAAAABCSEAAAQAAAAAAAAAAAAkAAAA=</HashCode>
+      <FileName>GuiObjects\ElementalMagic\ShortRangeProjectileMagic.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SimonsGame.GuiObjects.ElementalMagic.SurroundRangeMagic">
+    <Position X="5" Y="8.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAMAAAIgAAAAAAABAQAAAAQAAAAQAAAAAAAgAQAA=</HashCode>
+      <FileName>GuiObjects\ElementalMagic\SurroundRangeMagic.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

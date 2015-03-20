@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimonsGame", "SImonsGame\SimonsGame.csproj", "{5B1C1C01-7E57-4670-B0EB-FD108C8D55C0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimonsGame", "SImonsGame\SImonsGame\SimonsGame.csproj", "{5B1C1C01-7E57-4670-B0EB-FD108C8D55C0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimonsGameContent", "SImonsGameContent\SimonsGameContent.contentproj", "{E438F83E-2BDD-4D5A-9D27-B8AC3739AAB0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimonsGameContent", "SImonsGame\SImonsGameContent\SimonsGameContent.contentproj", "{E438F83E-2BDD-4D5A-9D27-B8AC3739AAB0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
