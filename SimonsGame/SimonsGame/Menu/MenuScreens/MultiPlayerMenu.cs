@@ -43,8 +43,8 @@ namespace SimonsGame.Menu.MenuScreens
 					{
 						AllowAIScreens = true,
 						PauseStopsGame = false,
-						MapName = "Old Level 3",
-						LevelFileMetaData = MapEditorIOManager.GetMetadataForLevel("Old Level 3")
+						MapName = "Sprint 3 Demo",
+						LevelFileMetaData = MapEditorIOManager.GetMetadataForLevel("Sprint 3 Demo")
 					});
 			}, "Practice",
 				"Practice".GetTextBoundsByCenter(MainGame.PlainFont, new Vector2(_screenSize.X / 2 + 70, _screenSize.Y / 2 + 40)), Color.Black, Color.White, new Vector2(28, 40), false);

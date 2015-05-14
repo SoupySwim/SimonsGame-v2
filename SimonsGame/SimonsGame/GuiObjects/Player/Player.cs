@@ -7,6 +7,7 @@ using System.Text;
 using Microsoft.Xna.Framework.Input;
 using SimonsGame.Modifiers;
 using Microsoft.Xna.Framework.Graphics;
+using SimonsGame.Modifiers.Abilities;
 
 namespace SimonsGame.GuiObjects
 {
@@ -15,7 +16,6 @@ namespace SimonsGame.GuiObjects
 		protected Animation _idleAnimation;
 		protected Animation _runAnimation;
 
-
 		public static float Sprint3TestScore = 0;
 
 		private Vector2 _startingPosition;
@@ -23,11 +23,12 @@ namespace SimonsGame.GuiObjects
 		public bool IsAi { get { return _isAi; } }
 		public bool UsesMouseAndKeyboard { get; set; }
 
-		public bool NotAcceptingControls { get; set; } // Used when viewing In-Game Menus.
+		public bool NotAcceptingControls { get; set; } // Used when viewing In-Game Menus... and when stunned?!
 
 		public Player(Guid guid, Vector2 position, Vector2 hitbox, Group group, Level level, string name, Team team, bool isAi = false)
 			: base(position, hitbox, group, level, name)
 		{
+			_showHealthBar = true;
 			_guid = guid;
 			_isAi = isAi;
 
@@ -46,10 +47,27 @@ namespace SimonsGame.GuiObjects
 
 			// Elemental Magic
 			List<PlayerAbilityInfo> elementalInfos = new List<PlayerAbilityInfo>();
-			elementalInfos.Add(AbilityBuilder.GetLongRangeElementalAbility1(this));
-			//elementalInfos.Add(AbilityBuilder.GetShortRangeMeleeElementalAbility1(this));
-			elementalInfos.Add(AbilityBuilder.GetShortRangeProjectileElementalAbility1(this));
+			PlayerAbilityInfo pai = AbilityBuilder.GetBaseLongRangeElementAbility(this, "Test/Fireball");
+			pai.Name = "Ball";
+			pai.AbilityAttributes = AbilityAttributes.ClickToDetonate | AbilityAttributes.Explosion | AbilityAttributes.PassWall | AbilityAttributes.PassCharacters;
+			elementalInfos.Add(pai);
+			elementalInfos.Add(AbilityBuilder.GetShortRangeMeleeElementalAbility1(this));
+
+			pai = AbilityBuilder.GetBaseLongRangeElementAbility(this, "Test/leaf", 0, 20);
+			pai.Name = "Daft";
+			pai.Cooldown = new TimeSpan(0, 0, 0, 0, 50);
+			pai.Modifier.Speed = 7.5f;
+			pai.Modifier.Damage = -40;
+			pai.Modifier.SetSize(new Vector2(40, 40));
+			ProjectileElementalMagicAbility mod = pai.Modifier as ProjectileElementalMagicAbility;
+			elementalInfos.Add(pai);
+			//elementalInfos.Add(AbilityBuilder.GetShortRangeProjectileElementalAbility1(this));
 			elementalInfos.Add(AbilityBuilder.GetSurroundRangeElementalAbility1(this));
+			elementalInfos.Add(AbilityBuilder.GetBaseLongRangeElementAbility(this, "Test/Fireball"));
+			elementalInfos.Add(AbilityBuilder.GetBasePushElementAbility(this, "Test/PushingWave"));
+			elementalInfos.Add(AbilityBuilder.GetSelfHealAbility(this));
+			//elementalInfos.Add(AbilityBuilder.GetBlinkMiscAbility(this));
+
 
 			abilities.Add(KnownAbility.Elemental, elementalInfos);
 
@@ -58,9 +76,16 @@ namespace SimonsGame.GuiObjects
 
 			abilities.Add(KnownAbility.Miscellaneous, miscellaneousInfos);
 
-			_abilityManager = new AbilityManager(this, abilities);
+			_abilityManager = new AbilityManager(this, abilities,
+				AvailableButtons.RightTrigger | AvailableButtons.RightBumper | AvailableButtons.LeftTrigger | AvailableButtons.LeftBumper);
 
-			_healthTotal = 10;
+			// Will Change when we level up stuff and things...
+			_abilityManager.SetAbility(elementalInfos.First(ei => ei.Name == "Melee"), AvailableButtons.RightTrigger);
+			_abilityManager.SetAbility(elementalInfos.First(ei => ei.Name == "Ball"), AvailableButtons.RightBumper);
+			//_abilityManager.SetAbility(elementalInfos.First(ei => ei.Name == "Blink"), AvailableButtons.LeftTrigger);
+			_abilityManager.SetAbility(elementalInfos.First(ei => ei.Name == "Heal"), AvailableButtons.LeftTrigger);
+
+			_healthTotal = 1000;
 			_healthCurrent = _healthTotal;
 
 			// Temp Animations
@@ -85,17 +110,17 @@ namespace SimonsGame.GuiObjects
 		public override void PreUpdate(GameTime gameTime)
 		{
 			base.PreUpdate(gameTime);
-			VerticalPass = GameStateManager.AllControls[_guid].YMovement > .5;
+			VerticalPass = Controls.AllControls[_guid].YMovement > .5;
 		}
 		// If there are player specific modifiers, I will add these.
 		//public override void AddCustomModifiers(GameTime gameTime, Modifiers.ModifierBase modifyAdd) { }
 		//public override void MultiplyCustomModifiers(GameTime gameTime, Modifiers.ModifierBase modifyMult) { }
 		public override void PreDraw(GameTime gameTime, Microsoft.Xna.Framework.Graphics.SpriteBatch spriteBatch)
 		{
-			if (GameStateManager.AllControls != null && GameStateManager.AllControls.ContainsKey(_guid))
+			if (Controls.AllControls != null && Controls.AllControls.ContainsKey(_guid))
 			{
-				PlayerControls controls = GameStateManager.AllControls[_guid];
-				if (controls.XMovement == 0)
+				PlayerControls controls = Controls.AllControls[_guid];
+				if (IsStunned || NotAcceptingControls || controls.XMovement == 0)
 					_animator.PlayAnimation(_idleAnimation);
 				else
 					_animator.PlayAnimation(_runAnimation);
@@ -104,7 +129,7 @@ namespace SimonsGame.GuiObjects
 		public override void PostDraw(GameTime gameTime, Microsoft.Xna.Framework.Graphics.SpriteBatch spriteBatch) { }
 		public override void SetMovement(GameTime gameTime)
 		{
-			Movement = new Vector2(GameStateManager.AllControls[_guid].XMovement, GameStateManager.AllControls[_guid].YMovement);
+			Movement = new Vector2(Controls.AllControls[_guid].XMovement, Controls.AllControls[_guid].YMovement);
 		}
 
 		public override void HitByObject(MainGuiObject mgo, ModifierBase mb)
@@ -122,6 +147,11 @@ namespace SimonsGame.GuiObjects
 				Position = _startingPosition;
 			}
 			//Level.RemoveGuiObject(this);
+		}
+		public override Vector2 GetAim()
+		{
+			PlayerControls playerControls = GameStateManager.GetControlsForPlayer(this);
+			return playerControls.GetAim(this);
 		}
 	}
 }

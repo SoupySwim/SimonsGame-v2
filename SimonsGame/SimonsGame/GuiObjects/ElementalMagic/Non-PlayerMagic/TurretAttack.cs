@@ -17,7 +17,7 @@ namespace SimonsGame.GuiObjects.ElementalMagic
 		private ModifierBase _damageDealt;
 		private StandardTurret _turret;
 
-		public TurretAttack(Vector2 position, Vector2 hitbox, Group group, Level level, Vector2 speed, StandardTurret turret)
+		public TurretAttack(Vector2 position, Vector2 hitbox, Group group, Level level, Vector2 speed, StandardTurret turret, Element element)
 			: base(position, hitbox, group, level, "TurretAttack")
 		{
 			_fireball = MainGame.ContentManager.Load<Texture2D>("Test/Fireball");
@@ -25,9 +25,10 @@ namespace SimonsGame.GuiObjects.ElementalMagic
 			_turret = turret;
 			MaxSpeedBase = speed;
 			_fireball = MainGame.ContentManager.Load<Texture2D>("Test/Fireball");
-			_damageDealt = new TickModifier(1, ModifyType.Add, turret);
-			_damageDealt.SetHealthTotal(-1);
+			_damageDealt = new TickModifier(1, ModifyType.Add, turret, element);
+			_damageDealt.SetHealthTotal(-10);
 			Team = _turret.Team;
+			IsMovable = false;
 			//_objectType = GuiObjectType.Attack;
 		}
 		public override void PreDraw(GameTime gameTime, Microsoft.Xna.Framework.Graphics.SpriteBatch spriteBatch) { }
@@ -73,12 +74,13 @@ namespace SimonsGame.GuiObjects.ElementalMagic
 			//	}
 			//}
 			MainGuiObject hitMgo = null;
-			if (PrimaryOverlapObjects.Any())
-				hitMgo = PrimaryOverlapObjects.Values.FirstOrDefault();
+			var hitObjects = PrimaryOverlapObjects.SelectMany(mgos => mgos.Value);
+			if (hitObjects.Any())
+				hitMgo = hitObjects.FirstOrDefault();
 			else
 			{
-				Dictionary<Group, List<MainGuiObject>> guiObjects = Level.GetAllGuiObjects().Where(kv => kv.Key != Group.Passable).ToDictionary(kv => kv.Key, kv => kv.Value);
-				IEnumerable<Tuple<DoubleVector2, MainGuiObject>> hitPlatforms = GetHitObjects(guiObjects, this.HitBoxBounds, (mgo) => mgo.Id == _turret.Id);
+				IEnumerable<MainGuiObject> guiObjects = Level.GetPossiblyHitEnvironmentObjects(this).Concat(Level.GetAllUnPassableMovableObjects());
+				IEnumerable<Tuple<Vector2, MainGuiObject>> hitPlatforms = GetHitObjects(guiObjects, this.HitBoxBounds).Where(tup => tup.Item2.Id != _turret.Id);
 				hitPlatforms = hitPlatforms.Where(hp => hp.Item2.Team != Team);
 				hitMgo = hitPlatforms.Any() ? hitPlatforms.First().Item2 : null;
 			}
@@ -88,35 +90,13 @@ namespace SimonsGame.GuiObjects.ElementalMagic
 				Level.RemoveGuiObject(this);
 			}
 		}
-		protected override Dictionary<Group, List<MainGuiObject>> GetAllVerticalPassableGroups(Dictionary<Group, List<MainGuiObject>> guiObjects)
+		protected override IEnumerable<MainGuiObject> GetAllVerticalPassableGroups(IEnumerable<MainGuiObject> guiObjects)
 		{
-			var allObjects = guiObjects;//.Where(g => g.Key == Group.ImpassableIncludingMagic || g.Key == Group.Impassable).ToDictionary(o => o.Key, o => o.Value);
-			foreach (KeyValuePair<Group, List<MainGuiObject>> kv in allObjects.ToList())
-				allObjects[kv.Key] = kv.Value.Where(mgo => mgo.ObjectType != GuiObjectType.Structure || mgo.Team != Parent.Team).ToList();
-
-			foreach (var kv in _turret.Level.Players)
-			{
-				Group playerGroup = kv.Value.Group;
-				if (!allObjects.ContainsKey(playerGroup))
-					allObjects.Add(playerGroup, new List<MainGuiObject>());
-				allObjects[playerGroup].Add(kv.Value);
-			}
-			return allObjects;
+			return guiObjects.Where(mgo => mgo.ObjectType != GuiObjectType.Structure || mgo.Team != Parent.Team).Concat(_turret.Level.Players.Values);
 		}
-		protected override Dictionary<Group, List<MainGuiObject>> GetAllHorizontalPassableGroups(Dictionary<Group, List<MainGuiObject>> guiObjects)
+		protected override IEnumerable<MainGuiObject> GetAllHorizontalPassableGroups(IEnumerable<MainGuiObject> guiObjects)
 		{
-			var allObjects = guiObjects;//.Where(g => g.Key == Group.ImpassableIncludingMagic || g.Key == Group.Impassable).ToDictionary(o => o.Key, o => o.Value);
-			foreach (KeyValuePair<Group, List<MainGuiObject>> kv in allObjects.ToList())
-				allObjects[kv.Key] = kv.Value.Where(mgo => mgo.ObjectType != GuiObjectType.Structure || mgo.Team != Parent.Team).ToList();
-
-			foreach (var kv in _turret.Level.Players)
-			{
-				Group playerGroup = kv.Value.Group;
-				if (!allObjects.ContainsKey(playerGroup))
-					allObjects.Add(playerGroup, new List<MainGuiObject>());
-				allObjects[playerGroup].Add(kv.Value);
-			}
-			return allObjects;
+			return guiObjects.Where(mgo => mgo.ObjectType != GuiObjectType.Structure || mgo.Team != Parent.Team).Concat(_turret.Level.Players.Values);
 		}
 	}
 }

@@ -15,10 +15,11 @@ namespace SimonsGame.GuiObjects
 		public StandardBase(Vector2 position, Vector2 hitbox, Group group, Level level, Team team)
 			: base(position, hitbox, group, level, "StandardBase")
 		{
+			_showHealthBar = true;
 			SwitchTeam(team);
 			AdditionalGroupChange(group, group);
 			_baseImage = new Animation(MainGame.ContentManager.Load<Texture2D>("Test/Base"), 1, false, 400, 400, new Vector2(Size.X / 400.0f, Size.Y / 400.0f));
-			_healthTotal = 6;
+			_healthTotal = 5000;
 			_healthCurrent = _healthTotal;
 			_objectType = GuiObjectType.Structure;
 			_animator.Color = _hitBoxColor;
@@ -27,15 +28,10 @@ namespace SimonsGame.GuiObjects
 
 			// Elemental Magic
 			List<PlayerAbilityInfo> elementalInfos = new List<PlayerAbilityInfo>();
-			//elementalInfos.Add(AbilityBuilder.GetTurretAttackAbility(this));
-			//elementalInfos.Add(AbilityBuilder.GetLongRangeElementalAbility1(this));
-			//elementalInfos.Add(AbilityBuilder.GetShortRangeMeleeElementalAbility1(this));
-			//elementalInfos.Add(AbilityBuilder.GetShortRangeProjectileElementalAbility1(this));
-			//elementalInfos.Add(AbilityBuilder.GetSurroundRangeElementalAbility1(this));
-
 			//abilities.Add(KnownAbility.Elemental, elementalInfos);
 
-			_abilityManager = new AbilityManager(this, abilities);
+			_abilityManager = new AbilityManager(this, abilities, AvailableButtons.None);
+			IsMovable = false;
 		}
 		public override float GetXMovement()
 		{

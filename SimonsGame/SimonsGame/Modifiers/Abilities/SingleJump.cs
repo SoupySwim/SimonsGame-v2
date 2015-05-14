@@ -7,10 +7,10 @@ using System.Text;
 
 namespace SimonsGame.Modifiers.Abilities
 {
-	class SingleJump : CustomModifier
+	public class SingleJump : AbilityModifier
 	{
-		protected Player _player;
-		private int _tickTotal = 21; // number of ticks the ability will take place. This takes a third of a second.
+		protected PhysicsObject _character;
+		private int _tickTotal = 26; // number of ticks the ability will take place. This takes a third of a second.
 		private int _tickCount = 0; // Where we currently are in the ability.
 		private float _powerBase; // The amount of platforms this jump could cover.
 		public float AmountOfPlatformsPossible { get { return _powerBase; } }
@@ -18,26 +18,27 @@ namespace SimonsGame.Modifiers.Abilities
 		private bool _hasStopped = false;
 		public bool HasStopped { get { return _hasStopped; } }
 		private Func<bool> _checkStopped;
+		public Func<bool> CheckStopped { get { return _checkStopped; } set { _checkStopped = value; } }
 		private Func<bool> _forceStop;
 
 		/// <summary>
 		/// Creates a new Jump ability.
 		/// </summary>
-		/// <param name="p"> The Player the ability is tied to</param>
+		/// <param name="character"> The Player the ability is tied to</param>
 		/// <param name="pow"> How far the Player will jump upwards. Given by number of Platforms the Player can jump.</param>
 		/// <param name="checkStopped"> A function that checks if the ability is done. </param>
 		/// <param name="forceStop"> A function that checks if an ability can no longer be used. </param>
-		public SingleJump(Player p, float pow, Func<bool> checkStopped, Func<bool> forceStop)
-			: base(ModifyType.Add, p)
+		public SingleJump(PhysicsObject character, float pow, Func<bool> checkStopped, Func<bool> forceStop)
+			: base(ModifyType.Add, character, Utility.Element.Normal)
 		{
-			_player = p;
+			_character = character;
 			_powerBase = pow;
 			//_power = pow;
 			var numberOfUnitsTravelling = ((_tickTotal + 1) * _tickTotal) / 2;
-			var distanceAffectedByGravity = _tickTotal * _player.MaxSpeed.Y;
-			var totalDistanceNeededToCover = (_powerBase * p.Level.PlatformDifference) + Math.Abs(distanceAffectedByGravity);
+			var distanceAffectedByGravity = _tickTotal * _character.MaxSpeed.Y;
+			var totalDistanceNeededToCover = (_powerBase * character.Level.PlatformDifference) + Math.Abs(distanceAffectedByGravity);
 			_power = totalDistanceNeededToCover / numberOfUnitsTravelling;
-			Movement = new Vector2(0, (-_power * (_tickTotal - _tickCount)) + _player.MaxSpeed.Y);
+			Movement = new Vector2(0, (-_power * (_tickTotal - _tickCount)) + _character.MaxSpeed.Y);
 			_checkStopped = checkStopped;
 			_forceStop = forceStop;
 			IsExpiredFunction = IsExpiredFunc;
@@ -54,13 +55,22 @@ namespace SimonsGame.Modifiers.Abilities
 			if (_tickCount == _tickTotal)
 				_hasReachedEnd = true;
 
-			if (_hasStopped || _tickCount == _tickTotal || _player.CurrentMovement.Y > 0)
-			{
+			if (_hasStopped || _tickCount == _tickTotal || _character.CurrentMovement.Y > 0)
 				StopGravity = false;
+
+			if (_character.IsOnLadder && (_tickCount == 0 || _tickCount > _tickTotal / 2) && !_hasStopped)
+			{
+				Movement = new Vector2(0, -4.5f);
+				_tickCount = _tickTotal - 1;
 			}
-			Movement = new Vector2(0, (-_power * (_tickTotal - _tickCount)) + (StopGravity ? _player.MaxSpeed.Y : 0f));
-			_tickCount = Math.Min(_tickCount + 1, _tickTotal);
-			return _forceStop() || (_hasStopped && _tickCount >= _tickTotal && _player.IsLanded);
+			else
+			{
+				Movement = new Vector2(0, (-_power * (_tickTotal - _tickCount)) + (StopGravity ? _character.MaxSpeed.Y : 0f));
+				_tickCount = Math.Min(_tickCount + 1, _tickTotal);
+			}
+			// If you've forced stopped or
+			// If you've stopped or reached the end of the jump while be landed, then we are done!
+			return _forceStop() || ((_hasStopped || _hasReachedEnd) && _character.IsLanded);
 		}
 		public override void Reset()
 		{
@@ -73,7 +83,7 @@ namespace SimonsGame.Modifiers.Abilities
 		}
 		public override ModifierBase Clone()
 		{
-			SingleJump jump = new SingleJump(_player, _powerBase, _checkStopped, _forceStop);
+			SingleJump jump = new SingleJump(_character, _powerBase, _checkStopped, _forceStop);
 			return jump;
 		}
 	}

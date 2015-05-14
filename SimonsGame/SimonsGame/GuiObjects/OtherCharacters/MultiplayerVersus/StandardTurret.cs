@@ -13,14 +13,26 @@ namespace SimonsGame.GuiObjects
 	{
 		private bool _isTurned = false;
 		protected Animation _turretImage;
-		public Vector4 SensorBounds { get { return new Vector4(Position.X - Size.X * 3, Position.Y - Size.Y * 2, Size.X * 6, Size.Y * 4); } }
+		public Vector4 _sensorBoundsBuffer = new Vector4();
+		public Vector4 SensorBounds
+		{
+			get
+			{
+				_sensorBoundsBuffer.X = Position.X - Size.X * 3;
+				_sensorBoundsBuffer.Y = Position.Y - Size.Y * 2;
+				_sensorBoundsBuffer.W = Size.X * 6;
+				_sensorBoundsBuffer.Z = Size.Y * 4;
+				return _sensorBoundsBuffer;
+			}
+		}
 		public StandardTurret(Vector2 position, Vector2 hitbox, Group group, Level level, Team team)
 			: base(position, hitbox, group, level, "StandardTurret")
 		{
+			_showHealthBar = true;
 			SwitchTeam(team);
 			AdditionalGroupChange(group, group);
 			_turretImage = new Animation(MainGame.ContentManager.Load<Texture2D>("Test/Turret"), 1, false, 300, 500, new Vector2(Size.X / 300.0f, Size.Y / 500));
-			_healthTotal = 60;
+			_healthTotal = 4000;
 			_healthCurrent = _healthTotal;
 			_objectType = GuiObjectType.Structure;
 			_animator.Color = _hitBoxColor;
@@ -31,14 +43,10 @@ namespace SimonsGame.GuiObjects
 			// Elemental Magic
 			List<PlayerAbilityInfo> elementalInfos = new List<PlayerAbilityInfo>();
 			elementalInfos.Add(AbilityBuilder.GetTurretAttackAbility(this));
-			//elementalInfos.Add(AbilityBuilder.GetLongRangeElementalAbility1(this));
-			//elementalInfos.Add(AbilityBuilder.GetShortRangeMeleeElementalAbility1(this));
-			//elementalInfos.Add(AbilityBuilder.GetShortRangeProjectileElementalAbility1(this));
-			//elementalInfos.Add(AbilityBuilder.GetSurroundRangeElementalAbility1(this));
-
 			abilities.Add(KnownAbility.Elemental, elementalInfos);
 
-			_abilityManager = new AbilityManager(this, abilities);
+			_abilityManager = new AbilityManager(this, abilities, AvailableButtons.None);
+			IsMovable = false;
 		}
 		public override float GetXMovement()
 		{
@@ -77,7 +85,7 @@ namespace SimonsGame.GuiObjects
 			_team = newTeam;
 			_hitBoxColor = TeamColorMap[newTeam];
 			_animator.Color = _hitBoxColor;
-			_isTurned = !(_team == Team.Team1 || _team == Team.Team3);
+			//_isTurned = !(_team == Team.Team1 || _team == Team.Team3);
 		}
 		public override void SwitchDirections()
 		{
@@ -90,6 +98,10 @@ namespace SimonsGame.GuiObjects
 		public override bool DidSwitchDirection()
 		{
 			return _isTurned;
+		}
+		public override Vector2 GetAim()
+		{
+			return new Vector2(_isTurned ? -1 : 1, 0);
 		}
 	}
 }

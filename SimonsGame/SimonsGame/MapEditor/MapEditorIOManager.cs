@@ -15,6 +15,9 @@ using System.Threading;
 using SimonsGame.Menu.MenuScreens;
 using SimonsGame.MainFiles;
 using SimonsGame.Test;
+using SimonsGame.Extensions;
+using SimonsGame.GuiObjects.Zones;
+using SimonsGame.GuiObjects.OtherCharacters.Global;
 
 namespace SimonsGame.MapEditor
 {
@@ -45,6 +48,7 @@ namespace SimonsGame.MapEditor
 
 		public static void Initialize()
 		{
+			Console.WriteLine(LevelLocation);
 			Task.Factory.StartNew(() =>
 			{
 				int pathSize = LevelLocation.Count();
@@ -89,7 +93,7 @@ namespace SimonsGame.MapEditor
 						LevelName = fileName.Substring(indexOfLastSlash + 1),
 						LevelRelativePath = fileName.Substring(0, indexOfLastSlash + 1),
 						LevelSize = level.Size,
-						TeamCount = level.GetAllGuiObjects().SelectMany(kv => kv.Value).GroupBy(mgo => mgo.Team).Count(),
+						TeamCount = level.GetAllGuiObjects().GroupBy(mgo => mgo.Team).Count(),
 						ScenarioType = ScenarioType.Unknown,
 						WinCondition = WinCondition.Unknown
 					});
@@ -128,22 +132,9 @@ namespace SimonsGame.MapEditor
 			levelBuilder.LevelHeight = level.Size.Y;
 			levelBuilder.PlatformDiffernce = level.PlatformDifference;
 			levelBuilder.Objects = new List<GuiObjectStore>();
-			levelBuilder.Objects.AddRange(level.GetAllGuiObjects().Values.SelectMany(ls => ls).Select(mgo =>
-				{
-					return new GuiObjectStore()
-					{
-						X = mgo.Bounds.X,
-						Y = mgo.Bounds.Y,
-						Width = mgo.Bounds.W,
-						Height = mgo.Bounds.Z,
-						Class = mgo.GetClass(),
-						Group = mgo.Group,
-						Team = mgo.Team,
-						ShouldSwitchDirection = mgo.DidSwitchDirection(),
-						MaxSpeedX = mgo.MaxSpeedBase.X,
-						MaxSpeedY = mgo.MaxSpeedBase.Y
-					};
-				}));
+			levelBuilder.Objects.AddRange(level.GetAllGuiObjects().Select(mgo => mgo.GetGuiObjectStore()));
+			levelBuilder.Objects.AddRange(level.GetAllTeleporters().Select(mgo => mgo.GetGuiObjectStore()));
+			levelBuilder.Objects.AddRange(level.GetAllZones().Select(mgo => mgo.GetGuiObjectStore()));
 
 			IFormatter formatter = new BinaryFormatter();
 			if (!Directory.Exists(LevelLocation))
@@ -168,7 +159,6 @@ namespace SimonsGame.MapEditor
 			MainGame.PlayerManager.RemoveAllPlayers();
 			levelBuilder.Objects.ForEach(os => level.AddGuiObject(os.GetObject(level)));
 
-
 			return level;
 		}
 
@@ -181,68 +171,6 @@ namespace SimonsGame.MapEditor
 			public List<GuiObjectStore> Objects { get; set; }
 		}
 
-		[Serializable]
-		public class GuiObjectStore
-		{
-			public GuiObjectClass Class { get; set; }
-			public float X { get; set; }
-			public float Y { get; set; }
-			public float Width { get; set; }
-			public float Height { get; set; }
-			public SimonsGame.Utility.Group Group { get; set; }
-			public Team Team { get; set; }
-			public bool ShouldSwitchDirection { get; set; }
-			public float MaxSpeedX { get; set; }
-			public float MaxSpeedY { get; set; }
-
-			public MainGuiObject GetObject(Level level)
-			{
-				MainGuiObject baseObject = GetBaseObject(level);
-				if (ShouldSwitchDirection)
-					baseObject.SwitchDirections();
-				if (MaxSpeedX > 0 || MaxSpeedY > 0)
-					baseObject.MaxSpeedBase = new Vector2(MaxSpeedX, MaxSpeedY);
-				return baseObject;
-			}
-			private MainGuiObject GetBaseObject(Level level)
-			{
-				Vector2 position = new Vector2(X, Y);
-				Vector2 size = new Vector2(Width, Height);
-				MainGuiObject mgo;
-				switch (Class)
-				{
-					case GuiObjectClass.Platform:
-						return new Platform(position, size, Group, level);
-					case GuiObjectClass.MovingPlatform:
-						return new MovingPlatform(position, size, Group, level, true, (int)level.PlatformDifference, false);
-					case GuiObjectClass.Player:
-						int playerCount = MainGame.PlayerManager.PlayerInputMap.Count(kv => !kv.Value.IsAi);
-						Guid playerId = MainGame.PlayerManager.AddPlayer(TempControls.GetPlayerInput(playerCount));
-						return new Player(playerId, position, size, Group, level, "Player" + MainGame.PlayerManager.PlayerInputMap.Count(), Team, false);
-					case GuiObjectClass.AIPlayer:
-						Guid id = MainGame.PlayerManager.AddPlayer(new UsableInputMap() { IsAi = true });
-						return new Player(id, position, size, Group, level, "Player " + MainGame.PlayerManager.PlayerInputMap.Count(), Team, true);
-					case GuiObjectClass.HealthCreep:
-						return new HealthCreep(position, size, Group, level, true, 0, (int)level.Size.X);
-					case GuiObjectClass.MovingCharacter:
-						mgo = new MovingCharacter(position, size, Group, level, true);
-						mgo.Team = Team;
-						return mgo;
-					case GuiObjectClass.WallRunner:
-						mgo = new WallRunner(position, size, Group, level, true);
-						mgo.Team = Team;
-						return mgo;
-					case GuiObjectClass.StandardTurret:
-						return new StandardTurret(position, size, Group, level, Team);
-					case GuiObjectClass.StandardBase:
-						return new StandardBase(position, size, Group, level, Team);
-					case GuiObjectClass.FinishLineFlagPole:
-						return new FinishLineFlagPole(position, size, Group, level);
-				}
-				return null;
-			}
-
-		}
 
 		public static void SaveAllFiles(Dictionary<string, LevelFileMetaData> loadedFiles, string fullPath)
 		{
@@ -332,5 +260,107 @@ namespace SimonsGame.MapEditor
 		public static bool operator ==(LevelFileMetaData a, LevelFileMetaData b) { return a.Equals(b); }
 		public static bool operator !=(LevelFileMetaData a, LevelFileMetaData b) { return !a.Equals(b); }
 		public override int GetHashCode() { return base.GetHashCode(); }
+	}
+	[Serializable]
+	public class GuiObjectStore
+	{
+		public GuiObjectClass Class { get; set; }
+		public float X { get; set; }
+		public float Y { get; set; }
+		public float Width { get; set; }
+		public float Height { get; set; }
+		public Group Group { get; set; }
+		public Team Team { get; set; }
+		public float MaxSpeedX { get; set; }
+		public float MaxSpeedY { get; set; }
+		public Dictionary<ButtonType, int> ExtraSavedInformation { get; set; }
+
+		public MainGuiObject GetObject(Level level)
+		{
+			MainGuiObject mgo = GetBaseObject(level);
+			foreach (var kv in ExtraSavedInformation)
+				mgo.SetSpecialValue(kv.Key, kv.Value);
+			//if (ShouldSwitchDirection)
+			//	baseObject.SwitchDirections();
+			if (MaxSpeedX > 0 || MaxSpeedY > 0)
+				mgo.MaxSpeedBase = new Vector2(MaxSpeedX, MaxSpeedY);
+			return mgo;
+		}
+		private MainGuiObject GetBaseObject(Level level)
+		{
+			Vector2 position = new Vector2(X, Y);
+			Vector2 size = new Vector2(Width, Height);
+			MainGuiObject mgo;
+			switch (Class)
+			{
+				case GuiObjectClass.Platform:
+					return new Platform(position, size, Group, level);
+				case GuiObjectClass.MovingPlatform:
+					return new MovingPlatform(position, size, Group, level, true, (int)level.PlatformDifference, false);
+				case GuiObjectClass.Player:
+					int playerCount = MainGame.PlayerManager.PlayerInputMap.Count(kv => !kv.Value.IsAi);
+					Guid playerId = MainGame.PlayerManager.AddPlayer(TempControls.GetPlayerInput(playerCount));
+					return new Player(playerId, position, size, Group, level, "Player" + MainGame.PlayerManager.PlayerInputMap.Count(), Team, false);
+				case GuiObjectClass.AIPlayer:
+					Guid id = MainGame.PlayerManager.AddPlayer(new UsableInputMap() { IsAi = true });
+					return new Player(id, position, size, Group, level, "Player " + MainGame.PlayerManager.PlayerInputMap.Count(), Team, true);
+				case GuiObjectClass.HealthCreep:
+					return new HealthCreep(position, size, Group, level, true, 0, (int)level.Size.X);
+				case GuiObjectClass.MovingCharacter:
+					mgo = new MovingCharacter(position, size, Group, level, true);
+					mgo.Team = Team;
+					return mgo;
+				case GuiObjectClass.NeutralCreep:
+					return new NeutralCreep(position, size, Group, level);
+				case GuiObjectClass.FlyingCreature:
+					return new FlyingCreature(position, size, Group, level);
+				case GuiObjectClass.LargeCreep:
+					return new LargeCreep(position, size, Group, level);
+				case GuiObjectClass.CreepBoss:
+					return new CreepBoss(position, size, Group, level);
+				case GuiObjectClass.WallRunner:
+					mgo = new WallRunner(position, size, Group, level, true);
+					mgo.Team = Team;
+					return mgo;
+				case GuiObjectClass.StandardTurret:
+					return new StandardTurret(position, size, Group, level, Team);
+				case GuiObjectClass.StandardBase:
+					return new StandardBase(position, size, Group, level, Team);
+				case GuiObjectClass.FinishLineFlagPole:
+					return new FinishLineFlagPole(position, size, Group, level);
+				case GuiObjectClass.Block:
+					return new Block(position, size, Group, level);
+				case GuiObjectClass.ObjectSpawner:
+					mgo = new ObjectSpawner(position, size, Group, level);
+					mgo.Team = Team;
+					return mgo;
+				case GuiObjectClass.Ladder:
+					return new Ladder(position, size, level);
+				case GuiObjectClass.JumpPad:
+					return new JumpPad(position, size, level);
+				case GuiObjectClass.HealthPack:
+					return PowerUpBuilder.GetHealthPackPU(position, size, level);
+				case GuiObjectClass.SuperSpeed:
+					return PowerUpBuilder.GetSpeedUpPU(position, size, level);
+				case GuiObjectClass.SuperJump:
+					return PowerUpBuilder.GetSuperJumpPU(position, size, level);
+				case GuiObjectClass.Teleporter:
+					return new Teleporter(position, size, level);
+				case GuiObjectClass.Spike:
+					return new Spike(position, size, Group, level);
+				case GuiObjectClass.LockedBarrier:
+					return new LockedBarrier(position, size, level);
+				case GuiObjectClass.SmallKeyObject:
+					return new SmallKeyObject(position, size, level);
+				case GuiObjectClass.AbilityObject:
+					return PowerUpBuilder.GetBlinkAbilityObject(position, size, level);
+				case GuiObjectClass.JungleCreepZone:
+					return new JungleCreepZone(position, size, level);
+				case GuiObjectClass.BehaviorZone:
+					return new BehaviorZone(position, size, level, Team);
+
+			}
+			return null;
+		}
 	}
 }

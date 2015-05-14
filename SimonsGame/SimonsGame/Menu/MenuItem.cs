@@ -30,5 +30,7 @@ namespace SimonsGame.Menu
 		{
 			_selectedAcion();
 		}
+
+		public virtual bool IsStuck(Direction2D direction) { return false; }
 	}
 }

@@ -40,8 +40,8 @@ namespace SimonsGame.Menu.MenuScreens
 				{
 					AllowAIScreens = false,
 					PauseStopsGame = true,
-					MapName = "mario1-1",
-					LevelFileMetaData = MapEditorIOManager.GetMetadataForLevel("mario1-1")
+					MapName = "Mario1-1",
+					LevelFileMetaData = MapEditorIOManager.GetMetadataForLevel("Mario1-1")
 				});
 			}, "Challenge Mode",
 				"Challenge Mode".GetTextBoundsByCenter(MainGame.PlainFont, new Vector2(_screenSize.X / 2, _screenSize.Y / 2 + 40)), Color.Black, Color.White, new Vector2(40, 40), false);

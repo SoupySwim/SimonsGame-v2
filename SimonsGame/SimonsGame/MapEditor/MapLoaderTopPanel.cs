@@ -38,11 +38,12 @@ namespace SimonsGame.MapEditor
 			_sortButtons = categoryNames.Select((category, ndx) =>
 				{
 					Vector4 buttonTotalBounds = new Vector4(_topPanelBounds.W - categoryWidth, 2 + ndx * categoryHeight, categoryHeight, categoryWidth);
-					Vector2 paddingBounds = category.GetPaddingGivenBounds(MainGame.PlainFont, buttonTotalBounds.GetSize());
-					Vector2 buttonSize = buttonTotalBounds.GetSize() - paddingBounds;
-					Vector4 buttonBounds = new Vector4(buttonTotalBounds.GetPosition() + (paddingBounds / 2), buttonSize.Y, buttonSize.X);
+					//Vector2 paddingBounds = category.GetPaddingGivenBounds(MainGame.PlainFont, buttonTotalBounds.GetSize());
+					//Vector2 buttonSize = buttonTotalBounds.GetSize() - paddingBounds;
+					//Vector4 buttonBounds = new Vector4(buttonTotalBounds.GetPosition() + (paddingBounds / 2), buttonSize.Y, buttonSize.X);
+					var tuple = category.GetSizeAndPadding(MainGame.PlainFont, buttonTotalBounds);
 					return new TextMenuItemButton(() => { MapEditorIOManager.CurrentLevelOrderByCategory = (OrderLevelByCategory)Enum.Parse(typeof(OrderLevelByCategory), category); _manager.RefreshLevels(); },
-						category, buttonBounds, paddingBounds, false);
+						category, tuple.Item1, tuple.Item2, false);
 				}).ToList();
 			GetArrowBounds(_sortButtons.FirstOrDefault());
 		}

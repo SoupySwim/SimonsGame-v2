@@ -10,15 +10,13 @@ using System.Text;
 
 namespace SimonsGame.GuiObjects.ElementalMagic
 {
-	// First draft of Long Range Magic.
-	// First draft will not include type of magic as that comes at a later sprint.
 	public class SurroundRangeMagic : PlayerMagicObject
 	{
 		// the temp-est of textures...
 		private Texture2D _bubble;
 		private MainGuiObject _surroundObject;
 		public SurroundRangeMagic(Vector2 position, Player player, Vector2 hitbox, Group group, Level level, MainGuiObject o)
-			: base(position, hitbox, group, level, player, "SurroundRangeMagic")
+			: base(position, hitbox, group, level, player, "SurroundRangeMagic", null)
 		//: base(position, hitbox, group, level, "SurroundRangeMagic")
 		{
 			_surroundObject = o;

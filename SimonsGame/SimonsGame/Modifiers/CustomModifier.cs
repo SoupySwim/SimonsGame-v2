@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using SimonsGame.GuiObjects;
+using SimonsGame.Utility;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,12 +11,13 @@ namespace SimonsGame.Modifiers
 	public class CustomModifier : ModifierBase
 	{
 		protected Func<GameTime, bool> IsExpiredFunction;
-		public CustomModifier(Func<GameTime, bool> isExpiredFunc, ModifyType type, MainGuiObject owner)
-			: base(type, owner)
+
+		public CustomModifier(Func<GameTime, bool> isExpiredFunc, ModifyType type, MainGuiObject owner, Element element)
+			: base(type, owner, element)
 		{
 		}
-		public CustomModifier(ModifyType type, MainGuiObject owner)
-			: base(type, owner)
+		public CustomModifier(ModifyType type, MainGuiObject owner, Element element)
+			: base(type, owner, element)
 		{
 			IsExpiredFunction = (g) => false;
 		}
@@ -29,12 +31,15 @@ namespace SimonsGame.Modifiers
 		}
 		public override ModifierBase Clone()
 		{
-			CustomModifier mod = new CustomModifier(IsExpiredFunction, Type, _owner);
+			CustomModifier mod = new CustomModifier(IsExpiredFunction, Type, _owner, Element);
 			if (Type == ModifyType.Add)
 				mod = (CustomModifier)(mod + this);
 			else
 				mod = (CustomModifier)(mod * this);
 			return mod;
 		}
+
+		public override long GetTickCount() { return 0; }
+		public override void SetTickCount(long value) { }
 	}
 }

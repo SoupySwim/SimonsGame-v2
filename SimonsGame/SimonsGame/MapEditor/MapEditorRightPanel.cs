@@ -69,14 +69,14 @@ namespace SimonsGame.MapEditor
 
 			_arrow = MainGame.ContentManager.Load<Texture2D>("Test/Menu/RightArrow");
 			_trashCan = MainGame.ContentManager.Load<Texture2D>("Test/TrashCan");
-
+			_selectedObjectClass = (GuiObjectClass)(-1); // Start off with nothing selected!
 			MakeButtons();
 		}
 		public void SelectNewItem(MainGuiObject mgo)
 		{
 			if (mgo != null)
 			{
-				GuiObjectClass classType = (GuiObjectClass)Enum.Parse(typeof(GuiObjectClass), mgo.GetType().Name);
+				GuiObjectClass classType = mgo.GetClass();//(GuiObjectClass)Enum.Parse(typeof(GuiObjectClass), mgo.GetType().Name);
 				SelectNewItem(mgo, classType);
 			}
 			else _selectedObject = null; // If you select nothingness, then you will be modifying the level.
@@ -84,7 +84,11 @@ namespace SimonsGame.MapEditor
 		private void SelectNewItem(MainGuiObject mgo, GuiObjectClass objClass)
 		{
 			_selectedObject = mgo;
-			_selectedObjectClass = objClass;
+			if (_selectedObjectClass != objClass)
+			{
+				_selectedObjectClass = objClass;
+				ButtonConfiguration.GenericButtons.ForEach(bType => _buttons[bType].ChangeTitle(mgo.GetSpecialTitle(bType)));
+			}
 		}
 		public void DeselectItem()
 		{
@@ -120,7 +124,13 @@ namespace SimonsGame.MapEditor
 			List<ButtonConfiguration> visibleButtons = GetVisibleButtons();
 			foreach (var button in visibleButtons)
 				if (button.YOffset < mousePosition.Y && mousePosition.Y < button.YOffset + button.Height)
+				{
 					button.CheckMouse(mousePosition);
+					if (Controls.CurrentMouse.ScrollWheelValue > Controls.PreviousMouse.ScrollWheelValue)
+						button.Scroll(mousePosition, true);
+					else if (Controls.CurrentMouse.ScrollWheelValue < Controls.PreviousMouse.ScrollWheelValue)
+						button.Scroll(mousePosition, false);
+				}
 		}
 		private List<ButtonConfiguration> GetVisibleButtons()
 		{
@@ -144,147 +154,181 @@ namespace SimonsGame.MapEditor
 				if (button.YOffset < mousePosition.Y && mousePosition.Y < button.YOffset + button.Height)
 					button.Click();
 		}
-		[Flags]
-		private enum ButtonType
-		{
-			Group = 1,
-			Position = 2,
-			Size = 4,
-			Direction1 = 8,
-			//Direction2 = 16, // Need to switch this out!
-			Speed = 32,
-			Remove = 64,
-			Team = 128,
-			LevelSize = 256,
-			LevelWinCondition = 512,
-			LevelScenarioType = 1024
-			// Health, damage, stuff like that.
-		}
 
 		private void MakeButtons()
 		{
 			Vector4 leftButtonBounds = new Vector4(Bounds.X + Size.X - 63, 0, 30, 30);
 			Vector4 rightButtonBounds = new Vector4(Bounds.X + Size.X - 33, 0, 30, 30);
 			_buttons = new Dictionary<ButtonType, ButtonConfiguration>();
-			var groupButtons = new List<Tuple<Func<MainGuiObject, string>, List<MenuItemButton>>>();
-			groupButtons.Add(new Tuple<Func<MainGuiObject, string>, List<MenuItemButton>>((mgo) => mgo.Group.ToString(),
+
+			var groupButtons = new List<RightPanelButtonGroup>();
+			Action upAction = () => { _selectedObject.Group = (Group)(((int)_selectedObject.Group + 1) % Enum.GetNames(typeof(Group)).Length); };
+			Action downAction = () => { _selectedObject.Group = (Group)(((int)_selectedObject.Group + Enum.GetNames(typeof(Group)).Length - 1) % Enum.GetNames(typeof(Group)).Length); };
+			groupButtons.Add(new RightPanelButtonGroup((mgo) => mgo.Group.ToString(),
 				new List<MenuItemButton>(){
-					new ImageMenuItemButton(() => { _selectedObject.Group = (Group)(((int)_selectedObject.Group + 1) % Enum.GetNames(typeof(Group)).Length); }, _arrow, rightButtonBounds, Color.Orange, Color.Red, false),
-					new ImageMenuItemButton(() => { _selectedObject.Group = (Group)(((int)_selectedObject.Group + Enum.GetNames(typeof(Group)).Length -1) % Enum.GetNames(typeof(Group)).Length); }, _arrow, leftButtonBounds, Color.Orange, Color.Red, false, SpriteEffects.FlipHorizontally)
-				}));
+					new ImageMenuItemButton(upAction, _arrow, rightButtonBounds, Color.Orange, Color.Red, false),
+					new ImageMenuItemButton(downAction, _arrow, leftButtonBounds, Color.Orange, Color.Red, false, SpriteEffects.FlipHorizontally)
+				}, upAction, downAction));
 			_buttons.Add(ButtonType.Group, new ButtonConfiguration(this, ButtonType.Group.ToString(), groupButtons));
 
-			var teamButtons = new List<Tuple<Func<MainGuiObject, string>, List<MenuItemButton>>>();
-			teamButtons.Add(new Tuple<Func<MainGuiObject, string>, List<MenuItemButton>>((mgo) => mgo.Team.ToString(),
+			var teamButtons = new List<RightPanelButtonGroup>();
+			upAction = () => { _selectedObject.Team = (Team)(((int)_selectedObject.Team + 1) % Enum.GetNames(typeof(Team)).Length); };
+			downAction = () => { _selectedObject.Team = (Team)(((int)_selectedObject.Team + Enum.GetNames(typeof(Team)).Length - 1) % Enum.GetNames(typeof(Team)).Length); };
+			teamButtons.Add(new RightPanelButtonGroup((mgo) => mgo.Team.ToString(),
 				new List<MenuItemButton>(){
 					new ImageMenuItemButton(() => { _selectedObject.Team = (Team)(((int)_selectedObject.Team + 1) % Enum.GetNames(typeof(Team)).Length); }, _arrow, rightButtonBounds, Color.Orange, Color.Red, false),
 					new ImageMenuItemButton(() => { _selectedObject.Team = (Team)(((int)_selectedObject.Team + Enum.GetNames(typeof(Team)).Length -1) % Enum.GetNames(typeof(Team)).Length); }, _arrow, leftButtonBounds, Color.Orange, Color.Red, false, SpriteEffects.FlipHorizontally)
-				}));
+				}, upAction, downAction));
 			_buttons.Add(ButtonType.Team, new ButtonConfiguration(this, ButtonType.Team.ToString(), teamButtons));
 
-			var positionButtons = new List<Tuple<Func<MainGuiObject, string>, List<MenuItemButton>>>();
-			positionButtons.Add(new Tuple<Func<MainGuiObject, string>, List<MenuItemButton>>((mgo) => "X: " + ((int)(mgo.Position.X / MapEditorEditMap.SnapTo)).ToString(),
+			var positionButtons = new List<RightPanelButtonGroup>();
+			positionButtons.Add(new RightPanelButtonGroup((mgo) => "X: " + ((int)(mgo.Position.X / MapEditorEditMap.SnapTo)).ToString(),
 				new List<MenuItemButton>(){
 					new ImageMenuItemButton(MoveRight, _arrow, rightButtonBounds, Color.Orange, Color.Red, false),
 					new ImageMenuItemButton(MoveLeft, _arrow, leftButtonBounds, Color.Orange, Color.Red, false, SpriteEffects.FlipHorizontally)
-				}));
-			positionButtons.Add(new Tuple<Func<MainGuiObject, string>, List<MenuItemButton>>((mgo) => "Y: " + ((int)(mgo.Position.Y / MapEditorEditMap.SnapTo)).ToString(),
+				}, () => { }, () => { }));
+			positionButtons.Add(new RightPanelButtonGroup((mgo) => "Y: " + ((int)(mgo.Position.Y / MapEditorEditMap.SnapTo)).ToString(),
 				new List<MenuItemButton>(){
 					new ImageMenuItemButton(MoveDown, _arrow, rightButtonBounds, Color.Orange, Color.Red, false),
 					new ImageMenuItemButton(MoveUp, _arrow, leftButtonBounds, Color.Orange, Color.Red, false, SpriteEffects.FlipHorizontally)
-				}));
+				}, () => { }, () => { }));
 			_buttons.Add(ButtonType.Position, new ButtonConfiguration(this, ButtonType.Position.ToString(), positionButtons));
 
-			var sizeButtons = new List<Tuple<Func<MainGuiObject, string>, List<MenuItemButton>>>();
-			sizeButtons.Add(new Tuple<Func<MainGuiObject, string>, List<MenuItemButton>>((mgo) => "Width: " + ((int)(mgo.Size.X / MapEditorEditMap.SnapTo)).ToString(),
+			var sizeButtons = new List<RightPanelButtonGroup>();
+			sizeButtons.Add(new RightPanelButtonGroup((mgo) => "Width: " + ((int)(mgo.Size.X / MapEditorEditMap.SnapTo)).ToString(),
 				new List<MenuItemButton>(){
 					new ImageMenuItemButton(() => { _selectedObject.Size = new Vector2(_selectedObject.Size.X + MapEditorEditMap.SnapTo, _selectedObject.Size.Y); }, _arrow, rightButtonBounds, Color.Orange, Color.Red, false),
 					new ImageMenuItemButton(() => { _selectedObject.Size = new Vector2(_selectedObject.Size.X - MapEditorEditMap.SnapTo, _selectedObject.Size.Y); }, _arrow, leftButtonBounds, Color.Orange, Color.Red, false, SpriteEffects.FlipHorizontally)
-				}));
-			sizeButtons.Add(new Tuple<Func<MainGuiObject, string>, List<MenuItemButton>>((mgo) => "Height: " + ((int)(mgo.Size.Y / MapEditorEditMap.SnapTo)).ToString(),
+				}, () => { _selectedObject.Size = new Vector2(_selectedObject.Size.X + (MapEditorEditMap.SnapTo * 4), _selectedObject.Size.Y); },
+				() => { _selectedObject.Size = new Vector2(_selectedObject.Size.X - (MapEditorEditMap.SnapTo * 4), _selectedObject.Size.Y); }));
+			sizeButtons.Add(new RightPanelButtonGroup((mgo) => "Height: " + ((int)(mgo.Size.Y / MapEditorEditMap.SnapTo)).ToString(),
 				new List<MenuItemButton>(){
 					new ImageMenuItemButton(() => { _selectedObject.Size = new Vector2(_selectedObject.Size.X, _selectedObject.Size.Y + MapEditorEditMap.SnapTo); }, _arrow, rightButtonBounds, Color.Orange, Color.Red, false),
 					new ImageMenuItemButton(() => { _selectedObject.Size = new Vector2(_selectedObject.Size.X, _selectedObject.Size.Y - MapEditorEditMap.SnapTo); }, _arrow, leftButtonBounds, Color.Orange, Color.Red, false, SpriteEffects.FlipHorizontally)
-				}));
+				}, () => { _selectedObject.Size = new Vector2(_selectedObject.Size.X, _selectedObject.Size.Y + (MapEditorEditMap.SnapTo * 4)); },
+				() => { _selectedObject.Size = new Vector2(_selectedObject.Size.X, _selectedObject.Size.Y - (MapEditorEditMap.SnapTo * 4)); }));
 			_buttons.Add(ButtonType.Size, new ButtonConfiguration(this, ButtonType.Size.ToString(), sizeButtons));
 
-			var levelSizeButtons = new List<Tuple<Func<MainGuiObject, string>, List<MenuItemButton>>>();
-			levelSizeButtons.Add(new Tuple<Func<MainGuiObject, string>, List<MenuItemButton>>((mgo) => "Width: " + ((int)(_mapEditorEditMap.Level.Size.X / (MapEditorEditMap.SnapTo * 4))).ToString(),
+			var levelSizeButtons = new List<RightPanelButtonGroup>();
+			levelSizeButtons.Add(new RightPanelButtonGroup((mgo) => "Width: " + ((int)(_mapEditorEditMap.Level.Size.X / (MapEditorEditMap.SnapTo * 4))).ToString(),
 				new List<MenuItemButton>(){
-					new ImageMenuItemButton(() => { _mapEditorEditMap.Level.Size = new Vector2(_mapEditorEditMap.Level.Size.X + (MapEditorEditMap.SnapTo*4), _mapEditorEditMap.Level.Size.Y); }, _arrow, rightButtonBounds, Color.Orange, Color.Red, false),
-					new ImageMenuItemButton(() => { _mapEditorEditMap.Level.Size = new Vector2(_mapEditorEditMap.Level.Size.X - (MapEditorEditMap.SnapTo*4), _mapEditorEditMap.Level.Size.Y); }, _arrow, leftButtonBounds, Color.Orange, Color.Red, false, SpriteEffects.FlipHorizontally)
-				}));
-			levelSizeButtons.Add(new Tuple<Func<MainGuiObject, string>, List<MenuItemButton>>((mgo) => "Height: " + ((int)(_mapEditorEditMap.Level.Size.Y / (MapEditorEditMap.SnapTo * 4))).ToString(),
+					new ImageMenuItemButton(() => { _mapEditorEditMap.Level.Size = new Vector2(_mapEditorEditMap.Level.Size.X + (MapEditorEditMap.SnapTo * 4), _mapEditorEditMap.Level.Size.Y); }, _arrow, rightButtonBounds, Color.Orange, Color.Red, false),
+					new ImageMenuItemButton(() => { _mapEditorEditMap.Level.Size = new Vector2(_mapEditorEditMap.Level.Size.X - (MapEditorEditMap.SnapTo * 4), _mapEditorEditMap.Level.Size.Y); }, _arrow, leftButtonBounds, Color.Orange, Color.Red, false, SpriteEffects.FlipHorizontally)
+				}, () => { _mapEditorEditMap.Level.Size = new Vector2(_mapEditorEditMap.Level.Size.X + (MapEditorEditMap.SnapTo * 16), _mapEditorEditMap.Level.Size.Y); },
+				() => { _mapEditorEditMap.Level.Size = new Vector2(_mapEditorEditMap.Level.Size.X - (MapEditorEditMap.SnapTo * 16), _mapEditorEditMap.Level.Size.Y); }));
+
+			levelSizeButtons.Add(new RightPanelButtonGroup((mgo) => "Height: " + ((int)(_mapEditorEditMap.Level.Size.Y / (MapEditorEditMap.SnapTo * 4))).ToString(),
 				new List<MenuItemButton>(){
 					new ImageMenuItemButton(() => { _mapEditorEditMap.Level.Size = new Vector2(_mapEditorEditMap.Level.Size.X, _mapEditorEditMap.Level.Size.Y + (MapEditorEditMap.SnapTo*4)); }, _arrow, rightButtonBounds, Color.Orange, Color.Red, false),
 					new ImageMenuItemButton(() => { _mapEditorEditMap.Level.Size = new Vector2(_mapEditorEditMap.Level.Size.X, _mapEditorEditMap.Level.Size.Y - (MapEditorEditMap.SnapTo*4)); }, _arrow, leftButtonBounds, Color.Orange, Color.Red, false, SpriteEffects.FlipHorizontally)
-				}));
+				}, () => { _mapEditorEditMap.Level.Size = new Vector2(_mapEditorEditMap.Level.Size.X, _mapEditorEditMap.Level.Size.Y + (MapEditorEditMap.SnapTo * 16)); },
+				() => { _mapEditorEditMap.Level.Size = new Vector2(_mapEditorEditMap.Level.Size.X, _mapEditorEditMap.Level.Size.Y - (MapEditorEditMap.SnapTo * 16)); }));
 			_buttons.Add(ButtonType.LevelSize, new ButtonConfiguration(this, ButtonType.LevelSize.ToString(), levelSizeButtons));
 
 			int numWinConditions = Enum.GetNames(typeof(WinCondition)).Length - 1;
-			var winConditionButtons = new List<Tuple<Func<MainGuiObject, string>, List<MenuItemButton>>>();
-			winConditionButtons.Add(new Tuple<Func<MainGuiObject, string>, List<MenuItemButton>>((mgo) => _mapEditorEditMap.LevelMetaData.WinCondition.ToString(),
+			var winConditionButtons = new List<RightPanelButtonGroup>();
+			upAction = () => { _mapEditorEditMap.LevelMetaData.WinCondition = (WinCondition)(((int)_mapEditorEditMap.LevelMetaData.WinCondition + 1) % numWinConditions); };
+			downAction = () => { _mapEditorEditMap.LevelMetaData.WinCondition = (WinCondition)(((int)_mapEditorEditMap.LevelMetaData.WinCondition + numWinConditions - 1) % numWinConditions); };
+			winConditionButtons.Add(new RightPanelButtonGroup((mgo) => _mapEditorEditMap.LevelMetaData.WinCondition.ToString(),
 				new List<MenuItemButton>(){
-					new ImageMenuItemButton(() => { _mapEditorEditMap.LevelMetaData.WinCondition = (WinCondition)(((int)_mapEditorEditMap.LevelMetaData.WinCondition + 1) % numWinConditions); }, _arrow, rightButtonBounds, Color.Orange, Color.Red, false),
-					new ImageMenuItemButton(() => { _mapEditorEditMap.LevelMetaData.WinCondition = (WinCondition)(((int)_mapEditorEditMap.LevelMetaData.WinCondition + numWinConditions-1) % numWinConditions); }, _arrow, leftButtonBounds, Color.Orange, Color.Red, false, SpriteEffects.FlipHorizontally)
-				}));
+					new ImageMenuItemButton( upAction, _arrow, rightButtonBounds, Color.Orange, Color.Red, false),
+					new ImageMenuItemButton( downAction, _arrow, leftButtonBounds, Color.Orange, Color.Red, false, SpriteEffects.FlipHorizontally)
+				}, upAction, downAction));
 			_buttons.Add(ButtonType.LevelWinCondition, new ButtonConfiguration(this, ButtonType.LevelWinCondition.ToString(), winConditionButtons));
 
 			int numScenarioType = Enum.GetNames(typeof(ScenarioType)).Length - 1;
-			var scenarioButtons = new List<Tuple<Func<MainGuiObject, string>, List<MenuItemButton>>>();
-			scenarioButtons.Add(new Tuple<Func<MainGuiObject, string>, List<MenuItemButton>>((mgo) => _mapEditorEditMap.LevelMetaData.ScenarioType.ToString(),
+			var scenarioButtons = new List<RightPanelButtonGroup>();
+			upAction = () => { _mapEditorEditMap.LevelMetaData.ScenarioType = (ScenarioType)(((int)_mapEditorEditMap.LevelMetaData.ScenarioType + 1) % numScenarioType); };
+			downAction = () => { _mapEditorEditMap.LevelMetaData.ScenarioType = (ScenarioType)(((int)_mapEditorEditMap.LevelMetaData.ScenarioType + numScenarioType - 1) % numScenarioType); };
+			scenarioButtons.Add(new RightPanelButtonGroup((mgo) => _mapEditorEditMap.LevelMetaData.ScenarioType.ToString(),
 				new List<MenuItemButton>(){
-					new ImageMenuItemButton(() => { _mapEditorEditMap.LevelMetaData.ScenarioType = (ScenarioType)(((int)_mapEditorEditMap.LevelMetaData.ScenarioType + 1) % numScenarioType); }, _arrow, rightButtonBounds, Color.Orange, Color.Red, false),
-					new ImageMenuItemButton(() => { _mapEditorEditMap.LevelMetaData.ScenarioType = (ScenarioType)(((int)_mapEditorEditMap.LevelMetaData.ScenarioType + numScenarioType-1) % numScenarioType); }, _arrow, leftButtonBounds, Color.Orange, Color.Red, false, SpriteEffects.FlipHorizontally)
-				}));
+					new ImageMenuItemButton(upAction, _arrow, rightButtonBounds, Color.Orange, Color.Red, false),
+					new ImageMenuItemButton(downAction, _arrow, leftButtonBounds, Color.Orange, Color.Red, false, SpriteEffects.FlipHorizontally)
+				}, upAction, downAction));
 			_buttons.Add(ButtonType.LevelScenarioType, new ButtonConfiguration(this, ButtonType.LevelScenarioType.ToString(), scenarioButtons));
 
-
-
-			var direction1Buttons = new List<Tuple<Func<MainGuiObject, string>, List<MenuItemButton>>>();
-			direction1Buttons.Add(new Tuple<Func<MainGuiObject, string>, List<MenuItemButton>>((mgo) => _selectedObject.GetDirectionalText(),
-				new List<MenuItemButton>(){
-					new ImageMenuItemButton(() => { _selectedObject.SwitchDirections(); }, _arrow, rightButtonBounds, Color.Orange, Color.Red, false),
-					new ImageMenuItemButton(() => { _selectedObject.SwitchDirections(); }, _arrow, leftButtonBounds, Color.Orange, Color.Red, false, SpriteEffects.FlipHorizontally)
-				}));
-			_buttons.Add(ButtonType.Direction1, new ButtonConfiguration(this, ButtonType.Direction1.ToString(), direction1Buttons));
-
-			var speedButtons = new List<Tuple<Func<MainGuiObject, string>, List<MenuItemButton>>>();
-			speedButtons.Add(new Tuple<Func<MainGuiObject, string>, List<MenuItemButton>>((mgo) => "X Speed: " + mgo.MaxSpeedBase.X.ToString("#.0"),
+			var speedButtons = new List<RightPanelButtonGroup>();
+			speedButtons.Add(new RightPanelButtonGroup((mgo) => "X Speed: " + mgo.MaxSpeedBase.X.ToString("#.0"),
 				new List<MenuItemButton>(){
 					new ImageMenuItemButton(() => { _selectedObject.MaxSpeedBase = new Vector2(_selectedObject.MaxSpeedBase.X + .2f, _selectedObject.MaxSpeedBase.Y); }, _arrow, rightButtonBounds, Color.Orange, Color.Red, false),
 					new ImageMenuItemButton(() => { _selectedObject.MaxSpeedBase = new Vector2(_selectedObject.MaxSpeedBase.X - .2f, _selectedObject.MaxSpeedBase.Y); }, _arrow, leftButtonBounds, Color.Orange, Color.Red, false, SpriteEffects.FlipHorizontally)
-				}));
-			speedButtons.Add(new Tuple<Func<MainGuiObject, string>, List<MenuItemButton>>((mgo) => "Y Speed: " + mgo.MaxSpeedBase.Y.ToString("#.0"),
+				}, () => { _selectedObject.MaxSpeedBase = new Vector2(_selectedObject.MaxSpeedBase.X + .6f, _selectedObject.MaxSpeedBase.Y); },
+				() => { _selectedObject.MaxSpeedBase = new Vector2(_selectedObject.MaxSpeedBase.X - .6f, _selectedObject.MaxSpeedBase.Y); }));
+			speedButtons.Add(new RightPanelButtonGroup((mgo) => "Y Speed: " + mgo.MaxSpeedBase.Y.ToString("#.0"),
 				new List<MenuItemButton>(){
 					new ImageMenuItemButton(() => { _selectedObject.MaxSpeedBase = new Vector2(_selectedObject.MaxSpeedBase.X, _selectedObject.MaxSpeedBase.Y + .2f); }, _arrow, rightButtonBounds, Color.Orange, Color.Red, false),
 					new ImageMenuItemButton(() => { _selectedObject.MaxSpeedBase = new Vector2(_selectedObject.MaxSpeedBase.X, _selectedObject.MaxSpeedBase.Y - .2f); }, _arrow, leftButtonBounds, Color.Orange, Color.Red, false, SpriteEffects.FlipHorizontally)
-				}));
+				}, () => { _selectedObject.MaxSpeedBase = new Vector2(_selectedObject.MaxSpeedBase.X, _selectedObject.MaxSpeedBase.Y + .6f); },
+				() => { _selectedObject.MaxSpeedBase = new Vector2(_selectedObject.MaxSpeedBase.X, _selectedObject.MaxSpeedBase.Y - .6f); }));
 			_buttons.Add(ButtonType.Speed, new ButtonConfiguration(this, ButtonType.Speed.ToString(), speedButtons));
 
+			ButtonConfiguration.GenericButtons.ForEach(type =>
+			{
+				var genericButton = new List<RightPanelButtonGroup>();
+				//
+				upAction = () => { _selectedObject.ModifySpecialText(type, true); };
+				downAction = () => { _selectedObject.ModifySpecialText(type, false); };
+				genericButton.Add(new RightPanelButtonGroup((mgo) => mgo.GetSpecialText(type),
+					new List<MenuItemButton>(){
+					new ImageMenuItemButton(upAction, _arrow, rightButtonBounds, Color.Orange, Color.Red, false),
+					new ImageMenuItemButton(downAction, _arrow, leftButtonBounds, Color.Orange, Color.Red, false, SpriteEffects.FlipHorizontally)
+				}, upAction, downAction));
+				_buttons.Add(type, new ButtonConfiguration(this, type.ToString(), genericButton));
+			});
 
-			var trashButtons = new List<Tuple<Func<MainGuiObject, string>, List<MenuItemButton>>>();
-			trashButtons.Add(new Tuple<Func<MainGuiObject, string>, List<MenuItemButton>>((mgo) => "Click to Trash " + mgo.Name,
+
+
+			//var direction1Buttons = new List<RightPanelButtonGroup>();
+			//direction1Buttons.Add(new RightPanelButtonGroup((mgo) => _selectedObject.GetDirectionalText(),
+			//	new List<MenuItemButton>(){
+			//		new ImageMenuItemButton(() => { _selectedObject.SwitchDirections(); }, _arrow, rightButtonBounds, Color.Orange, Color.Red, false),
+			//		new ImageMenuItemButton(() => { _selectedObject.SwitchDirections(); }, _arrow, leftButtonBounds, Color.Orange, Color.Red, false, SpriteEffects.FlipHorizontally)
+			//	}));
+			//_buttons.Add(ButtonType.Direction1, new ButtonConfiguration(this, ButtonType.Direction1.ToString(), direction1Buttons));
+
+			var trashButtons = new List<RightPanelButtonGroup>();
+			trashButtons.Add(new RightPanelButtonGroup((mgo) => "Click to Trash " + mgo.Name,
 				new List<MenuItemButton>(){
 					new ImageMenuItemButton(TrashCurrentItem, _trashCan, rightButtonBounds + new Vector4(0,0,10,0), false),
-				}));
+				}, () => { }, () => { }));
 			_buttons.Add(ButtonType.Remove, new ButtonConfiguration(this, ButtonType.Remove.ToString(), trashButtons));
 		}
-
 		private Dictionary<GuiObjectClass, ButtonType> _availableButtons = new Dictionary<GuiObjectClass, ButtonType>()
 		{
-			{GuiObjectClass.Platform       , ButtonType.Remove | ButtonType.Group | ButtonType.Position | ButtonType.Size},    
-			{GuiObjectClass.MovingPlatform , ButtonType.Remove | ButtonType.Direction1 | ButtonType.Group | ButtonType.Position | ButtonType.Size},
-			{GuiObjectClass.Player         , ButtonType.Remove | ButtonType.Team | ButtonType.Group | ButtonType.Position | ButtonType.Size},
-			{GuiObjectClass.AIPlayer       , ButtonType.Remove | ButtonType.Team | ButtonType.Group | ButtonType.Position | ButtonType.Speed},
-			{GuiObjectClass.HealthCreep    , ButtonType.Remove | ButtonType.Direction1 | ButtonType.Group | ButtonType.Position | ButtonType.Speed},
-			{GuiObjectClass.MovingCharacter, ButtonType.Remove | ButtonType.Team | ButtonType.Direction1 | ButtonType.Group | ButtonType.Position | ButtonType.Speed},
-			{GuiObjectClass.WallRunner		 , ButtonType.Remove | ButtonType.Team | ButtonType.Direction1 | ButtonType.Group | ButtonType.Position | ButtonType.Speed},
-			{GuiObjectClass.StandardTurret , ButtonType.Remove | ButtonType.Direction1 | ButtonType.Team | ButtonType.Position | ButtonType.Size },
-			{GuiObjectClass.StandardBase   , ButtonType.Remove | ButtonType.Team | ButtonType.Position | ButtonType.Size },
-			{GuiObjectClass.Level			 , ButtonType.LevelSize | ButtonType.LevelWinCondition | ButtonType.LevelScenarioType },
-			{GuiObjectClass.FinishLineFlagPole, ButtonType.Remove | ButtonType.Position | ButtonType.Size },
+			{GuiObjectClass.Level					, ButtonType.LevelSize | ButtonType.LevelWinCondition | ButtonType.LevelScenarioType },
+			{GuiObjectClass.Platform				, ButtonType.Remove | ButtonType.Position | ButtonType.Group | ButtonType.Size | ButtonType.SpecialToggle1 | ButtonType.SpecialToggle2 },
+			{GuiObjectClass.MovingPlatform		, ButtonType.Remove | ButtonType.Position | ButtonType.SpecialToggle1 | ButtonType.SpecialToggle2 | ButtonType.Group  | ButtonType.Size},
+			{GuiObjectClass.Player					, ButtonType.Remove | ButtonType.Position | ButtonType.Team | ButtonType.Group },
+			{GuiObjectClass.AIPlayer				, ButtonType.Remove | ButtonType.Position | ButtonType.Team | ButtonType.Group | ButtonType.Speed },
+			{GuiObjectClass.HealthCreep			, ButtonType.Remove | ButtonType.Position | ButtonType.Direction | ButtonType.Group | ButtonType.Speed },
+			{GuiObjectClass.MovingCharacter		, ButtonType.Remove | ButtonType.Position | ButtonType.Team | ButtonType.Direction | ButtonType.Group | ButtonType.Speed },
+			{GuiObjectClass.NeutralCreep			, ButtonType.Remove | ButtonType.Position | ButtonType.SpecialToggle1 },
+			{GuiObjectClass.FlyingCreature		, ButtonType.Remove | ButtonType.Position | ButtonType.SpecialToggle1 },
+			{GuiObjectClass.LargeCreep				, ButtonType.Remove | ButtonType.Position | ButtonType.Direction },
+			{GuiObjectClass.CreepBoss				, ButtonType.Remove | ButtonType.Position | ButtonType.SpecialToggle1 | ButtonType.SpecialToggle2 | ButtonType.SpecialToggle3 },
+			{GuiObjectClass.WallRunner				, ButtonType.Remove | ButtonType.Position | ButtonType.Team | ButtonType.Direction | ButtonType.Group | ButtonType.Speed },
+			{GuiObjectClass.StandardTurret		, ButtonType.Remove | ButtonType.Position | ButtonType.Direction | ButtonType.Team | ButtonType.Size },
+			{GuiObjectClass.StandardBase			, ButtonType.Remove | ButtonType.Position | ButtonType.Team | ButtonType.Size },
+			{GuiObjectClass.FinishLineFlagPole	, ButtonType.Remove | ButtonType.Position | ButtonType.Size },
+			{GuiObjectClass.Block					, ButtonType.Remove | ButtonType.Position | ButtonType.Group | ButtonType.Size },
+			{GuiObjectClass.ObjectSpawner			, ButtonType.Remove | ButtonType.Position | ButtonType.Team | ButtonType.Group | ButtonType.Direction | ButtonType.Size | ButtonType.SpecialToggle1 | ButtonType.SpecialToggle2 | ButtonType.SpecialToggle3 | ButtonType.SpecialToggle4 }, // Definitely must do object spawner...!
+			{GuiObjectClass.Ladder					, ButtonType.Remove | ButtonType.Position | ButtonType.Size },
+			{GuiObjectClass.JumpPad					, ButtonType.Remove | ButtonType.Position | ButtonType.Size | ButtonType.SpecialToggle1 | ButtonType.SpecialToggle2 },
+			{GuiObjectClass.HealthPack				, ButtonType.Remove | ButtonType.Position | ButtonType.Size },
+			{GuiObjectClass.SuperSpeed				, ButtonType.Remove | ButtonType.Position | ButtonType.Size | ButtonType.SpecialToggle1 | ButtonType.SpecialToggle2 },
+			{GuiObjectClass.SuperJump				, ButtonType.Remove | ButtonType.Position | ButtonType.Size | ButtonType.SpecialToggle1 | ButtonType.SpecialToggle2 },
+			{GuiObjectClass.Teleporter				, ButtonType.Remove | ButtonType.Position | ButtonType.Size | ButtonType.SpecialToggle1| ButtonType.SpecialToggle2},
+			{GuiObjectClass.Spike					, ButtonType.Remove | ButtonType.Position | ButtonType.Group | ButtonType.Size | ButtonType.SpecialToggle1 | ButtonType.SpecialToggle2 },
+			{GuiObjectClass.LockedBarrier			, ButtonType.Remove | ButtonType.Position | ButtonType.Size | ButtonType.SpecialToggle1 },
+			{GuiObjectClass.SmallKeyObject		, ButtonType.Remove | ButtonType.Position | ButtonType.Size | ButtonType.SpecialToggle1 },
+			{GuiObjectClass.AbilityObject			, ButtonType.Remove | ButtonType.Position | ButtonType.Size },
+			{GuiObjectClass.JungleCreepZone		, ButtonType.Remove | ButtonType.Position | ButtonType.Size | ButtonType.SpecialToggle1 },
+			{GuiObjectClass.BehaviorZone			, ButtonType.Remove | ButtonType.Position | ButtonType.Size | ButtonType.Team | ButtonType.SpecialToggle1 | ButtonType.SpecialToggle2 },
 		};
+		public ButtonType GetCurrentSettings(GuiObjectClass selectedObjectClass)
+		{
+			return _availableButtons[selectedObjectClass];
+		}
 
 		public void MoveLeft()
 		{
@@ -317,6 +361,26 @@ namespace SimonsGame.MapEditor
 			}
 		}
 	}
+	[Flags]
+	public enum ButtonType
+	{
+		Group = 1,
+		Position = 2,
+		Size = 4,
+		Direction = 8,
+		//Direction2 = 16, // Need to switch this out!
+		Speed = 32,
+		Remove = 64,
+		Team = 128,
+		LevelSize = 256,
+		LevelWinCondition = 512,
+		LevelScenarioType = 1024,
+		SpecialToggle1 = 2048,
+		SpecialToggle2 = 4096,
+		SpecialToggle3 = 8192,
+		SpecialToggle4 = 16384,
+		// Health, damage, stuff like that.
+	}
 	public class ButtonConfiguration
 	{
 		public int YOffset { get { return _yOffsetbegin; } }
@@ -327,12 +391,19 @@ namespace SimonsGame.MapEditor
 		private MapEditorRightPanel _manager;
 		private string _title;
 		private Vector4 _titleRelativeBounds;
-		private List<Tuple<Func<MainGuiObject, string>, List<MenuItemButton>>> _buttons;
-		public ButtonConfiguration(MapEditorRightPanel manager, string title, List<Tuple<Func<MainGuiObject, string>, List<MenuItemButton>>> buttons)
+		private List<RightPanelButtonGroup> _buttonGroups;
+		public ButtonConfiguration(MapEditorRightPanel manager, string title, List<RightPanelButtonGroup> buttons)
 		{
-			_title = title;
 			_manager = manager;
-			_buttons = buttons;
+			ChangeTitle(title);
+			_buttonGroups = buttons;
+		}
+
+		public void ChangeTitle(string title)
+		{
+			if (title == "")
+				return;
+			_title = title;
 			_titleRelativeBounds = _title.GetTextBoundsByCenter(MainGame.PlainFont, _manager.Size / 2);
 			_titleRelativeBounds.Y = 0;
 		}
@@ -342,12 +413,11 @@ namespace SimonsGame.MapEditor
 			yOffset += 10;
 			spriteBatch.DrawString(MainGame.PlainFont, _title, _titleRelativeBounds.GetPosition() + new Vector2(_manager.Bounds.X, yOffset), Color.Black);
 			yOffset += (int)_titleRelativeBounds.Z + 10;
-			foreach (Tuple<Func<MainGuiObject, string>, List<MenuItemButton>> buttonTuple in _buttons)
+			foreach (RightPanelButtonGroup group in _buttonGroups)
 			{
-				string currentText = buttonTuple.Item1(_manager.SelectedObject);
-				List<MenuItemButton> buttons = buttonTuple.Item2;
+				string currentText = group.GetObjectValue(_manager.SelectedObject);
 				spriteBatch.DrawString(MainGame.PlainFont, currentText, new Vector2(_manager.Bounds.X + 10, 5 + yOffset), Color.Black);
-				foreach (MenuItemButton button in buttons)
+				foreach (MenuItemButton button in group)
 				{
 					button.Bounds = new Vector4(button.TotalBounds.X, yOffset, button.TotalBounds.Z, button.TotalBounds.W);
 					button.Draw(gameTime, spriteBatch);
@@ -359,9 +429,8 @@ namespace SimonsGame.MapEditor
 		}
 		public void CheckMouse(Vector2 mousePosition)
 		{
-			foreach (Tuple<Func<MainGuiObject, string>, List<MenuItemButton>> buttonTuple in _buttons)
+			foreach (RightPanelButtonGroup buttons in _buttonGroups)
 			{
-				List<MenuItemButton> buttons = buttonTuple.Item2;
 				foreach (MenuItemButton button in buttons)
 				{
 					if (mousePosition.IsInBounds(button.TotalBounds))
@@ -373,21 +442,59 @@ namespace SimonsGame.MapEditor
 		}
 		public void Click()
 		{
-			foreach (Tuple<Func<MainGuiObject, string>, List<MenuItemButton>> buttonTuple in _buttons)
+			foreach (RightPanelButtonGroup group in _buttonGroups)
 			{
-				List<MenuItemButton> buttons = buttonTuple.Item2;
-				foreach (MenuItemButton button in buttons.Where(b => b.IsHighLighted))
+				foreach (MenuItemButton button in group.Where(b => b.IsHighLighted))
 					button.CallAction();
+			}
+		}
+		public void Scroll(Vector2 mousePosition, bool up)
+		{
+			foreach (RightPanelButtonGroup buttons in _buttonGroups)
+			{
+				foreach (MenuItemButton button in buttons)
+				{
+					if (mousePosition.IsInBounds(button.TotalBounds))
+					{
+						if (up)
+							buttons.ScrollUp();
+						else // down
+							buttons.ScrollDown();
+						return;
+					}
+				}
 			}
 		}
 		//public void DeselectAll()
 		//{
-		//	foreach (Tuple<Func<MainGuiObject, string>, List<MenuItemButton>> buttonTuple in _buttons)
+		//	foreach (RightPanelButtonGroup buttonTuple in _buttons)
 		//	{
 		//		List<MenuItemButton> buttons = buttonTuple.Item2;
 		//		foreach (MenuItemButton button in buttons)
 		//			button.HasBeenDeHighlighted();
 		//	}
 		//}
+		public static List<ButtonType> GenericButtons = new List<ButtonType>()
+		{
+			ButtonType.Direction,
+			ButtonType.SpecialToggle1,
+			ButtonType.SpecialToggle2,
+			ButtonType.SpecialToggle3,
+			ButtonType.SpecialToggle4,
+		};
+	}
+
+	public class RightPanelButtonGroup : List<MenuItemButton>
+	{
+		public Action ScrollUp;
+		public Action ScrollDown;
+		public RightPanelButtonGroup(Func<MainGuiObject, string> func, List<MenuItemButton> ls, Action up, Action down)
+			: base(ls)
+		{
+			GetObjectValue = func;
+			ScrollUp = up;
+			ScrollDown = down;
+		}
+		public Func<MainGuiObject, string> GetObjectValue { get; set; }
 	}
 }

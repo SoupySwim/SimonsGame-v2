@@ -47,10 +47,10 @@ namespace SimonsGame.Menu.MenuScreens
 				_menuLayout[curXndx][curYndx] = new MapEditorLevelItem(_manager, metaData, new Vector4(curX, curY, ItemHeight, _itemWidth - 20), Color.Black, Color.White, Vector2.Zero);
 
 				curY += ItemHeight + 10;
-				curYndx++;
-				if (curYndx >= _itemsPerRow) // if (curY + ItemHeight + 9 >= _screenSize.Y)
+				if (curYndx >= _itemsPerRow - 1) // if (curY + ItemHeight + 9 >= _screenSize.Y)
 				{
 					curXndx++;
+					_menuLayout[curXndx] = new MenuItemButton[Math.Min(_itemsPerRow, levelsCount - (curXndx * _itemsPerRow))];
 					curYndx = 0;
 					curX += _itemWidth;
 					curY = _topPanel.Bounds.Z + 10;
@@ -59,6 +59,8 @@ namespace SimonsGame.Menu.MenuScreens
 					else
 						_menuLayout[curXndx] = new MenuItemButton[Math.Min(_itemsPerRow, levelsCount - (curXndx * _itemsPerRow))];
 				}
+				else
+					curYndx++;
 			}
 		}
 		public override void HandleMouseEvent(GameTime gameTime, Vector2 newMousePosition)

@@ -31,8 +31,15 @@ namespace SimonsGame.Extensions
 		}
 		public static Vector2 GetPaddingGivenBounds(this string text, SpriteFont font, Vector2 totalSize)
 		{
-			Vector2 est = totalSize - text.GetTextSize(font);
-			return est;
+			Vector2 padding = totalSize - text.GetTextSize(font);
+			return padding;
+		}
+		public static Tuple<Vector4, Vector2> GetSizeAndPadding(this string text, SpriteFont font, Vector4 totalBounds)
+		{
+			Vector2 paddingBounds = totalBounds.GetSize() - text.GetTextSize(font);
+			Vector2 buttonSize = totalBounds.GetSize() - paddingBounds;
+			Vector4 buttonBounds = new Vector4(totalBounds.GetPosition() + (paddingBounds / 2), buttonSize.Y, buttonSize.X);
+			return new Tuple<Vector4, Vector2>(buttonBounds, paddingBounds);
 		}
 		public static Vector2 GetPosition(this Vector4 bounds)
 		{
@@ -41,21 +48,6 @@ namespace SimonsGame.Extensions
 		public static Vector2 GetSize(this Vector4 bounds)
 		{
 			return new Vector2(bounds.W, bounds.Z);
-		}
-		public static GuiObjectClass GetClass(this MainGuiObject mgo)
-		{
-			if (mgo != null)
-			{
-				try
-				{
-					GuiObjectClass objectClass = (GuiObjectClass)Enum.Parse(typeof(GuiObjectClass), mgo.GetType().Name);
-					if (objectClass == GuiObjectClass.Player && ((Player)mgo).IsAi)
-						return GuiObjectClass.AIPlayer;
-					return objectClass;
-				}
-				catch (Exception) { }
-			}
-			return GuiObjectClass.Platform;
 		}
 		public static Color ToColor(this Vector4 v4)
 		{
@@ -82,6 +74,27 @@ namespace SimonsGame.Extensions
 		{
 			return mousePosition.X > panelBounds.X && mousePosition.X < panelBounds.X + panelBounds.W &&
 				mousePosition.Y > panelBounds.Y && mousePosition.Y < panelBounds.Y + panelBounds.Z;
+		}
+		public static void DrawLine(this SpriteBatch sb, Vector2 start, Vector2 end, Color color, int width = 1)
+		{
+			start.X = width;
+			Vector2 edge = end - start;
+			// calculate angle to rotate line
+			float angle =
+				 (float)Math.Atan2(edge.Y, edge.X);
+			sb.Draw(MainGame.SingleColor,
+				 new Rectangle(// rectangle defines shape of line and position of start of line
+					  (int)start.X / 2,
+					  (int)start.Y,
+					  (int)edge.Length(), //sb will strech the texture to fill this rectangle
+					  width), //width of line, change this to make thicker line
+				 null,
+				 color,
+				 angle,     //angle of line (calulated above)
+				 new Vector2(0, 0), // point in line about which to rotate
+				 SpriteEffects.None,
+				 0);
+
 		}
 	}
 }

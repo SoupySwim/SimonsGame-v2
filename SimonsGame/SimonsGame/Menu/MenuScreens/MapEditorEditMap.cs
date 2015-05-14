@@ -9,6 +9,7 @@ using Microsoft.Xna.Framework.Graphics;
 using SimonsGame.MapEditor;
 using SimonsGame.Utility;
 using Microsoft.Xna.Framework.Input;
+using SimonsGame.GlobalGameSettings;
 
 namespace SimonsGame.Menu.MenuScreens
 {
@@ -19,10 +20,16 @@ namespace SimonsGame.Menu.MenuScreens
 	}
 	public class MapEditorEditMap : MainMenuScreen
 	{
+		private enum MapEditStepType
+		{
+			Creating,
+			Resize,
+			MirrorMap,
+		}
 		private class MapEditStep
 		{
 			public Vector4 OldBounds { get; set; }
-			public bool isCreating { get; set; }
+			public MapEditStepType MapEditStepType { get; set; }
 			public Guid ItemId { get; set; }
 			public GuiObjectType Type { get; set; }
 			public Group Group { get; set; }
@@ -45,23 +52,26 @@ namespace SimonsGame.Menu.MenuScreens
 		public LevelFileMetaData LevelMetaData { get { return _levelMetaData; } }
 		#endregion
 		#region Panel Information
-		private Vector4 _namePanelBounds;
 		private Vector4 _leftPanelBounds;
 		public MapEditorLeftPanel LeftPanel { get { return _leftPanel; } }
 		private MapEditorLeftPanel _leftPanel;
+
 		private Vector4 _rightPanelBounds;
 		public MapEditorRightPanel RightPanel { get { return _rightPanel; } }
 		private MapEditorRightPanel _rightPanel;
 
+		private Vector4 _topPanelBounds;
+		public MapEditorTopPanel TopPanel { get { return _topPanel; } }
+		private MapEditorTopPanel _topPanel;
+
 		private Vector4 _levelBounds;
-		private string _mapName;
-		private Vector2 _namePosition;
 		private int _borderRadius = 2;
 		#endregion
 
 		private MapEditorShortcutHandler _shortcutHandler = new MapEditorShortcutHandler();
 
 		private MainGuiObject selectedItemToAdd; // Only used in AddNew state.
+		public MainGuiObject SelectedItemToAdd { get { return selectedItemToAdd; } } // Only used in AddNew state.
 		private Stack<MapEditStep> _undoStack = new Stack<MapEditStep>();
 
 		private Vector2 _moveCameraAnchor;
@@ -80,10 +90,7 @@ namespace SimonsGame.Menu.MenuScreens
 			_leftPanelBounds = new Vector4(0, 0, screenSize.Y, screenSize.X / 5.0f);
 			_rightPanelBounds = new Vector4(screenSize.X - (screenSize.X / 5.0f), 0, screenSize.Y, screenSize.X / 5.0f);
 			int namePanelHeight = 30;
-			_namePanelBounds = new Vector4(screenSize.X / 5.0f, 0, namePanelHeight, (3.0f / 5.0f) * screenSize.X);
 			_levelBounds = new Vector4(screenSize.X / 5.0f, namePanelHeight, screenSize.Y - namePanelHeight, (3.0f / 5.0f) * screenSize.X);
-			_mapName = "Sprint 5 Map";
-			_namePosition = _namePanelBounds.GetPosition() + _namePanelBounds.GetSize() / 2 - _mapName.GetTextSize(MainGame.PlainFont) / 2;
 
 			_levelViewport = new Viewport((int)(_levelBounds.X + _borderRadius), (int)(_levelBounds.Y + _borderRadius),
 				(int)(_levelBounds.W - (_borderRadius * 2)), (int)(_levelBounds.Z - (_borderRadius * 2)));
@@ -92,6 +99,9 @@ namespace SimonsGame.Menu.MenuScreens
 
 			_state = MapEditorState.AddNew; // MapEditorState.Select;
 			_leftPanel = new MapEditorLeftPanel(this, _leftPanelBounds, this);
+
+			_topPanelBounds = new Vector4(screenSize.X / 5.0f, 0, namePanelHeight, (3.0f / 5.0f) * screenSize.X);
+			_topPanel = new MapEditorTopPanel(this, _topPanelBounds, "Sprint 5 Map");
 		}
 		public void AddLevel(Level level, LevelFileMetaData levelMetaData)
 		{
@@ -122,8 +132,10 @@ namespace SimonsGame.Menu.MenuScreens
 			spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.LinearWrap, DepthStencilState.None, RasterizerState.CullNone, null, cameraTransform);
 			_level.DrawInViewport(gameTime, spriteBatch, new Vector4((_levelBounds.X + _borderRadius), (_levelBounds.Y + _borderRadius),
 				(_levelBounds.Z - (_borderRadius * 2)) / _scaleAmount, (_levelBounds.W - (_borderRadius * 2)) / _scaleAmount), _cameraPosition, null);
-			_level.DrawGridInViewport(spriteBatch, new Vector4((_levelBounds.X + _borderRadius), (_levelBounds.Y + _borderRadius),
-				(_levelBounds.Z - (_borderRadius * 2)) / _scaleAmount, (_levelBounds.W - (_borderRadius * 2)) / _scaleAmount), _cameraPosition, _scaleAmount);
+
+			if (AllGameSettings.MenuEditor_ShowGrid)
+				_level.DrawGridInViewport(spriteBatch, new Vector4((_levelBounds.X + _borderRadius), (_levelBounds.Y + _borderRadius),
+					(_levelBounds.Z - (_borderRadius * 2)) / _scaleAmount, (_levelBounds.W - (_borderRadius * 2)) / _scaleAmount), _cameraPosition, _scaleAmount);
 			spriteBatch.End();
 
 			spriteBatch.GraphicsDevice.Viewport = originalViewport;
@@ -138,11 +150,11 @@ namespace SimonsGame.Menu.MenuScreens
 			_leftPanel.Draw(gameTime, spriteBatch);
 
 			// Name Panel
-			spriteBatch.Draw(MainGame.SingleColor, _namePanelBounds.ToRectangle(), Color.Black);
-			well = new Rectangle((int)(_namePanelBounds.X + _borderRadius), (int)(_namePanelBounds.Y + _borderRadius),
-			  (int)(_namePanelBounds.W - (_borderRadius * 2)), (int)(_namePanelBounds.Z - (_borderRadius * 2)));
+			spriteBatch.Draw(MainGame.SingleColor, _topPanelBounds.ToRectangle(), Color.Black);
+			well = new Rectangle((int)(_topPanelBounds.X + _borderRadius), (int)(_topPanelBounds.Y + _borderRadius),
+			  (int)(_topPanelBounds.W - (_borderRadius * 2)), (int)(_topPanelBounds.Z - (_borderRadius * 2)));
 			spriteBatch.Draw(MainGame.SingleColor, well, Color.CornflowerBlue);
-			spriteBatch.DrawString(MainGame.PlainFont, _mapName, _namePosition, Color.Black);
+			_topPanel.Draw(gameTime, spriteBatch);
 
 			// Right Panel
 			spriteBatch.Draw(MainGame.SingleColor, _rightPanelBounds.ToRectangle(), Color.Black);
@@ -172,22 +184,23 @@ namespace SimonsGame.Menu.MenuScreens
 			else if (newMousePosition.IsInBounds(_levelBounds))
 				CheckLevelPanelActions(newMousePosition);
 			// else we are in the text panel
-			else if (newMousePosition.IsInBounds(_namePanelBounds))
+			else if (newMousePosition.IsInBounds(_topPanelBounds))
 				CheckTextPanelActions(newMousePosition);
 		}
 
 		private void CheckLeftPanelActions(Vector2 mousePosition)
 		{
 			_leftPanel.Update(mousePosition);
-			if (MenuStateManager.CurrentMouse.ScrollWheelValue > MenuStateManager.PreviousMouse.ScrollWheelValue)
+			if (Controls.CurrentMouse.ScrollWheelValue > Controls.PreviousMouse.ScrollWheelValue)
 				_leftPanel.ScrollUp();
-			else if (MenuStateManager.CurrentMouse.ScrollWheelValue < MenuStateManager.PreviousMouse.ScrollWheelValue)
+			else if (Controls.CurrentMouse.ScrollWheelValue < Controls.PreviousMouse.ScrollWheelValue)
 				_leftPanel.ScrollDown();
 
 
-			if (MenuStateManager.IsClickingLeftMouse())
+			if (Controls.IsClickingLeftMouse())
 			{
 				selectedItemToAdd = _leftPanel.Click(mousePosition, _level);
+				_rightPanel.SelectNewItem(selectedItemToAdd);
 				if (selectedItemToAdd == null)
 					_state = MapEditorState.Select;
 				else
@@ -197,24 +210,32 @@ namespace SimonsGame.Menu.MenuScreens
 		private void CheckRightPanelActions(Vector2 mousePosition)
 		{
 			_rightPanel.Update(mousePosition);
-			if (MenuStateManager.IsClickingLeftMouse())
+			if (Controls.IsClickingLeftMouse())
 				_rightPanel.Click(mousePosition, _level);
 		}
 		private void CheckLevelPanelActions(Vector2 mousePosition)
 		{
-			//Fix Scaling issue later... least important now...
-			if (MenuStateManager.CurrentMouse.ScrollWheelValue > MenuStateManager.PreviousMouse.ScrollWheelValue)
-				ScaleCamera(() => Math.Min(3.0f, _scaleAmount + (_scaleAmount <= 1 ? .1f : .2f)));
-			else if (MenuStateManager.CurrentMouse.ScrollWheelValue < MenuStateManager.PreviousMouse.ScrollWheelValue)
-				ScaleCamera(() => Math.Max(.1f, _scaleAmount - (_scaleAmount <= 1 ? .1f : .2f)));
+			int prevScroll = Controls.PreviousMouse.ScrollWheelValue;
+			int curScroll = Controls.CurrentMouse.ScrollWheelValue;
+			if (curScroll != prevScroll)
+			{
+				float scrollAmount = _scaleAmount <= 1 ? .1f : .2f;
+				if (_scaleAmount < .1f)
+					scrollAmount = .025f;
+				//Fix Scaling issue later... least important now...
+				if (curScroll > prevScroll)
+					ScaleCamera(() => Math.Min(3.0f, _scaleAmount + scrollAmount));
+				else if (curScroll < prevScroll)
+					ScaleCamera(() => Math.Max(.025f, _scaleAmount - (_scaleAmount == .1f ? .025f : scrollAmount)));
+			}
 
-			if (MenuStateManager.IsClickingMiddleMouse())
+			if (Controls.IsClickingMiddleMouse())
 			{
 				_moveCameraAnchor = mousePosition / _scaleAmount;// -_levelBounds.GetPosition() + _cameraPosition;
 				_moveCameraAnchor = new Vector2(_moveCameraAnchor.X - (_moveCameraAnchor.X % (_level.PlatformDifference / 4)),
 													_moveCameraAnchor.Y - (_moveCameraAnchor.Y % (_level.PlatformDifference / 4)));
 			}
-			else if (MenuStateManager.IsHoldingMiddleMouse())
+			else if (Controls.IsHoldingMiddleMouse())
 			{
 				//Vector2 tempPosition = mousePosition;// -_levelBounds.GetPosition() + _cameraPosition;
 				Vector2 tempPosition = mousePosition / _scaleAmount;
@@ -223,14 +244,14 @@ namespace SimonsGame.Menu.MenuScreens
 				_cameraPosition = (_cameraPosition + _moveCameraAnchor - tempPosition);
 				_moveCameraAnchor = tempPosition;
 			}
-			if (MenuStateManager.IsClickingRightMouse())
+			if (Controls.IsClickingRightMouse())
 				UndoAction();
 			else
 			{
 				switch (_state)
 				{
 					case MapEditorState.AddNew:
-						if (MenuStateManager.IsClickingLeftMouse())
+						if (Controls.IsClickingLeftMouse())
 						{
 							Vector2 tempPosition = ((mousePosition - _levelBounds.GetPosition()) / _scaleAmount + _cameraPosition);
 							tempPosition = NormalizePosition(tempPosition);
@@ -242,11 +263,11 @@ namespace SimonsGame.Menu.MenuScreens
 							_level.AddGuiObject(selectedItemToAdd);
 							//selectedItemToAdd = new Platform(Vector2.Zero, new Vector2(200, 20), Group.ImpassableIncludingMagic, _level);
 						}
-						else if (MenuStateManager.IsHoldingLeftMouse())
+						else if (Controls.IsHoldingLeftMouse())
 						{
-							IsAlteringObject(selectedItemToAdd, mousePosition, selectedItemToAdd.ObjectType == GuiObjectType.Environment || selectedItemToAdd.ObjectType == GuiObjectType.Structure);
+							IsAlteringObject(selectedItemToAdd, mousePosition, GetCurrentObjectOptions().HasFlag(ButtonType.Size));
 						}
-						else if (MenuStateManager.IsReleasingLeftMouse() && FinishAlteringObject(selectedItemToAdd))
+						else if (Controls.IsReleasingLeftMouse() && FinishAlteringObject(selectedItemToAdd))
 						{
 							_undoStack.Push(new MapEditStep()
 							{
@@ -254,13 +275,13 @@ namespace SimonsGame.Menu.MenuScreens
 								Group = selectedItemToAdd.Group,
 								Type = selectedItemToAdd.ObjectType,
 								State = _state,
-								isCreating = true
+								MapEditStepType = MapEditStepType.Creating
 							});
 							selectedItemToAdd = _leftPanel.GetNewItem(_level);
 						}
 						break;
 					case MapEditorState.Select:
-						if (MenuStateManager.IsClickingLeftMouse())
+						if (Controls.IsClickingLeftMouse())
 						{
 							Vector2 tempPosition = ((mousePosition - _levelBounds.GetPosition()) / _scaleAmount + _cameraPosition);
 							_rightPanel.SelectNewItem(_level.GetGuiObjectAtPosition(tempPosition));
@@ -275,22 +296,28 @@ namespace SimonsGame.Menu.MenuScreens
 									Group = mgo.Group,
 									Type = mgo.ObjectType,
 									State = _state,
-									isCreating = false,
+									MapEditStepType = MapEditStepType.Resize,
 									OldBounds = mgo.Bounds
 								});
 								_isResizing = tempPosition.IsInBounds(isSizingBounds);
 								_mouseOffset = _isResizing ? (mgo.Size + mgo.Position) - tempPosition : mgo.Center - tempPosition;
 							}
 						}
-						else if (MenuStateManager.IsHoldingLeftMouse())
+						else if (Controls.IsHoldingLeftMouse())
 						{
 							IsAlteringObject(_rightPanel.SelectedObject, mousePosition, _isResizing, _mouseOffset);
 						}
-						else if (MenuStateManager.IsReleasingLeftMouse() && FinishAlteringObject(_rightPanel.SelectedObject)) { } // if it's releasing, then we finish altering the object.
+						else if (Controls.IsReleasingLeftMouse() && FinishAlteringObject(_rightPanel.SelectedObject)) { } // if it's releasing, then we finish altering the object.
 						break;
 				}
 			}
 		}
+
+		public ButtonType GetCurrentObjectOptions()
+		{
+			return _rightPanel.GetCurrentSettings(_leftPanel.SelectedObjectClass);
+		}
+
 		private void ScaleCamera(Func<float> scaleFunction)
 		{
 			Vector2 middleOfLevelBounds = NormalizePosition((_levelBounds.GetSize() / 2.0f) / _scaleAmount);
@@ -304,6 +331,11 @@ namespace SimonsGame.Menu.MenuScreens
 		}
 		private void CheckTextPanelActions(Vector2 mousePosition)
 		{
+			_topPanel.Update(mousePosition);
+			if (Controls.IsClickingLeftMouse())
+				_topPanel.Click(mousePosition, _level);
+			if (Controls.IsClickingRightMouse())
+				_topPanel.ClickRight(mousePosition, _level);
 		}
 
 		private void UndoAction()
@@ -312,17 +344,19 @@ namespace SimonsGame.Menu.MenuScreens
 			{
 				MapEditStep lastStep = _undoStack.Pop();
 				MainGuiObject lastItemUsed = _level.GetObject(lastStep.Type, lastStep.ItemId);
-				if (lastStep.isCreating && lastItemUsed != null)
+				if (lastStep.MapEditStepType == MapEditStepType.Creating && lastItemUsed != null)
 				{
 					if (lastItemUsed.GetType().IsAssignableFrom(typeof(Player)))
 						MainGame.PlayerManager.RemovePlayer(lastItemUsed.Id);
 					_level.RemoveGuiObject(lastItemUsed);
 				}
-				else if (lastItemUsed != null)
+				else if (lastStep.MapEditStepType == MapEditStepType.Resize && lastItemUsed != null)
 				{
 					lastItemUsed.Size = lastStep.OldBounds.GetSize();
 					lastItemUsed.Position = lastStep.OldBounds.GetPosition();
 				}
+				else if (lastStep.MapEditStepType == MapEditStepType.MirrorMap)
+					_topPanel.UnMirrorMap(_level);
 			}
 			_rightPanel.DeselectItem();
 		}
@@ -387,6 +421,14 @@ namespace SimonsGame.Menu.MenuScreens
 		{
 			return new Vector2(levelPosition.X - (levelPosition.X % SnapTo),
 												levelPosition.Y - (levelPosition.Y % SnapTo));
+		}
+
+		public void HasMirroredMap()
+		{
+			_undoStack.Push(new MapEditStep()
+			{
+				MapEditStepType = MapEditStepType.MirrorMap
+			});
 		}
 	}
 }

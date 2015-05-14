@@ -17,16 +17,17 @@ namespace SimonsGame.GuiObjects.ElementalMagic
 	{
 		private Texture2D _leaf;
 		private float radians = 0;
+		public ModifierBase DamageDoneOnCollide { get { return _damageDoneOnCollide; } }
 		private ModifierBase _damageDoneOnCollide;
 
 
-		public ShortRangeProjectileMagic(Vector2 position, Vector2 hitbox, Group group, Level level, Vector2 speed, Player player)
-			: base(position, hitbox, group, level, player, "ShortRangeProjectileMagic")
+		public ShortRangeProjectileMagic(Vector2 position, Vector2 hitbox, Group group, Level level, Vector2 speed, Player player, Element element, float damage)
+			: base(position, hitbox, group, level, player, "ShortRangeProjectileMagic", null)
 		{
 			MaxSpeedBase = speed;
 			_leaf = MainGame.ContentManager.Load<Texture2D>("Test/leaf");
-			_damageDoneOnCollide = new TickModifier(1, ModifyType.Add, _player);
-			_damageDoneOnCollide.SetHealthTotal(-2);
+			_damageDoneOnCollide = new TickModifier(1, ModifyType.Add, _character, element);
+			_damageDoneOnCollide.SetHealthTotal(damage);
 			Parent = player;
 		}
 
@@ -43,12 +44,13 @@ namespace SimonsGame.GuiObjects.ElementalMagic
 		{
 			base.PostUpdate(gameTime);
 			MainGuiObject hitMgo = null;
-			if (PrimaryOverlapObjects.Any())
-				hitMgo = PrimaryOverlapObjects.Values.FirstOrDefault();
+			var hitObjects = PrimaryOverlapObjects.SelectMany(mgos => mgos.Value);
+			if (hitObjects.Any())
+				hitMgo = hitObjects.FirstOrDefault();
 			else
 			{
-				Dictionary<Group, List<MainGuiObject>> guiObjects = Level.GetAllGuiObjects().Where(kv => kv.Key != Group.Passable).ToDictionary(kv => kv.Key, kv => kv.Value);
-				IEnumerable<Tuple<DoubleVector2, MainGuiObject>> hitPlatforms = GetHitObjects(guiObjects, this.HitBoxBounds, (mgo) => mgo.Id == _player.Id || mgo.Team == Team);
+				IEnumerable<MainGuiObject> guiObjects = Level.GetPossiblyHitEnvironmentObjects(this);
+				IEnumerable<Tuple<Vector2, MainGuiObject>> hitPlatforms = GetHitObjects(guiObjects, this.HitBoxBounds).Where(tup => tup.Item2.Id != _character.Id && tup.Item2.Team != Team);
 				hitPlatforms = hitPlatforms.Where(hp => hp.Item2.Team != Team);
 				hitMgo = hitPlatforms.Any() ? hitPlatforms.First().Item2 : null;
 			}
@@ -64,7 +66,6 @@ namespace SimonsGame.GuiObjects.ElementalMagic
 		public override void PostDraw(GameTime gameTime, Microsoft.Xna.Framework.Graphics.SpriteBatch spriteBatch)
 		{
 			//spriteBatch.Begin();
-			Rectangle destinationRect = new Rectangle((int)Position.X, (int)Position.Y, (int)Size.X, (int)Size.Y);
 
 			float scale = Size.Y / _leaf.Height;
 			spriteBatch.Draw(_leaf, Position + (Size / 2), null, Color.White, radians, new Vector2(_leaf.Width / 2, _leaf.Height / 2), scale, SpriteEffects.None, 0);
@@ -78,21 +79,13 @@ namespace SimonsGame.GuiObjects.ElementalMagic
 			return false;
 		}
 		public override void HitByObject(MainGuiObject mgo, ModifierBase mb) { }
-		protected override Dictionary<Group, List<MainGuiObject>> GetAllVerticalPassableGroups(Dictionary<Group, List<MainGuiObject>> guiObjects)
+		protected override IEnumerable<MainGuiObject> GetAllVerticalPassableGroups(IEnumerable<MainGuiObject> guiObjects)
 		{
-			var allObjects = guiObjects;//.Where(g => g.Key == Group.ImpassableIncludingMagic || g.Key == Group.Impassable).ToDictionary(o => o.Key, o => o.Value);
-			foreach (KeyValuePair<Group, List<MainGuiObject>> kv in allObjects.ToList())
-				allObjects[kv.Key] = kv.Value.Where(mgo => mgo.Team != Parent.Team).ToList();
-
-			return allObjects;
+			return guiObjects.ToList().Where(mgo => mgo.Team != Parent.Team);
 		}
-		protected override Dictionary<Group, List<MainGuiObject>> GetAllHorizontalPassableGroups(Dictionary<Group, List<MainGuiObject>> guiObjects)
+		protected override IEnumerable<MainGuiObject> GetAllHorizontalPassableGroups(IEnumerable<MainGuiObject> guiObjects)
 		{
-			var allObjects = guiObjects;//.Where(g => g.Key == Group.ImpassableIncludingMagic || g.Key == Group.Impassable).ToDictionary(o => o.Key, o => o.Value);
-			foreach (KeyValuePair<Group, List<MainGuiObject>> kv in allObjects.ToList())
-				allObjects[kv.Key] = kv.Value.Where(mgo => mgo.Team != Parent.Team).ToList();
-
-			return allObjects;
+			return guiObjects.ToList().Where(mgo => mgo.Team != Parent.Team);
 		}
 	}
 }

@@ -43,19 +43,27 @@ namespace SimonsGame
 		LeftBumper = 64,
 		RightBumper = 128,
 		Start = 256,
-		Select = 512
+		Select = 512,
+		None = 1024, // This can/should never be selected.
 	}
-	public enum Direction
+	public enum Direction2D
 	{
 		Up = 1,
 		Left = 2,
 		Down = 4,
 		Right = 8
 	}
+
+	// Utility Class for handling User inputs.
 	public class Controls
 	{
 		private static MouseProperties _previousMouseProperties = null;
 		public static List<PlayerControls> PlayerControls { get; set; }
+		public static Dictionary<Guid, PlayerControls> AllControls { get; set; }
+		public static Dictionary<Guid, PlayerControls> PreviousControls { get; set; }
+		public static MouseState PreviousMouse;
+		public static MouseState CurrentMouse;
+
 		public Controls(int playerCount)
 		{
 			if (playerCount < 1)
@@ -95,12 +103,14 @@ namespace SimonsGame
 						playerControls.GetAim = (p) =>
 						{
 							Vector2 mouseOffset = Vector2.Zero;
+							float scale = 1;
 							if (p.Level != null && p.Level.GameStateManager != null)
 							{
 								PlayerViewport viewport = p.Level.GameStateManager.GetPlayerViewport(p);
 								mouseOffset = viewport.CameraPosition;
+								scale = viewport.Scale;
 							}
-							Vector2 mousePosition = mouseProperties.MousePosition + mouseOffset - p.Center;
+							Vector2 mousePosition = (mouseProperties.MousePosition / scale) + mouseOffset - p.Center;
 							float normalizer = (float)Math.Sqrt(Math.Pow((double)mousePosition.X, 2) + Math.Pow((double)mousePosition.Y, 2));
 							return mousePosition / normalizer;
 						};
@@ -172,11 +182,12 @@ namespace SimonsGame
 			};
 		}
 
+		// Guid is the Player's ID
 		public static bool IsDown(Guid guiId /* See what I did there, ha! */, AvailableButtons button)
 		{
 			try
 			{
-				return (GameStateManager.AllControls[guiId].PressedButtons & button) == button;
+				return (Controls.AllControls[guiId].PressedButtons & button) == button;
 			}
 			catch (Exception) { return false; } // if guid doesn't exist, then say no!
 		}
@@ -184,7 +195,23 @@ namespace SimonsGame
 		{
 			try
 			{
-				return PressedDown(GameStateManager.AllControls[guiId], GameStateManager.PreviousControls[guiId], button);
+				return PressedDown(Controls.AllControls[guiId], Controls.PreviousControls[guiId], button);
+			}
+			catch (Exception) { return false; } // if guid doesn't exist, then say no!
+		}
+		public static bool PressingDown(Guid guiId /* See what I did there, ha! */, AvailableButtons button)
+		{
+			try
+			{
+				return PressingDown(Controls.AllControls[guiId], Controls.PreviousControls[guiId], button);
+			}
+			catch (Exception) { return false; } // if guid doesn't exist, then say no!
+		}
+		public static bool ReleasedDown(Guid guiId /* See what I did there, ha! */, AvailableButtons button)
+		{
+			try
+			{
+				return ReleasedDown(Controls.AllControls[guiId], Controls.PreviousControls[guiId], button);
 			}
 			catch (Exception) { return false; } // if guid doesn't exist, then say no!
 		}
@@ -203,22 +230,22 @@ namespace SimonsGame
 			return (((controls.PressedButtons & button) == button)
 				&& ((previousControls.PressedButtons & button) == button));
 		}
-		public static bool PressedDirectionDown(PlayerControls controls, PlayerControls previousControls, Direction controlDirection, double threshold = .5)
+		public static bool PressedDirectionDown(PlayerControls controls, PlayerControls previousControls, Direction2D controlDirection, double threshold = .5)
 		{
 			bool goingThatDirection = true;
-			if (controlDirection.HasFlag(Direction.Up))
+			if (controlDirection.HasFlag(Direction2D.Up))
 			{
 				goingThatDirection &= controls.YMovement < -threshold && previousControls.YMovement >= -threshold;
 			}
-			if (controlDirection.HasFlag(Direction.Down))
+			if (controlDirection.HasFlag(Direction2D.Down))
 			{
 				goingThatDirection &= controls.YMovement > threshold && previousControls.YMovement <= threshold;
 			}
-			if (controlDirection.HasFlag(Direction.Left))
+			if (controlDirection.HasFlag(Direction2D.Left))
 			{
 				goingThatDirection &= controls.XMovement < -threshold && previousControls.XMovement >= -threshold;
 			}
-			if (controlDirection.HasFlag(Direction.Right))
+			if (controlDirection.HasFlag(Direction2D.Right))
 			{
 				goingThatDirection &= controls.XMovement > threshold && previousControls.XMovement <= threshold;
 			}
@@ -228,10 +255,84 @@ namespace SimonsGame
 		}
 
 
+		public static void Update(Dictionary<Guid, PlayerControls> allControls)
+		{
+			PreviousControls = AllControls;
+			AllControls = allControls;
+			PreviousMouse = CurrentMouse;
+			CurrentMouse = Mouse.GetState();
+		}
+		public static bool IsClickingLeftMouse()
+		{
+			return PreviousMouse != null &&
+				PreviousMouse.LeftButton == ButtonState.Released &&
+				CurrentMouse.LeftButton == ButtonState.Pressed;
+		}
+		public static bool IsReleasingLeftMouse()
+		{
+			//return PreviousControls != null && Controls.ReleasedDown(AllControls.First().Value, PreviousControls.First().Value, AvailableButtons.LeftBumper);
+			return PreviousMouse != null &&
+				PreviousMouse.LeftButton == ButtonState.Pressed &&
+				CurrentMouse.LeftButton == ButtonState.Released;
+		}
+		public static bool IsHoldingLeftMouse()
+		{
+			//return PreviousControls != null && Controls.PressingDown(AllControls.First().Value, PreviousControls.First().Value, AvailableButtons.LeftBumper);
+			return PreviousMouse != null &&
+				PreviousMouse.LeftButton == ButtonState.Pressed &&
+				CurrentMouse.LeftButton == ButtonState.Pressed;
+		}
+		public static bool IsClickingRightMouse()
+		{
+			//return PreviousControls != null && Controls.PressedDown(AllControls.First().Value, PreviousControls.First().Value, AvailableButtons.RightBumper);
+			return PreviousMouse != null &&
+				PreviousMouse.RightButton == ButtonState.Released &&
+				CurrentMouse.RightButton == ButtonState.Pressed;
+		}
+		public static bool IsReleasingRightMouse()
+		{
+			//return PreviousControls != null && Controls.ReleasedDown(AllControls.First().Value, PreviousControls.First().Value, AvailableButtons.RightBumper);
+			return PreviousMouse != null &&
+				PreviousMouse.RightButton == ButtonState.Pressed &&
+				CurrentMouse.RightButton == ButtonState.Released;
+		}
+		public static bool IsHoldingRightMouse()
+		{
+			//return PreviousControls != null && Controls.PressingDown(AllControls.First().Value, PreviousControls.First().Value, AvailableButtons.RightBumper);
+			return PreviousMouse != null &&
+				PreviousMouse.RightButton == ButtonState.Pressed &&
+				CurrentMouse.RightButton == ButtonState.Pressed;
+		}
+		public static bool IsClickingMiddleMouse()
+		{
+			//return PreviousControls != null && Controls.PressedDown(AllControls.First().Value, PreviousControls.First().Value, AvailableButtons.RightBumper);
+			return PreviousMouse != null &&
+				PreviousMouse.MiddleButton == ButtonState.Released &&
+				CurrentMouse.MiddleButton == ButtonState.Pressed;
+		}
+		public static bool IsReleasingMiddleMouse()
+		{
+			//return PreviousControls != null && Controls.ReleasedDown(AllControls.First().Value, PreviousControls.First().Value, AvailableButtons.RightBumper);
+			return PreviousMouse != null &&
+				PreviousMouse.MiddleButton == ButtonState.Pressed &&
+				CurrentMouse.MiddleButton == ButtonState.Released;
+		}
+		public static bool IsHoldingMiddleMouse()
+		{
+			//return PreviousControls != null && Controls.PressingDown(AllControls.First().Value, PreviousControls.First().Value, AvailableButtons.RightBumper);
+			return PreviousMouse != null &&
+				PreviousMouse.MiddleButton == ButtonState.Pressed &&
+				CurrentMouse.MiddleButton == ButtonState.Pressed;
+		}
 		public void SetPlayerCount(int playerCount)
 		{
 			PlayerControls = new List<PlayerControls>();
 		}
 
+		public static IEnumerable<AvailableButtons> ButtonEnumerate()
+		{
+			foreach (var button in Enum.GetValues(typeof(AvailableButtons)))
+				yield return (AvailableButtons)button;
+		}
 	}
 }

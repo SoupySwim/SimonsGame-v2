@@ -21,10 +21,6 @@ namespace SimonsGame.Menu
 		private MainGame _game;
 		private ContentManager _content;
 		public ContentManager Content { get { return _content; } }
-		public static Dictionary<Guid, PlayerControls> AllControls { get; set; }
-		public static Dictionary<Guid, PlayerControls> PreviousControls { get; set; }
-		public static MouseState PreviousMouse;
-		public static MouseState CurrentMouse;
 
 		private MenuScreen _currentMenuScreen;
 		private Vector2 _mousePosition;
@@ -80,19 +76,15 @@ namespace SimonsGame.Menu
 			if (PreviousScreens.Any())
 				_currentMenuScreen = PreviousScreens.Pop();
 		}
-		public void Update(GameTime gameTime, Dictionary<Guid, PlayerControls> allControls, Vector2 newMousePosition)
+		public void Update(GameTime gameTime, Vector2 newMousePosition)
 		{
-			PreviousMouse = CurrentMouse;
-			CurrentMouse = Mouse.GetState();
-			PreviousControls = AllControls;
-			AllControls = allControls;
 			_mousePosition = newMousePosition;
 			HandleKeyboardEvent();
 			_currentMenuScreen.HandleMouseEvent(gameTime, newMousePosition);
 		}
 		public void HandleKeyboardEvent()
 		{
-			if (IsClickingLeftMouse()) // TODO don't hack to use the left bumper as a click...
+			if (Controls.IsClickingLeftMouse()) // TODO don't hack to use the left bumper as a click...
 			{
 				if (_showMessage)
 					_showMessage = false;
@@ -103,7 +95,7 @@ namespace SimonsGame.Menu
 					_currentMenuScreen.SelectCurrent();
 				}
 			}
-			else if (IsClickingRightMouse()) // TODO don't hack to use the right bumper as a click...
+			else if (Controls.IsClickingRightMouse()) // TODO don't hack to use the right bumper as a click...
 			{
 				_currentMenuScreen.DeselectCurrent();
 				_currentMenuScreen.MoveBack();
@@ -111,10 +103,10 @@ namespace SimonsGame.Menu
 			}
 			else
 			{
-				foreach (KeyValuePair<Guid, PlayerControls> kv in AllControls)
+				foreach (KeyValuePair<Guid, PlayerControls> kv in Controls.AllControls)
 				{
 					PlayerControls playerControls = kv.Value;
-					PlayerControls previousControls = (PreviousControls == null || !PreviousControls.ContainsKey(kv.Key)) ? new PlayerControls() : PreviousControls[kv.Key];
+					PlayerControls previousControls = (Controls.PreviousControls == null || !Controls.PreviousControls.ContainsKey(kv.Key)) ? new PlayerControls() : Controls.PreviousControls[kv.Key];
 
 					if (Controls.PressedDown(playerControls, previousControls, AvailableButtons.Secondary))
 					{
@@ -149,25 +141,25 @@ namespace SimonsGame.Menu
 							_currentMenuScreen.SelectCurrent();
 						}
 					}
-					else if (Controls.PressedDirectionDown(playerControls, previousControls, Direction.Down))// playerControls.YMovement > .5)
+					else if (Controls.PressedDirectionDown(playerControls, previousControls, Direction2D.Down))// playerControls.YMovement > .5)
 					{
 						_currentMenuScreen.DeselectCurrent();
 						_currentMenuScreen.MoveDown();
 						_currentMenuScreen.SelectCurrent();
 					}
-					else if (Controls.PressedDirectionDown(playerControls, previousControls, Direction.Up))//playerControls.YMovement < -.5)
+					else if (Controls.PressedDirectionDown(playerControls, previousControls, Direction2D.Up))//playerControls.YMovement < -.5)
 					{
 						_currentMenuScreen.DeselectCurrent();
 						_currentMenuScreen.MoveUp();
 						_currentMenuScreen.SelectCurrent();
 					}
-					else if (Controls.PressedDirectionDown(playerControls, previousControls, Direction.Left))//playerControls.XMovement < -.5)
+					else if (Controls.PressedDirectionDown(playerControls, previousControls, Direction2D.Left))//playerControls.XMovement < -.5)
 					{
 						_currentMenuScreen.DeselectCurrent();
 						_currentMenuScreen.MoveLeft();
 						_currentMenuScreen.SelectCurrent();
 					}
-					else if (Controls.PressedDirectionDown(playerControls, previousControls, Direction.Right))//playerControls.XMovement > .5)
+					else if (Controls.PressedDirectionDown(playerControls, previousControls, Direction2D.Right))//playerControls.XMovement > .5)
 					{
 						_currentMenuScreen.DeselectCurrent();
 						_currentMenuScreen.MoveRight();
@@ -175,70 +167,6 @@ namespace SimonsGame.Menu
 					}
 				}
 			}
-		}
-
-		// TODO don't hack to use the left/right bumper as a click...
-		public static bool IsClickingLeftMouse()
-		{
-			return PreviousMouse != null &&
-				PreviousMouse.LeftButton == ButtonState.Released &&
-				CurrentMouse.LeftButton == ButtonState.Pressed;
-		}
-		public static bool IsReleasingLeftMouse()
-		{
-			//return PreviousControls != null && Controls.ReleasedDown(AllControls.First().Value, PreviousControls.First().Value, AvailableButtons.LeftBumper);
-			return PreviousMouse != null &&
-				PreviousMouse.LeftButton == ButtonState.Pressed &&
-				CurrentMouse.LeftButton == ButtonState.Released;
-		}
-		public static bool IsHoldingLeftMouse()
-		{
-			//return PreviousControls != null && Controls.PressingDown(AllControls.First().Value, PreviousControls.First().Value, AvailableButtons.LeftBumper);
-			return PreviousMouse != null &&
-				PreviousMouse.LeftButton == ButtonState.Pressed &&
-				CurrentMouse.LeftButton == ButtonState.Pressed;
-		}
-		public static bool IsClickingRightMouse()
-		{
-			//return PreviousControls != null && Controls.PressedDown(AllControls.First().Value, PreviousControls.First().Value, AvailableButtons.RightBumper);
-			return PreviousMouse != null &&
-				PreviousMouse.RightButton == ButtonState.Released &&
-				CurrentMouse.RightButton == ButtonState.Pressed;
-		}
-		public static bool IsReleasingRightMouse()
-		{
-			//return PreviousControls != null && Controls.ReleasedDown(AllControls.First().Value, PreviousControls.First().Value, AvailableButtons.RightBumper);
-			return PreviousMouse != null &&
-				PreviousMouse.RightButton == ButtonState.Pressed &&
-				CurrentMouse.RightButton == ButtonState.Released;
-		}
-		public static bool IsHoldingRightMouse()
-		{
-			//return PreviousControls != null && Controls.PressingDown(AllControls.First().Value, PreviousControls.First().Value, AvailableButtons.RightBumper);
-			return PreviousMouse != null &&
-				PreviousMouse.RightButton == ButtonState.Pressed &&
-				CurrentMouse.RightButton == ButtonState.Pressed;
-		}
-		public static bool IsClickingMiddleMouse()
-		{
-			//return PreviousControls != null && Controls.PressedDown(AllControls.First().Value, PreviousControls.First().Value, AvailableButtons.RightBumper);
-			return PreviousMouse != null &&
-				PreviousMouse.MiddleButton == ButtonState.Released &&
-				CurrentMouse.MiddleButton == ButtonState.Pressed;
-		}
-		public static bool IsReleasingMiddleMouse()
-		{
-			//return PreviousControls != null && Controls.ReleasedDown(AllControls.First().Value, PreviousControls.First().Value, AvailableButtons.RightBumper);
-			return PreviousMouse != null &&
-				PreviousMouse.MiddleButton == ButtonState.Pressed &&
-				CurrentMouse.MiddleButton == ButtonState.Released;
-		}
-		public static bool IsHoldingMiddleMouse()
-		{
-			//return PreviousControls != null && Controls.PressingDown(AllControls.First().Value, PreviousControls.First().Value, AvailableButtons.RightBumper);
-			return PreviousMouse != null &&
-				PreviousMouse.MiddleButton == ButtonState.Pressed &&
-				CurrentMouse.MiddleButton == ButtonState.Pressed;
 		}
 
 		public void Draw(GameTime gameTime, SpriteBatch spriteBatch)

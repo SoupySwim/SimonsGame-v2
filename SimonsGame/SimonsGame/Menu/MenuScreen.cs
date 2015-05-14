@@ -11,7 +11,7 @@ namespace SimonsGame.Menu
 	{
 		protected MenuItemButton[][] _menuLayout;
 		protected TimeSpan _timeSpentOnScreen = TimeSpan.Zero;
-		protected static TimeSpan _DELAY_ON_CLICK = new TimeSpan(0, 0, 0, 0, 400);
+		protected static TimeSpan _DELAY_ON_CLICK = new TimeSpan(0, 0, 0, 0, 200);
 		protected int X, Y;
 		public MenuScreen()
 		{
@@ -22,21 +22,29 @@ namespace SimonsGame.Menu
 		public Vector2 Size { get; set; }
 		public void MoveUp()
 		{
-			Y = Y == 0 ? _menuLayout.Count() - 1 : Y - 1; // wrap around
-			X = _menuLayout[Y].Count() > X ? X : _menuLayout[Y].Count() - 1; // If there's a spot then use it, otherwise go to the end of row.
+			if (!_menuLayout[Y][X].IsStuck(Direction2D.Up))
+			{
+				Y = Y == 0 ? _menuLayout.Count() - 1 : Y - 1; // wrap around
+				X = _menuLayout[Y].Count() > X ? X : _menuLayout[Y].Count() - 1; // If there's a spot then use it, otherwise go to the end of row.
+			}
 		}
 		public void MoveDown()
 		{
-			Y = Y == _menuLayout.Count() - 1 ? 0 : Y + 1; // wrap around
-			X = _menuLayout[Y].Count() > X ? X : _menuLayout[Y].Count() - 1; // If there's a spot then use it, otherwise go to the end of row.
+			if (!_menuLayout[Y][X].IsStuck(Direction2D.Down))
+			{
+				Y = Y == _menuLayout.Count() - 1 ? 0 : Y + 1; // wrap around
+				X = _menuLayout[Y].Count() > X ? X : _menuLayout[Y].Count() - 1; // If there's a spot then use it, otherwise go to the end of row.
+			}
 		}
 		public void MoveLeft()
 		{
-			X = X == 0 ? _menuLayout[Y].Count() - 1 : X - 1; // wrap around
+			if (!_menuLayout[Y][X].IsStuck(Direction2D.Left))
+				X = X == 0 ? _menuLayout[Y].Count() - 1 : X - 1; // wrap around
 		}
 		public void MoveRight()
 		{
-			X = X == _menuLayout[Y].Count() - 1 ? 0 : X + 1; // wrap around
+			if (!_menuLayout[Y][X].IsStuck(Direction2D.Right))
+				X = X == _menuLayout[Y].Count() - 1 ? 0 : X + 1; // wrap around
 		}
 		public abstract void MoveBack();
 

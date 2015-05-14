@@ -34,6 +34,7 @@ namespace SimonsGame.GuiObjects
 		public Guid Id { get { return _guid; } }
 
 		// Will base all other speeds to this.  Y direction is gravity.
+		public static float Gravity { get { return AverageSpeed.Y; } }
 		private static Vector2 _averageSpeed = new Vector2(4.2f, 6.5f);
 		public static Vector2 AverageSpeed { get { return _averageSpeed; } set { _averageSpeed = value; } }
 		//public float Scale { get; set; }

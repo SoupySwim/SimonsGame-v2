@@ -31,7 +31,7 @@ namespace SimonsGame.Utility
 
 			Rectangle bottomHUDBounds = new Rectangle((int)(_playerViewportBounds.W / 3), (int)(_playerViewportBounds.Z * .91), (int)(_playerViewportBounds.W / 3), (int)(_playerViewportBounds.Z * 087));
 			spriteBatch.Draw(_singleColor, bottomHUDBounds, new Color(0, 0, 0, .8f));
-			IEnumerable<PlayerAbilityInfo> abilities = _player.AbilityManager.KnownAbilities.SelectMany(kv => kv.Value).Where(i => i.Cooldown != TimeSpan.Zero);
+			IEnumerable<Guid> abilities = _player.AbilityManager.KnownAbilities.SelectMany(kv => kv.Value).Where(i => _player.AbilityManager.GetAbilityInfo(i).Cooldown != TimeSpan.Zero);
 			int abilityCount = abilities.Count() + 1;
 			int ndx = 1;
 			float itemWidth = bottomHUDBounds.Width / abilityCount;
@@ -39,9 +39,9 @@ namespace SimonsGame.Utility
 
 			spriteBatch.DrawString(MainGame.PlainFont, "Health\r\n" + _player.HealthCurrent, new Vector2(bottomHUDBounds.X + 6, bottomHUDBounds.Y + 2), Color.White);
 
-			foreach (PlayerAbilityInfo info in abilities)
+			foreach (Guid abilityId in abilities)
 			{
-				string text = string.Format("{0:0.00}", _player.AbilityManager.CoolDownTimer(info) / 1000f);
+				string text = string.Format("{0:0.00}", _player.AbilityManager.CoolDownTimer(abilityId) / 1000f);
 				//spriteBatch.DrawString(_singleColor, bottomHUDBounds, Color.Black);
 				spriteBatch.DrawString(MainGame.PlainFont, text, new Vector2(bottomHUDBounds.X + 10 + (ndx++ * itemWidth), bottomHUDBounds.Y + 5), Color.White);
 			}

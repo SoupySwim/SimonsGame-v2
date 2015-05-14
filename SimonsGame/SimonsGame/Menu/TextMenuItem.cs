@@ -37,6 +37,10 @@ namespace SimonsGame.Menu
 			_currentColor = _defaultColor;
 			IsHighLighted = false;
 		}
+		public void OverrideColor(Color color)
+		{
+			_currentColor = color;
+		}
 		public override void Update(GameTime gameTime)
 		{
 		}

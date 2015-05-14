@@ -18,8 +18,80 @@ namespace SimonsGame.MapEditor
 		private MapEditorEditMap _mapEditorEditMap;
 		private Vector4 _leftPanelBounds;
 		private GuiObjectClass _selectedObjectClass;
+		public GuiObjectClass SelectedObjectClass { get { return _selectedObjectClass; } }
 		private List<LeftPanelChoice> _menuItems;
+		private List<LeftPanelChoice> _currentMenuItems;
+		private SortType _currentSort = SortType.All;
+
 		private TextMenuItemButton _selectModeButton;
+		private Dictionary<SortType, TextMenuItemButton> _filterButtons;
+
+		private enum SortType
+		{
+			All,
+			Environment,
+			Character,
+			Structure,
+			PowerUp,
+			Zones
+		}
+		private Dictionary<SortType, HashSet<GuiObjectClass>> _filterMap = new Dictionary<SortType, HashSet<GuiObjectClass>>()
+		{
+			{SortType.All, new HashSet<GuiObjectClass>()},
+			{
+				SortType.Environment, new HashSet<GuiObjectClass>()
+				{
+					GuiObjectClass.Platform,
+					GuiObjectClass.MovingPlatform,
+					GuiObjectClass.FinishLineFlagPole,
+					GuiObjectClass.Block,
+					GuiObjectClass.ObjectSpawner,
+					GuiObjectClass.Spike,
+				}
+			},
+			{
+				SortType.Character, new HashSet<GuiObjectClass>()
+				{
+					GuiObjectClass.Player,
+					GuiObjectClass.AIPlayer,
+					GuiObjectClass.HealthCreep,
+					GuiObjectClass.MovingCharacter,
+					GuiObjectClass.NeutralCreep,
+					GuiObjectClass.FlyingCreature,
+					GuiObjectClass.LargeCreep,
+					GuiObjectClass.CreepBoss,
+					GuiObjectClass.WallRunner
+				}
+			},
+			{
+				SortType.Structure, new HashSet<GuiObjectClass>()
+				{
+					GuiObjectClass.StandardTurret,
+					GuiObjectClass.StandardBase,
+					GuiObjectClass.Ladder,
+					GuiObjectClass.JumpPad,
+					GuiObjectClass.Teleporter,
+					GuiObjectClass.LockedBarrier,
+					GuiObjectClass.SmallKeyObject,
+				}
+			},
+			{
+				SortType.PowerUp, new HashSet<GuiObjectClass>()
+				{
+					GuiObjectClass.HealthPack,
+					GuiObjectClass.SuperJump,
+					GuiObjectClass.SuperSpeed,
+					GuiObjectClass.AbilityObject,
+				}
+			},
+			{
+				SortType.Zones, new HashSet<GuiObjectClass>()
+				{
+					GuiObjectClass.JungleCreepZone,
+					GuiObjectClass.BehaviorZone,
+				}
+			},
+		};
 
 		private int _skipAmount = 0;
 		private int _selectedIndex = 0;
@@ -37,10 +109,32 @@ namespace SimonsGame.MapEditor
 			_menuItems.Add(new LeftPanelChoice("Test/PlayerStillAI", GuiObjectClass.AIPlayer, new Color(50, 50, 50)));
 			_menuItems.Add(new LeftPanelChoice("Test/HealthCreep", GuiObjectClass.HealthCreep, Color.Green));
 			_menuItems.Add(new LeftPanelChoice("Test/Mover", GuiObjectClass.MovingCharacter, Color.LightPink));
+			_menuItems.Add(new LeftPanelChoice("Test/Mover", GuiObjectClass.NeutralCreep, Color.LightGreen));
+			_menuItems.Add(new LeftPanelChoice("Test/BatIdle", GuiObjectClass.FlyingCreature, Color.Gray));
+			_menuItems.Add(new LeftPanelChoice("Test/LargeCreep", GuiObjectClass.LargeCreep, Color.White));
+			_menuItems.Add(new LeftPanelChoice("Test/LargeCreep", GuiObjectClass.CreepBoss, Color.SlateGray));
 			_menuItems.Add(new LeftPanelChoice("Test/WallRunner", GuiObjectClass.WallRunner, Color.Red));
 			_menuItems.Add(new LeftPanelChoice("Test/Turret", GuiObjectClass.StandardTurret, GuiVariables.TeamColorMap[Team.Team1])); // team 1 for now...
 			_menuItems.Add(new LeftPanelChoice("Test/Base", GuiObjectClass.StandardBase, GuiVariables.TeamColorMap[Team.Team1])); // team 1 for now...
-			_menuItems.Add(new LeftPanelChoice("Test/FlagPole", GuiObjectClass.FinishLineFlagPole, GuiVariables.TeamColorMap[Team.None])); // team 1 for now...
+			_menuItems.Add(new LeftPanelChoice("Test/FlagPole", GuiObjectClass.FinishLineFlagPole, GuiVariables.TeamColorMap[Team.None]));
+			_menuItems.Add(new LeftPanelChoice("Test/Block", GuiObjectClass.Block, Color.White));
+			_menuItems.Add(new LeftPanelChoice("Test/ObjectSpawnerFrame", GuiObjectClass.ObjectSpawner, GuiVariables.TeamColorMap[Team.None]));
+			_menuItems.Add(new LeftPanelChoice("Test/SingleColor", GuiObjectClass.Ladder, Color.Yellow));
+			_menuItems.Add(new LeftPanelChoice("Test/SingleColor", GuiObjectClass.JumpPad, Color.Green));
+			_menuItems.Add(new LeftPanelChoice("Test/HealthPack", GuiObjectClass.HealthPack, Color.White));
+			_menuItems.Add(new LeftPanelChoice("Test/SingleColor", GuiObjectClass.SuperJump, Color.White));
+			_menuItems.Add(new LeftPanelChoice("Test/SingleColor", GuiObjectClass.SuperSpeed, Color.White));
+			_menuItems.Add(new LeftPanelChoice("Test/SingleColor", GuiObjectClass.Teleporter, Color.Orange));
+			_menuItems.Add(new LeftPanelChoice("Test/Spikes", GuiObjectClass.Spike, Color.White));
+			_menuItems.Add(new LeftPanelChoice("Test/SingleColor", GuiObjectClass.LockedBarrier, Color.Gray));
+			_menuItems.Add(new LeftPanelChoice("Test/SmallKey", GuiObjectClass.SmallKeyObject, Color.Gray));
+			_menuItems.Add(new LeftPanelChoice("Test/NewAbility", GuiObjectClass.AbilityObject, Color.White));
+			_menuItems.Add(new LeftPanelChoice("Test/SingleColor", GuiObjectClass.JungleCreepZone, Color.Lerp(Color.Purple, new Color(1, 1, 1, 0), .5f)));
+			_menuItems.Add(new LeftPanelChoice("Test/SingleColor", GuiObjectClass.BehaviorZone, Color.LightGray));
+
+
+			_currentMenuItems = _menuItems.ToList();
+
 			_arrow = MainGame.ContentManager.Load<Texture2D>("Test/Menu/RightArrow");
 			Vector2 textSize = "Select Mode".GetTextSize(MainGame.PlainFont);
 			float desiredWidth = _leftPanelBounds.W - 10;
@@ -48,11 +142,31 @@ namespace SimonsGame.MapEditor
 			{
 				manager.SwitchState(MapEditorState.Select);
 			}, "Select Mode", new Vector4(_leftPanelBounds.X + 5 + ((desiredWidth - textSize.X) / 2), _leftPanelBounds.Y + 5 + ((80 - textSize.Y) / 2), textSize.Y, textSize.X), new Vector2(desiredWidth - textSize.X, 80 - textSize.Y), false);
+
+			float desiredFilterWidth = desiredWidth / _filterMap.Count();
+
+			int ndx = 0;
+			_filterButtons = _filterMap.ToDictionary(kv => kv.Key, kv =>
+				{
+					Vector4 sortBounds = new Vector4(_leftPanelBounds.X + 5 + (ndx++ * desiredFilterWidth), _selectModeButton.TotalBounds.Y + _selectModeButton.TotalBounds.Z, 50, desiredFilterWidth);
+					string sortText = kv.Key.ToString().Substring(0, 3);
+					var tuple = sortText.GetSizeAndPadding(MainGame.PlainFont, sortBounds);
+					return new TextMenuItemButton(() => ChangeFilter(kv.Key), sortText, tuple.Item1, tuple.Item2, false);
+				});
+		}
+
+		private void ChangeFilter(SortType sortType)
+		{
+			if (sortType == SortType.All)
+				_currentMenuItems = _menuItems.ToList();
+			else
+				_currentMenuItems = _menuItems.Where(mi => _filterMap[sortType].Contains(mi.Class)).ToList();
+			_currentSort = sortType;
 		}
 
 		public void ScrollDown()
 		{
-			_skipAmount = Math.Min(_menuItems.Count() - 5, _skipAmount + 1);
+			_skipAmount = Math.Min(_currentMenuItems.Count() - 5, _skipAmount + 1);
 		}
 		public void ScrollUp()
 		{
@@ -62,10 +176,15 @@ namespace SimonsGame.MapEditor
 		public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
 		{
 			_selectModeButton.Draw(gameTime, spriteBatch);
-
+			foreach (var kv in _filterButtons)
+			{
+				if (_currentSort == kv.Key)
+					kv.Value.OverrideColor(Color.Orange);
+				kv.Value.Draw(gameTime, spriteBatch);
+			};
 			int currentIndex = _skipAmount;
-			int currentY = 100;
-			foreach (LeftPanelChoice item in _menuItems.Skip(_skipAmount))
+			int currentY = 150;
+			foreach (LeftPanelChoice item in _currentMenuItems.Skip(_skipAmount))
 			{
 				if (currentIndex == _selectedIndex)
 					spriteBatch.Draw(_arrow, new Rectangle((int)(_leftPanelBounds.X + 10), currentY + 25, 40, 40), Color.Orange);
@@ -85,37 +204,28 @@ namespace SimonsGame.MapEditor
 				_selectModeButton.HasBeenHighlighted();
 			else
 				_selectModeButton.HasBeenDeHighlighted();
+			_filterButtons.Values.ToList().ForEach(button =>
+			{
+				if (mousePosition.IsInBounds(button.TotalBounds))
+					button.HasBeenHighlighted();
+				else
+					button.HasBeenDeHighlighted();
+			});
+
 		}
 		public MainGuiObject GetNewItem(Level level)
 		{
-			switch (_selectedObjectClass)
+			if (_mapEditorEditMap.SelectedItemToAdd != null && _mapEditorEditMap.SelectedItemToAdd.GetClass() == _selectedObjectClass)
 			{
-				case GuiObjectClass.Platform:
-					return new Platform(Vector2.Zero, Vector2.Zero, Group.ImpassableIncludingMagic, level);
-				case GuiObjectClass.MovingPlatform:
-					return new MovingPlatform(Vector2.Zero, Vector2.Zero, Group.BothPassable, level, true, (int)level.PlatformDifference, false);
-				case GuiObjectClass.Player:
-					int playerCount = MainGame.PlayerManager.PlayerInputMap.Count(kv => !kv.Value.IsAi);
-					Guid playerId = MainGame.PlayerManager.AddPlayer(TempControls.GetPlayerInput(playerCount));
-					return new Player(playerId, Vector2.Zero, new Vector2(50, 100), Group.BothPassable, level, "Player " + MainGame.PlayerManager.PlayerInfoMap.Count(), Team.Team1, false);
-				case GuiObjectClass.AIPlayer:
-					Guid id = MainGame.PlayerManager.AddPlayer(new UsableInputMap() { IsAi = true });
-					return new Player(id, Vector2.Zero, new Vector2(50, 100), Group.BothPassable, level, "Player " + MainGame.PlayerManager.PlayerInfoMap.Count(), Team.Neutral, true);
-				case GuiObjectClass.HealthCreep:
-					return new HealthCreep(Vector2.Zero, new Vector2(36, 20), Group.BothPassable, level, true, 0, (int)level.Size.X);
-				case GuiObjectClass.MovingCharacter:
-					return new MovingCharacter(Vector2.Zero, new Vector2(40, 80), Group.BothPassable, level, true);
-				case GuiObjectClass.WallRunner:
-					return new WallRunner(Vector2.Zero, new Vector2(50, 50), Group.BothPassable, level, true);
-				case GuiObjectClass.StandardTurret:
-					return new StandardTurret(Vector2.Zero, new Vector2(0, 0), Group.Impassable, level, Team.Team1);
-				case GuiObjectClass.StandardBase:
-					return new StandardBase(Vector2.Zero, new Vector2(0, 0), Group.Impassable, level, Team.Team1);
-				case GuiObjectClass.FinishLineFlagPole:
-					return new FinishLineFlagPole(Vector2.Zero, new Vector2(0, 0), Group.Passable, level);
+				MainGuiObject mgo = (MainGuiObject)_mapEditorEditMap.SelectedItemToAdd.Clone();
+				if (_mapEditorEditMap.GetCurrentObjectOptions().HasFlag(ButtonType.Size))
+					mgo.Size = Vector2.Zero;
+				mgo.Position = Vector2.Zero;
+				return mgo;
 			}
-			return null;
+			return level.GetNewItem(_selectedObjectClass);
 		}
+
 		public class LeftPanelChoice
 		{
 			public Texture2D Texture { get { return _texture; } }
@@ -134,17 +244,22 @@ namespace SimonsGame.MapEditor
 		{
 			if (mousePosition.IsInBounds(_selectModeButton.TotalBounds))
 			{
-				_selectedIndex = -1;
+				_selectModeButton.CallAction();
 				return null;
 			}
-			_selectedIndex = MathHelper.Clamp((int)(_skipAmount + ((mousePosition.Y - _leftPanelBounds.Y - 100) / 90)), 0, _menuItems.Count() - 1);
-			_selectedObjectClass = _menuItems.ElementAt(_selectedIndex).Class;
+			_filterButtons.Values.ToList().ForEach(button =>
+			{
+				if (mousePosition.IsInBounds(button.TotalBounds))
+					button.CallAction();
+			});
+			_selectedIndex = MathHelper.Clamp((int)(_skipAmount + ((mousePosition.Y - _leftPanelBounds.Y - 150) / 90)), 0, _currentMenuItems.Count() - 1);
+			_selectedObjectClass = _currentMenuItems.ElementAt(_selectedIndex).Class;
 			return GetNewItem(level);
 		}
 		public MainGuiObject CycleSelectedItem(Level level)
 		{
-			_selectedIndex = (_selectedIndex + 1) % _menuItems.Count();
-			_selectedObjectClass = _menuItems.ElementAt(_selectedIndex).Class;
+			_selectedIndex = (_selectedIndex + 1) % _currentMenuItems.Count();
+			_selectedObjectClass = _currentMenuItems.ElementAt(_selectedIndex).Class;
 			return GetNewItem(level);
 		}
 
@@ -170,6 +285,24 @@ namespace SimonsGame.MapEditor
 		StandardTurret,
 		StandardBase,
 		Level,
-		FinishLineFlagPole
+		FinishLineFlagPole,
+		Block,
+		ObjectSpawner,
+		Ladder,
+		JumpPad,
+		HealthPack,
+		SuperJump,
+		SuperSpeed,
+		Teleporter,
+		Spike,
+		LockedBarrier,
+		SmallKeyObject,
+		AbilityObject,
+		JungleCreepZone,
+		NeutralCreep,
+		LargeCreep,
+		FlyingCreature,
+		BehaviorZone,
+		CreepBoss,
 	}
 }

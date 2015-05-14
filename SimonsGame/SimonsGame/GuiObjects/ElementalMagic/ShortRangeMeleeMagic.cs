@@ -17,15 +17,20 @@ namespace SimonsGame.GuiObjects.ElementalMagic
 	{
 		private bool _isFlippeed;
 		private Texture2D _splash;
+		public ModifierBase DamageDoneOnCollide { get { return _damageDoneOnCollide; } }
 		private ModifierBase _damageDoneOnCollide;
-		public ShortRangeMeleeMagic(Vector2 position, Player player, Vector2 hitbox, Group group, Level level, bool isFlipped)
-			: base(position, hitbox, group, level, player, "ShortRangeMeleeMagic")
+		public ShortRangeMeleeMagic(Vector2 position, PhysicsObject character, Vector2 hitbox, Group group, Level level, bool isFlipped, Element element, float damage)
+			: base(position, hitbox, group, level, character, "ShortRangeMeleeMagic", null)
 		{
 			_splash = MainGame.ContentManager.Load<Texture2D>("Test/splash");
 			_isFlippeed = isFlipped;
-			Parent = player;
-			_damageDoneOnCollide = new TickModifier(1, ModifyType.Add, _player);
-			_damageDoneOnCollide.SetHealthTotal(-2);
+			Parent = character;
+			_damageDoneOnCollide = new TickModifier(1, ModifyType.Add, _character, element);
+			_damageDoneOnCollide.SetHealthTotal(damage);
+
+			float heightDif = character.Size.Y - Size.Y - 10; // 10 is an arbitrarily good enough number.
+			_bufferVector.Y = -heightDif / 2.0f;
+			_bufferVector.Z = heightDif;
 		}
 		public override float GetXMovement()
 		{
@@ -38,10 +43,9 @@ namespace SimonsGame.GuiObjects.ElementalMagic
 		public override void PostUpdate(GameTime gameTime)
 		{
 			base.PostUpdate(gameTime);
-			Dictionary<Group, List<MainGuiObject>> guiObjects = Level.GetAllGuiObjects().Where(kv => kv.Key != Group.Passable).ToDictionary(kv => kv.Key, kv => kv.Value);
-			IEnumerable<Tuple<DoubleVector2, MainGuiObject>> hitPlatforms = GetHitObjects(guiObjects, this.HitBoxBounds, (mgo) => mgo.Id == _player.Id);
+			IEnumerable<Tuple<Vector2, MainGuiObject>> hitPlatforms = GetHitObjects(Level.GetAllUnPassableMovableObjects().Concat(Level.GetAllUnPassableEnvironmentObjects()), this.HitBoxBounds).Where(tup => tup.Item2.Id != _character.Id);
 
-			foreach (MainGuiObject mgo in hitPlatforms.Select(tup => tup.Item2).Where(mgo => mgo.Team != Team))
+			foreach (MainGuiObject mgo in hitPlatforms.Select(tup => tup.Item2).Where(mgo => mgo.Team != Team).ToList())
 			{
 				mgo.HitByObject(this, _damageDoneOnCollide);
 				Level.RemoveGuiObject(this); // later... this will not happen...

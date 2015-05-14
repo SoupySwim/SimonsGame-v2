@@ -26,14 +26,15 @@ namespace SimonsGame.GuiObjects
 		public HealthCreep(Vector2 position, Vector2 hitbox, Group group, Level level, bool moveRight, int leftBounds, int rightBounds)
 			: base(position, hitbox, group, level, "HealthCreep")
 		{
+			_showHealthBar = true;
 			MaxSpeedBase = new Vector2(AverageSpeed.X / 3, AverageSpeed.Y);
 			AIState = moveRight ? CreepCharacterAIState.MoveRight : CreepCharacterAIState.MoveLeft;
-			_healthTotal = 6;
+			_healthTotal = 120;
 			_healthCurrent = _healthTotal;
 			_leftBounds = leftBounds;
 			_rightBounds = rightBounds;
-			_healModifier = new TickModifier(1, ModifyType.Add, this);
-			_healModifier.SetHealthTotal(4);
+			_healModifier = new TickModifier(1, ModifyType.Add, this, Element.Normal);
+			_healModifier.SetHealthTotal(300);
 			_idleAnimation = new Animation(MainGame.ContentManager.Load<Texture2D>("Test/HealthCreep"), 1, false, 72, 40, (Size.X / 72.0f));
 			_animator.Color = Color.Green;
 			_animator.PlayAnimation(_idleAnimation);
@@ -59,13 +60,14 @@ namespace SimonsGame.GuiObjects
 				if (_lastTargetHitBy != null)
 					_lastTargetHitBy.HitByObject(this, _healModifier);
 			}
-			MainGuiObject LandedOnPlatform;
+			List<MainGuiObject> landedOnPlatforms = PrimaryOverlapObjects[Orientation.Vertical];
+			MainGuiObject landedOnPlatform = landedOnPlatforms.FirstOrDefault();
 			if (_previousPosition == Position)
 			{
 				AIState = AIState == CreepCharacterAIState.MoveRight ? CreepCharacterAIState.MoveLeft : CreepCharacterAIState.MoveRight;
 			}
-			else if (PrimaryOverlapObjects.TryGetValue(Orientation.Vertical, out LandedOnPlatform)
-				&& (Position.X < LandedOnPlatform.Position.X || Position.X + Size.X > LandedOnPlatform.Position.X + LandedOnPlatform.Size.X))
+			else if (landedOnPlatform != null
+				&& (Position.X < landedOnPlatform.Position.X || Position.X + Size.X > landedOnPlatform.Position.X + landedOnPlatform.Size.X))
 				AIState = AIState == CreepCharacterAIState.MoveRight ? CreepCharacterAIState.MoveLeft : CreepCharacterAIState.MoveRight;
 			else if (Position.X <= _leftBounds || Position.X >= _rightBounds)
 				AIState = AIState == CreepCharacterAIState.MoveRight ? CreepCharacterAIState.MoveLeft : CreepCharacterAIState.MoveRight;
@@ -91,6 +93,10 @@ namespace SimonsGame.GuiObjects
 		public override bool DidSwitchDirection()
 		{
 			return AIState == CreepCharacterAIState.MoveLeft;
+		}
+		protected override Vector4 GetHealthBarBounds()
+		{
+			return new Vector4(Bounds.X, Bounds.Y - 6, 6, Bounds.W);
 		}
 	}
 }

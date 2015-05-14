@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using SimonsGame.GuiObjects;
+using SimonsGame.Utility;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,12 +15,14 @@ namespace SimonsGame.Modifiers
 	}
 	public abstract class ModifierBase : GuiVariables
 	{
+		public Element Element { get; set; }
 		public ModifyType Type { get; set; }
 		public bool StopGravity { get; set; }
 		protected bool _hasReachedEnd = false;
 		public bool HasReachedEnd { get { return _hasReachedEnd; } } // Used for combos
 		protected MainGuiObject _owner;
-		public MainGuiObject Owner { get { return _owner; } }
+		public MainGuiObject Owner { get { return _owner; } set { _owner = value; } }
+		public bool PreventControls { get; set; }
 
 		#region abstract functions
 
@@ -29,7 +32,7 @@ namespace SimonsGame.Modifiers
 
 		#endregion
 
-		public ModifierBase(ModifyType type, MainGuiObject owner)
+		public ModifierBase(ModifyType type, MainGuiObject owner, Element element)
 			: base()
 		{
 			_guid = Guid.NewGuid();
@@ -44,11 +47,16 @@ namespace SimonsGame.Modifiers
 				_healthTotal = 1;
 			}
 			_owner = owner;
+			Element = element;
 		}
 		public void SetHealthTotal(float newHealth)
 		{
 			_healthTotal = newHealth;
 		}
+
+		public abstract long GetTickCount();
+		public abstract void SetTickCount(long value);
+
 		public static ModifierBase operator +(ModifierBase a, ModifierBase b)
 		{
 			if (a.Type != b.Type)
@@ -57,10 +65,12 @@ namespace SimonsGame.Modifiers
 			a.Acceleration = new Vector2(a.Acceleration.X + b.Acceleration.X, a.Acceleration.Y + b.Acceleration.Y);
 			a.MaxSpeed = new Vector2(a.MaxSpeed.X + b.MaxSpeed.X, a.MaxSpeed.Y + b.MaxSpeed.Y);
 			a.CurrentMovement = new Vector2(a.CurrentMovement.X + b.CurrentMovement.X, a.CurrentMovement.Y + b.CurrentMovement.Y);
-			a.StopGravity = a.StopGravity || b.StopGravity;
 			if (Math.Abs(a.HealthTotal) < Math.Abs(b.HealthTotal))
 				a._owner = b._owner;
 			a.SetHealthTotal(a.HealthTotal + b.HealthTotal);
+
+			a.StopGravity = a.StopGravity || b.StopGravity;
+			a.PreventControls = a.PreventControls || b.PreventControls;
 			return a;
 		}
 		public static ModifierBase operator *(ModifierBase a, ModifierBase b)
@@ -71,10 +81,12 @@ namespace SimonsGame.Modifiers
 			a.Acceleration = new Vector2(a.Acceleration.X * b.Acceleration.X, a.Acceleration.Y * b.Acceleration.Y);
 			a.MaxSpeed = new Vector2(a.MaxSpeed.X * b.MaxSpeed.X, a.MaxSpeed.Y * b.MaxSpeed.Y);
 			a.CurrentMovement = new Vector2(a.CurrentMovement.X * b.CurrentMovement.X, a.CurrentMovement.Y * b.CurrentMovement.Y);
-			a.StopGravity = a.StopGravity || b.StopGravity;
 			if (a.HealthTotal < b.HealthTotal)
 				a._owner = b._owner;
 			a.SetHealthTotal(a.HealthTotal * b.HealthTotal);
+
+			a.StopGravity = a.StopGravity || b.StopGravity;
+			a.PreventControls = a.PreventControls || b.PreventControls;
 			return a;
 		}
 	}

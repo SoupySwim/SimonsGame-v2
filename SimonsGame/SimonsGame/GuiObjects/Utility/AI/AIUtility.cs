@@ -22,10 +22,10 @@ namespace SimonsGame.GuiObjects.Utility
 
 		public PlayerControls GetAiControls(PlayerControls previousControls)
 		{
-			MainGuiObject LandedOnPlatform;
+			MainGuiObject LandedOnPlatform = _player.PrimaryOverlapObjects[Orientation.Vertical].FirstOrDefault();
 			if (_player.Position == _player.PreviousPosition)
 				_movePositive = !_movePositive;
-			else if (_player.PrimaryOverlapObjects.TryGetValue(Orientation.Vertical, out LandedOnPlatform)
+			else if (LandedOnPlatform != null 
 				&& (_player.Position.X < LandedOnPlatform.Position.X || _player.Position.X + _player.Size.X > LandedOnPlatform.Position.X + LandedOnPlatform.Size.X))
 				_movePositive = !_movePositive;
 			int xMovement = _movePositive ? 1 : -1;
@@ -38,7 +38,7 @@ namespace SimonsGame.GuiObjects.Utility
 			LongRangeElementalMagicAbility lrm = (LongRangeElementalMagicAbility)_player.AbilityManager.CurrentAbilities.Select(kv => kv.Value).FirstOrDefault(m => m is LongRangeElementalMagicAbility);
 
 			if (lrm != null && lrm.TestMagic != null && closestPlayer != null
-				&& MainGuiObject.GetIntersectionDepth(closestPlayer.Bounds, lrm.TestMagic.HitBoxBounds) != DoubleVector2.Zero)
+				&& MainGuiObject.GetIntersectionDepth(closestPlayer.Bounds, lrm.TestMagic.HitBoxBounds) != Vector2.Zero)
 			{
 				pressedButtons = pressedButtons | AvailableButtons.RightBumper;
 			}

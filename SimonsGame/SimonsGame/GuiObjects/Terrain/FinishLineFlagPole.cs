@@ -38,7 +38,7 @@ namespace SimonsGame.GuiObjects
 			{
 				foreach (Player player in Level.Players.Values)
 				{
-					if (MainGuiObject.GetIntersectionDepth(player.HitBoxBounds, Bounds) != DoubleVector2.Zero)
+					if (MainGuiObject.GetIntersectionDepth(player.HitBoxBounds, Bounds) != Vector2.Zero)
 						Level.FinishedGame(player);
 				}
 			}
@@ -50,5 +50,6 @@ namespace SimonsGame.GuiObjects
 		}
 		public override void SetMovement(GameTime gameTime) { }
 		public override void HitByObject(MainGuiObject mgo, ModifierBase mb) { }
+		protected override bool ShowHitBox() { return false; }
 	}
 }

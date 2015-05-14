@@ -9,6 +9,9 @@ using Microsoft.Xna.Framework.Content;
 using SimonsGame.GuiObjects.Utility;
 using SimonsGame.Utility;
 using SimonsGame.MainFiles.InGame;
+using SimonsGame.MapEditor;
+using SimonsGame.MainFiles;
+using SimonsGame.GuiObjects.Zones;
 
 namespace SimonsGame.GuiObjects
 {
@@ -18,18 +21,18 @@ namespace SimonsGame.GuiObjects
 		Character,
 		Player,
 		Attack,
-		Structure
+		Structure,
+		Teleporter,
+		Zone,
 	}
 
 	public abstract class MainGuiObject : GuiVariables
 	{
-		public string Name { get; set; }
+		public string Name;
 		// Return an empty MainGuiObject, void of any important data.  It's a placeholder.
 		public static MainGuiObject EmptyVessel { get { return null; } }
 
 
-		// In the future, this will be used to animate the object.
-		protected Animator _animator;
 
 		// How much mana you have currently
 		protected float _manaCurrent;
@@ -42,25 +45,45 @@ namespace SimonsGame.GuiObjects
 		protected GuiObjectType _objectType;
 		public GuiObjectType ObjectType { get { return _objectType; } }
 
+		public bool IsStunned; // Similar to NotAcceptingControls.  However, broader spectrum and not to do with menus...
+
+		// This will be created during initialization of a level.
+		public HashSet<Guid> ZoneIds;
 
 		protected MainGuiObject _lastTargetHitBy;
 
 		#region Graphics
-		public Vector2 Position { get; set; }
+		public Vector2 Position;
 		protected Vector2 _previousPosition;
 		public Vector2 PreviousPosition { get { return _previousPosition; } }
+		protected bool _showHealthBar = false;
+
+		// In the future, this will be used to animate the object.
+		protected Animator _animator;
 
 		//  _____
 		// |     |
 		// |  *  |  <--- Center Position
 		// |_____|
-		public Vector2 Center { get { return new Vector2(Position.X + Size.X / 2, Position.Y + Size.Y / 2); } set { Position = new Vector2(value.X - Size.X / 2, value.Y - Size.Y / 2); } }
+		public Vector2 Center { get { return Position + (_size / 2); } set { Position = new Vector2(value.X - _size.X / 2, value.Y - _size.Y / 2); } }
 		public Vector2 Size { get { return _size; } set { ExtraSizeManipulation(value); _size = value; } }
-		private Vector2 _size;
-		public Texture2D HitboxImage { get; set; }
+		protected Vector2 _size;
+		public Texture2D HitboxImage;
 		protected Color _hitBoxColor = new Color(1f, 1f, 1f, .8f);
 		public Color HitBoxColor { get { return _hitBoxColor; } set { _hitBoxColor = value; } }
-		public Vector4 Bounds { get { return new Vector4(Position.X, Position.Y, Size.Y, Size.X); } }
+
+		private Vector4 _boundsBase = new Vector4();
+		public Vector4 Bounds
+		{
+			get
+			{
+				_boundsBase.X = Position.X;
+				_boundsBase.Y = Position.Y;
+				_boundsBase.W = _size.X;
+				_boundsBase.Z = _size.Y;
+				return _boundsBase;
+			}
+		}
 		public virtual Vector4 HitBoxBounds { get { return Bounds; } }//{ get { return new Vector4(Position.X - 5, Position.Y - 5, Size.Y + 10, Size.X + 10); } }
 		#endregion
 
@@ -92,13 +115,10 @@ namespace SimonsGame.GuiObjects
 			get { return _group; }
 			set
 			{
-				if (Level != null)
-					Level.ChangeGroup(this, value);
 				AdditionalGroupChange(_group, value);
 				_group = value;
 			}
 		}
-
 		private Group _group { get; set; }
 		public Team Team { get { return _team; } set { SwitchTeam(value); } }
 		protected Team _team;
@@ -108,6 +128,10 @@ namespace SimonsGame.GuiObjects
 
 		// A projectile may have a parent object.
 		public MainGuiObject Parent { get; set; }
+
+		// This is a list of items that the object has accrued.
+		public List<ObtainableItem> ObtainableItems { get; set; }
+		public bool IsMovable;
 
 
 		#region Abstract Functions
@@ -131,6 +155,7 @@ namespace SimonsGame.GuiObjects
 
 		public MainGuiObject(Vector2 position, Vector2 hitbox, Group group, Level level, string name)
 		{
+			IsStunned = false;
 			_guid = Guid.NewGuid();
 			Position = position;
 			_size = hitbox; // only this once do we use _size...!
@@ -153,6 +178,16 @@ namespace SimonsGame.GuiObjects
 			Name = name;
 			_lastTargetHitBy = null;
 			_team = Team.Neutral; // default to homeless for now...
+			ObtainableItems = new List<ObtainableItem>();
+			IsMovable = (ObjectType != GuiObjectType.Environment && ObjectType != GuiObjectType.Structure) || this.GetType().IsSubclassOf(typeof(PhysicsObject));
+			ZoneIds = new HashSet<Guid>();
+		}
+
+		public object Clone()
+		{
+			MainGuiObject mgo = MemberwiseClone() as MainGuiObject;
+			mgo._guid = Guid.NewGuid();
+			return mgo;
 		}
 
 		public void Update(GameTime gameTime)
@@ -160,7 +195,7 @@ namespace SimonsGame.GuiObjects
 			if (_healthCurrent <= 0)
 			{
 				Died();
-				if (this is MovingCharacter || this is WallRunner)
+				if (ObjectType == GuiObjectType.Character && !(this is HealthCreep)) // All characters except health creeps.
 				{
 					if (Player.Sprint3TestScore == 0)
 					{
@@ -171,7 +206,7 @@ namespace SimonsGame.GuiObjects
 							TimeOccured = GameStateManager.GameTimer
 						});
 					}
-					if (!Level.GetAllUnPassableCharacterObjects().Values.SelectMany(l => l).Any(g => g is MovingCharacter || g is WallRunner)
+					if (!Level.GetAllCharacterObjects().Any(g => !(g is HealthCreep) && !(g is Player))
 						&& Level.GameStateManager.WinCondition == MainFiles.WinCondition.DefeatAllEnemies)
 					{
 						Level.GameStateManager.AddHighLight(new GameHighlight()
@@ -180,7 +215,7 @@ namespace SimonsGame.GuiObjects
 							Character = _lastTargetHitBy,
 							TimeOccured = GameStateManager.GameTimer
 						});
-						Level.FinishedGame((Player)_lastTargetHitBy);
+						Level.FinishedGame(_lastTargetHitBy);
 					}
 					Player.Sprint3TestScore += (float)GameStateManager.GameTimer.TotalMilliseconds;
 				}
@@ -194,7 +229,7 @@ namespace SimonsGame.GuiObjects
 						Character = _lastTargetHitBy,
 						TimeOccured = GameStateManager.GameTimer
 					});
-					Level.FinishedGame((Player)_lastTargetHitBy);
+					Level.FinishedGame(_lastTargetHitBy);
 				}
 				else if (this is Player)
 				{
@@ -212,6 +247,7 @@ namespace SimonsGame.GuiObjects
 			ModifierBase modifyMult = new EmptyModifier(ModifyType.Multiply, this);
 			AddCustomModifiers(gameTime, modifyAdd);
 			MultiplyCustomModifiers(gameTime, modifyMult);
+			IsStunned = modifyAdd.PreventControls || modifyMult.PreventControls;
 
 			Movement = MovementBase;
 			Acceleration = AccelerationBase;
@@ -225,19 +261,20 @@ namespace SimonsGame.GuiObjects
 			else if (modifyMult.HealthTotal != 1)
 				_lastTargetHitBy = modifyMult.Owner;
 
-			_healthCurrent = MathHelper.Clamp(0, (_healthCurrent + modifyAdd.HealthTotal) * modifyMult.HealthTotal, HealthTotal);
-			if (healthPrior > _healthCurrent)
+			_healthCurrent = MathHelper.Clamp((_healthCurrent + modifyAdd.HealthTotal) * modifyMult.HealthTotal, 0, HealthTotal);
+			float healthDifference = healthPrior - _healthCurrent;
+			if (healthDifference > 0)
 				Level.AddLevelAnimation(new TextAnimation("" + (healthPrior - _healthCurrent), Color.Red, Level, new Vector2(Center.X, Position.Y - 30)));
-			else if (healthPrior < _healthCurrent)
+			else if (healthDifference < -20) // Don't show the little guys  Should probably add them up...
 				Level.AddLevelAnimation(new TextAnimation("" + (_healthCurrent - healthPrior), Color.Green, Level, new Vector2(Center.X, Position.Y - 30)));
 
 			PreUpdate(gameTime);
 			_previousPosition = Position;
 
 			SetMovement(gameTime);
-			double xCurMove = (GetXMovement() + modifyAdd.Movement.X) * modifyMult.Movement.X;
-			double yCurMove = (GetYMovement() + modifyAdd.Movement.Y) * modifyMult.Movement.Y;
-			CurrentMovement = new Vector2((float)xCurMove, (float)yCurMove);
+			float xCurMove = ((IsStunned ? 0 : GetXMovement()) + modifyAdd.Movement.X) * modifyMult.Movement.X;
+			float yCurMove = ((IsStunned ? 0 : GetYMovement()) + modifyAdd.Movement.Y) * modifyMult.Movement.Y;
+			CurrentMovement = new Vector2((float)xCurMove, (float)yCurMove); // only do this if you aren't stunned!
 			Position = new Vector2(Position.X + CurrentMovement.X, Position.Y + CurrentMovement.Y);
 
 			_animator.Update(gameTime);
@@ -248,24 +285,46 @@ namespace SimonsGame.GuiObjects
 		protected virtual void Died()
 		{
 			Level.RemoveGuiObject(this);
+			GenericZone zone = Level.GetAllZones().FirstOrDefault(z => ZoneIds.Contains(z.Id)); // Can't have behavior zones within jungle zones...
+			if (zone != null)
+				zone.CharacterDied(this);
 		}
 
 		public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
 		{
 			PreDraw(gameTime, spriteBatch);
 			//spriteBatch.Begin();
-			//if (ShowHitBox())
-			//{
-			//	Rectangle destinationRect = new Rectangle((int)Math.Round(Position.X), (int)Math.Round(Position.Y),
-			//		(int)Math.Round(Size.X), (int)Math.Round(Size.Y)); //casting to int takes the floor
-			//	spriteBatch.Draw(HitboxImage, destinationRect, _hitBoxColor);
-			//}
+			if (ShowHitBox())
+			{
+				Rectangle destinationRect = new Rectangle((int)Math.Round(Position.X), (int)Math.Round(Position.Y),
+					(int)Math.Round(_size.X), (int)Math.Round(_size.Y)); //casting to int takes the floor
+				spriteBatch.Draw(HitboxImage, destinationRect, _hitBoxColor);
+			}
 
 			_animator.Draw(gameTime, spriteBatch, Position, GetCurrentSpriteEffects());
+			if (_showHealthBar)
+				GlobalGuiObjects.DrawRatioBar(gameTime, spriteBatch, GetHealthBarBounds(), HealthCurrent, HealthTotal, Color.Green, GetHealthTickAmount(), false, ShowHealthTicks());
+
 			//spriteBatch.End();
 
 			PostDraw(gameTime, spriteBatch);
 		}
+
+		#region HealthBarInfo
+		protected virtual float GetHealthTickAmount()
+		{
+			return 100;
+		}
+		protected virtual bool ShowHealthTicks()
+		{
+			return true;
+		}
+
+		protected virtual Vector4 GetHealthBarBounds()
+		{
+			return new Vector4(Bounds.X, Bounds.Y, 10, Bounds.W);
+		}
+		#endregion
 
 		protected virtual SpriteEffects GetCurrentSpriteEffects()
 		{
@@ -288,9 +347,9 @@ namespace SimonsGame.GuiObjects
 
 		#region Static Intersection
 
-		public IEnumerable<Tuple<DoubleVector2, MainGuiObject>> GetHitPlatforms(Dictionary<Group, List<MainGuiObject>> guiObjects, Vector4 nextBounds, bool? isVertical = null)
+		public IEnumerable<Tuple<Vector2, MainGuiObject>> GetHitPlatforms(IEnumerable<MainGuiObject> guiObjects, Vector4 nextBounds, bool? isVertical = null)
 		{
-			return GetHitObjects(guiObjects, nextBounds, (p) => false, isVertical);
+			return GetHitObjects(guiObjects, nextBounds, isVertical);
 		}
 
 		protected static List<Group> _IgnoredVerticalUpGroups = new List<Group>()
@@ -316,15 +375,13 @@ namespace SimonsGame.GuiObjects
 		};
 
 		// if optional parameter isVertical is null, then 
-		public IEnumerable<Tuple<DoubleVector2, MainGuiObject>> GetHitObjects(Dictionary<Group, List<MainGuiObject>> guiObjects, Vector4 nextBounds, Func<MainGuiObject, bool> shouldSkip, bool? isVertical = null)
+		public IEnumerable<Tuple<Vector2, MainGuiObject>> GetHitObjects(IEnumerable<MainGuiObject> guiObjects, Vector4 nextBounds, bool? isVertical = null)
 		{
-			return guiObjects.SelectMany(kv => kv.Value).Select(mgo =>
+			return guiObjects.Select(mgo =>
 			{
-				if (shouldSkip(mgo))
-					return new { bounds = DoubleVector2.Zero, select = false, obj = MainGuiObject.EmptyVessel };
 				var bounds = MainGuiObject.GetIntersectionDepth(nextBounds, mgo.Bounds);
 				//return bounds != Vector2.Zero && bounds.Y <= 0 && bounds.Y >= -platHeight;
-				bool select = bounds != DoubleVector2.Zero; // if isVertical == null, then select this
+				bool select = bounds != Vector2.Zero; // if isVertical == null, then select this
 				if (isVertical != null)
 				{
 					if ((bool)isVertical)
@@ -338,7 +395,7 @@ namespace SimonsGame.GuiObjects
 							// unless it's impassable.
 							if (/*mgo.CurrentMovement.Y > 0 &&*/ _IgnoredVerticalUpGroups.Contains(mgo.Group) && bounds.Y > 0)
 							{
-								bounds = DoubleVector2.Zero;
+								bounds = Vector2.Zero;
 							}
 							//nextBounds.Y = nextBounds.Y + nextBounds.Z / 2;
 							//nextBounds.Z = nextBounds.Z / 2;
@@ -347,60 +404,62 @@ namespace SimonsGame.GuiObjects
 						// If we are moving down, then we want to land (unless otherwise told), otherwise we are going to move through the groups we are allowed to pass.
 						//select = bounds != Vector2.Zero && bounds.Y <= 0 && bounds.Y >= -platHeight; // <- old
 
-						select = (bounds != DoubleVector2.Zero && Math.Abs(bounds.Y) > 0 /*&& Math.Abs(bounds.Y) <= platHeight*/)
+						select = (bounds != Vector2.Zero && Math.Abs(bounds.Y) > 0 /*&& Math.Abs(bounds.Y) <= platHeight*/)
 							&& (movingDown || !GetIgnoredVerticalGroups(_IgnoredVerticalUpGroups).Contains(mgo.Group));
 					}
 					else // !isVertical, aka isHorizontal
 					{
 						float platWidth = mgo.Size.X;
 						bool movingLeft = _previousPosition.X > nextBounds.X;
-						select = bounds != DoubleVector2.Zero && Math.Abs(bounds.X) > 0 && Math.Abs(bounds.X) <= platWidth;
+						select = bounds != Vector2.Zero && Math.Abs(bounds.X) > 0 && Math.Abs(bounds.X) <= platWidth;
 					}
 				}
 				return new { bounds = bounds, select = select, obj = mgo };
-			}).Where(o => o.select).Select(o => new Tuple<DoubleVector2, MainGuiObject>(o.bounds, o.obj));
+			}).Where(o => o.select).Select(o => new Tuple<Vector2, MainGuiObject>(o.bounds, o.obj));
 		}
 
-		public DoubleVector2 GetIntersectionDepth(MainGuiObject obj)
+		public Vector2 GetIntersectionDepth(MainGuiObject obj)
 		{
 			Vector4 thisBounds = this.Bounds;
 			Vector4 thatBounds = obj.Bounds;
 			return GetIntersectionDepth(thisBounds, thatBounds);
 		}
 
-		public static DoubleVector2 GetIntersectionDepth(Vector4 rectA, Vector4 rectB)
+		public static Vector2 GetIntersectionDepth(Vector4 rectA, Vector4 rectB)
 		{
 			// Calculate half sizes.
-			double halfWidthA = (double)rectA.W / 2.0;
-			double halfHeightA = (double)rectA.Z / 2.0;
-			double halfWidthB = (double)rectB.W / 2.0;
-			double halfHeightB = (double)rectB.Z / 2.0;
+			float halfWidthA = rectA.W / 2.0f;
+			float halfWidthB = rectB.W / 2.0f;
 
 			// Calculate centers.
-			double centerAX = (double)rectA.X + halfWidthA;// new Vector2(rectA.X + halfWidthA, rectA.Y + halfHeightA);
-			double centerAY = (double)rectA.Y + halfHeightA;// new Vector2(rectA.X + halfWidthA, rectA.Y + halfHeightA);
-			double centerBX = (double)rectB.X + halfWidthB;// new Vector2(rectA.X + halfWidthA, rectA.Y + halfHeightA);
-			double centerBY = (double)rectB.Y + halfHeightB;// new Vector2(rectA.X + halfWidthA, rectA.Y + halfHeightA);
-			//double centerA = new Vector2(rectA.X + halfWidthA, rectA.Y + halfHeightA);
-			//Vector2 centerB = new Vector2(rectB.X + halfWidthB, rectB.Y + halfHeightB);
+			float centerAX = (float)rectA.X + halfWidthA;
+			float centerBX = (float)rectB.X + halfWidthB;
 
 			// Calculate current and minimum-non-intersecting distances between centers.
-			double distanceX = centerAX - centerBX;
-			double distanceY = centerAY - centerBY;
-			double minDistanceX = halfWidthA + halfWidthB;
-			double minDistanceY = halfHeightA + halfHeightB;
+			float distanceX = centerAX - centerBX;
+			float minDistanceX = halfWidthA + halfWidthB;
 
 			// If we are not intersecting at all, return (0, 0).
-			if (Math.Abs(distanceX) >= minDistanceX || Math.Abs(distanceY) >= minDistanceY)
-				return DoubleVector2.Zero;
+			if (Math.Abs(distanceX) >= minDistanceX)
+				return Vector2.Zero;
+
+			float halfHeightA = rectA.Z / 2.0f;
+			float halfHeightB = rectB.Z / 2.0f;
+			float centerAY = (float)rectA.Y + halfHeightA;
+			float centerBY = (float)rectB.Y + halfHeightB;
+			float distanceY = centerAY - centerBY;
+			float minDistanceY = halfHeightA + halfHeightB;
+
+			if (Math.Abs(distanceY) >= minDistanceY)
+				return Vector2.Zero;
 
 			// Calculate and return intersection depths.
-			double depthX = distanceX > 0 ? minDistanceX - distanceX : -minDistanceX - distanceX;
-			double depthY = distanceY > 0 ? minDistanceY - distanceY : -minDistanceY - distanceY;
+			float depthX = distanceX > 0 ? minDistanceX - distanceX : -minDistanceX - distanceX;
+			float depthY = distanceY > 0 ? minDistanceY - distanceY : -minDistanceY - distanceY;
 			//return new Vector2((float)Math.Round(depthX, 2), (float)Math.Round(depthY, 2));
-			return new DoubleVector2(depthX, depthY);
+			return new Vector2(depthX, depthY);
 		}
-		protected virtual Dictionary<Group, List<MainGuiObject>> GetAllVerticalPassableGroups(Dictionary<Group, List<MainGuiObject>> guiObjects)
+		protected virtual IEnumerable<MainGuiObject> GetAllVerticalPassableGroups(IEnumerable<MainGuiObject> guiObjects)
 		{
 			return guiObjects;
 		}
@@ -417,8 +476,58 @@ namespace SimonsGame.GuiObjects
 		#endregion
 
 
+		public virtual bool CanPushObjects()
+		{
+			return IsMovable && Group != Group.Passable;
+		}
+
 		public virtual void SwitchDirections() { }
 		public virtual string GetDirectionalText() { return ""; }
 		public virtual bool DidSwitchDirection() { return false; }
+		public virtual string GetSpecialText(ButtonType bType)
+		{
+			if (bType == ButtonType.Direction)
+				return GetDirectionalText();
+			return "";
+		}
+		public virtual string GetSpecialTitle(ButtonType bType) { return ""; }
+		public virtual void ModifySpecialText(ButtonType bType, bool moveRight /* as opposed to move left*/)
+		{
+			if (bType == ButtonType.Direction)
+				SwitchDirections();
+		}
+		public virtual int GetSpecialValue(ButtonType bType) // For Saving the object
+		{
+			if (bType == ButtonType.Direction)
+				return DidSwitchDirection() ? 1 : 0;
+			return 0;
+		}
+		public virtual void SetSpecialValue(ButtonType bType, int value) // For Loading the object
+		{
+			if (bType == ButtonType.Direction && value == 1)
+				SwitchDirections();
+		}
+		public IEnumerable<T> GetObtainableItemsOfType<T>() where T : ObtainableItem
+		{
+			return ObtainableItems.OfType<T>();//.Where(oi => oi.GetType() == obtainableItemType);
+		}
+
+		public void UseKey(SmallKey key)
+		{
+			key.DecrementQuantity();
+			if (key.IsGone())
+				ObtainableItems.Remove(key);
+		}
+
+		public void ObtainItem(ObtainableItem newOI)
+		{
+			ObtainableItem availableOI = ObtainableItems.FirstOrDefault(oi => oi.Id == newOI.Id);
+			if (availableOI != null)
+				availableOI.IncrementQuantity(newOI.Quantity);
+			else
+				ObtainableItems.Add(newOI);
+		}
+
+		public virtual void TriggerBehavior(BehaviorZone _behaviorZone) { }
 	}
 }

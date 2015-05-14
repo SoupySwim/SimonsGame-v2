@@ -1,0 +1,124 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns:dm0="http://schemas.microsoft.com/VisualStudio/2008/DslTools/Core" xmlns:dm1="http://schemas.microsoft.com/dsltools/Kernel" xmlns:dm2="http://schemas.microsoft.com/dsltools/Component" xmlns:dm3="http://schemas.microsoft.com/dsltools/UseCase" xmlns:dm4="http://schemas.microsoft.com/dsltools/Activity" xmlns:dm5="http://schemas.microsoft.com/dsltools/Interaction" xmlns:dm6="http://schemas.microsoft.com/dsltools/UmlModelLibrary" xmlns:dm7="http://schemas.microsoft.com/dsltools/UmlDiagrams" xmlns:dm8="http://schemas.microsoft.com/dsltools/LogicalClassDesigner"
+  dslVersion="1.0.0.0"
+  Id="76fa7885-4a6b-42d4-93c5-dd0092ce2f8c"
+  name="Utility"
+  visibility="Private" xmlns="http://schemas.microsoft.com/dsltools/ModelStore">
+  <referencesInternal>
+    <reference
+      Id="c2ab3892-d80c-4d61-b136-5d147bdd46b6"
+      handle="viewcode://./CodeSchema_Namespace?Namespace%3DSimonsGame.GuiObjects.Utility"
+      tag="ViewCode" />
+  </referencesInternal>
+  <packagedElements>
+    <packageHasNamedElement>
+      <class
+        Id="f3f336dd-a5bf-4243-bf9c-9b3d3babccc9"
+        name="DoubleVector2"
+        isAbstract="false"
+        isLeaf="false"
+        isActiveClass="false">
+        <referencesInternal>
+          <reference
+            Id="b7b27807-99a3-4558-ac10-07fcac800322"
+            handle="viewcode://./CodeSchema_Class?Assembly%3Dfile:%2F%2F%2FE:%2FDropbox%2FSimonsGame_copy%2FSImonsGame%2FSImonsGame%2Fbin%2FDebug%2FSimonsGame.exe Namespace%3DSimonsGame.GuiObjects.Utility Type%3DDoubleVector2"
+            tag="ViewCode" />
+        </referencesInternal>
+        <appliedStereotypesInternal>
+          <stereotypeInstance
+            Id="8c1dabb2-2343-4ef2-9d6e-93103c6c8c4f"
+            name="class"
+            profile="CSharpProfile">
+            <propertyInstances>
+              <stereotypeInstanceHasPropertyInstances
+                Id="15e022cd-2d37-4b87-aa77-724a5004c518">
+                <propertyInstance
+                  Id="738f2852-d9cc-4339-8cbf-9602a7381066"
+                  name="ClrAttributes" />
+              </stereotypeInstanceHasPropertyInstances>
+              <stereotypeInstanceHasPropertyInstances
+                Id="f3630478-c2a1-4a1b-a58d-9a867f35a493">
+                <propertyInstance
+                  Id="5f9d7885-2643-4213-8596-9d8a86892c66"
+                  name="IsPartial"
+                  value="false" />
+              </stereotypeInstanceHasPropertyInstances>
+              <stereotypeInstanceHasPropertyInstances
+                Id="316bf5b8-51b3-42a2-aecd-a6b2ec51a661">
+                <propertyInstance
+                  Id="64d454ba-f8df-48d2-bce4-ad456c75b807"
+                  name="IsStatic"
+                  value="False" />
+              </stereotypeInstanceHasPropertyInstances>
+              <stereotypeInstanceHasPropertyInstances
+                Id="66490446-0d1c-4512-9a12-bcb20e3fdfa1">
+                <propertyInstance
+                  Id="f77e61d4-d0c7-4965-a0e3-7cb52c4bfdf9"
+                  name="IsUnsafe"
+                  value="false" />
+              </stereotypeInstanceHasPropertyInstances>
+              <stereotypeInstanceHasPropertyInstances
+                Id="68683e2e-9369-44d6-9d70-a39ac0d31554">
+                <propertyInstance
+                  Id="de1f3b00-73a2-4a05-a66c-7cec5d7f19cd"
+                  name="PackageVisibility"
+                  value="internal" />
+              </stereotypeInstanceHasPropertyInstances>
+            </propertyInstances>
+          </stereotypeInstance>
+        </appliedStereotypesInternal>
+      </class>
+    </packageHasNamedElement>
+    <packageHasNamedElement>
+      <class
+        Id="b3721581-a198-417b-a2d5-747f7e7b550d"
+        name="Animator"
+        isAbstract="false"
+        isLeaf="false"
+        isActiveClass="false">
+        <referencesInternal>
+          <reference
+            Id="902daed4-b2f6-4a9e-b05e-96513c194fe3"
+            handle="viewcode://./CodeSchema_Struct?Assembly%3Dfile:%2F%2F%2FE:%2FDropbox%2FSimonsGame_copy%2FSImonsGame%2FSImonsGame%2Fbin%2FDebug%2FSimonsGame.exe Namespace%3DSimonsGame.GuiObjects.Utility Type%3DAnimator"
+            tag="ViewCode" />
+        </referencesInternal>
+        <appliedStereotypesInternal>
+          <stereotypeInstance
+            Id="f9d90df4-89c8-4229-a66a-7edb2e8e0d79"
+            name="struct"
+            profile="CSharpProfile">
+            <propertyInstances>
+              <stereotypeInstanceHasPropertyInstances
+                Id="be43e880-05b1-44d6-a520-b84779d56e65">
+                <propertyInstance
+                  Id="8f2477a7-b5fc-4453-96f6-82c03790a30e"
+                  name="ClrAttributes" />
+              </stereotypeInstanceHasPropertyInstances>
+              <stereotypeInstanceHasPropertyInstances
+                Id="d30c716a-ffb4-47e2-ae1b-01135231c557">
+                <propertyInstance
+                  Id="8665cb53-4f83-4e88-8ac2-f1d26b5ce2dc"
+                  name="IsPartial"
+                  value="false" />
+              </stereotypeInstanceHasPropertyInstances>
+              <stereotypeInstanceHasPropertyInstances
+                Id="d1b62c4f-39a9-4ad0-b1ab-cfb384336e8d">
+                <propertyInstance
+                  Id="81cd8016-70f6-47c9-904f-dd1bdccd2163"
+                  name="IsUnsafe"
+                  value="false" />
+              </stereotypeInstanceHasPropertyInstances>
+              <stereotypeInstanceHasPropertyInstances
+                Id="6339e2b5-b596-4630-ac9c-0bd4dfc6360e">
+                <propertyInstance
+                  Id="15b5fed2-68c5-4b94-9fef-29602a75e53a"
+                  name="PackageVisibility"
+                  value="internal" />
+              </stereotypeInstanceHasPropertyInstances>
+            </propertyInstances>
+          </stereotypeInstance>
+        </appliedStereotypesInternal>
+      </class>
+    </packageHasNamedElement>
+  </packagedElements>
+</package>

@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using SimonsGame.GuiObjects;
+using SimonsGame.Menu.InGame;
 using SimonsGame.Menu.MenuScreens;
 using System;
 using System.Collections.Generic;
@@ -18,6 +19,7 @@ namespace SimonsGame.Menu
 		}
 		private GameStateManager _manager;
 		private MenuScreen _currentMenuScreen;
+
 		private Vector2 _mousePosition;
 		private Dictionary<InGameScreenType, MenuScreen> _allScreens = new Dictionary<InGameScreenType, MenuScreen>();
 		Stack<MenuScreen> PreviousScreens = new Stack<MenuScreen>();
@@ -27,16 +29,24 @@ namespace SimonsGame.Menu
 			: base("", bounds)
 		{
 			_player = player;
-			_allScreens.Add(InGameScreenType.InGameMenuScreen, new MainInGameMenu(this, bounds));
+			// So, the hover bounds must be width of 100, but we gotta make sure it meets with the
+			// end of the all magic pane and doesn't extend past 50px from the end of the screen.
+			Vector4 inGameStatusMenuBounds = new Vector4(bounds.X, bounds.Y, bounds.Z, bounds.W * .85f);
+			float hoverX = bounds.X + bounds.W - 220;
+			float hoverX2 = bounds.X + inGameStatusMenuBounds.W - 20;
+			hoverX = hoverX > hoverX2 ? hoverX2 : hoverX;
+			Vector4 allMagicHoverBounds = new Vector4(hoverX, bounds.Y, bounds.Z, 180);
+			InGameStatusMenu statusMenu = new InGameStatusMenu(inGameStatusMenuBounds, _player, allMagicHoverBounds);
+			_allScreens.Add(InGameScreenType.InGameMenuScreen, new MainInGameMenu(this, bounds, statusMenu));
 
 			_currentMenuScreen = _allScreens[InGameScreenType.InGameMenuScreen];
 			_mousePosition = Vector2.Zero;
 			_manager = manager;
 		}
-		public void Update(GameTime gameTime)
+		public void Update(GameTime gameTime, Vector2 newMousePosition)
 		{
 			HandleKeyboardEvent();
-			//_currentMenuScreen.HandleMouseEvent(newMousePosition);
+			_currentMenuScreen.HandleMouseEvent(gameTime, newMousePosition);
 		}
 		public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
 		{
@@ -68,7 +78,7 @@ namespace SimonsGame.Menu
 				_currentMenuScreen.PressEnter();
 				_currentMenuScreen.SelectCurrent();
 			}
-			else if (Controls.PressedDown(playerControls, previousControls, AvailableButtons.LeftBumper)) // TODO don't hack to use the left bumper as a click...
+			else if (Controls.IsClickingLeftMouse()) // TODO don't hack to use the left bumper as a click...
 			{
 				_currentMenuScreen.DeselectCurrent();
 				_currentMenuScreen.PressEnter();
@@ -80,25 +90,25 @@ namespace SimonsGame.Menu
 				_currentMenuScreen.MoveBack();
 				_currentMenuScreen.SelectCurrent();
 			}
-			else if (Controls.PressedDirectionDown(playerControls, previousControls, Direction.Down))// playerControls.YMovement > .5)
+			else if (Controls.PressedDirectionDown(playerControls, previousControls, Direction2D.Down))// playerControls.YMovement > .5)
 			{
 				_currentMenuScreen.DeselectCurrent();
 				_currentMenuScreen.MoveDown();
 				_currentMenuScreen.SelectCurrent();
 			}
-			else if (Controls.PressedDirectionDown(playerControls, previousControls, Direction.Up))//playerControls.YMovement < -.5)
+			else if (Controls.PressedDirectionDown(playerControls, previousControls, Direction2D.Up))//playerControls.YMovement < -.5)
 			{
 				_currentMenuScreen.DeselectCurrent();
 				_currentMenuScreen.MoveUp();
 				_currentMenuScreen.SelectCurrent();
 			}
-			else if (Controls.PressedDirectionDown(playerControls, previousControls, Direction.Left))//playerControls.XMovement < -.5)
+			else if (Controls.PressedDirectionDown(playerControls, previousControls, Direction2D.Left))//playerControls.XMovement < -.5)
 			{
 				_currentMenuScreen.DeselectCurrent();
 				_currentMenuScreen.MoveLeft();
 				_currentMenuScreen.SelectCurrent();
 			}
-			else if (Controls.PressedDirectionDown(playerControls, previousControls, Direction.Right))//playerControls.XMovement > .5)
+			else if (Controls.PressedDirectionDown(playerControls, previousControls, Direction2D.Right))//playerControls.XMovement > .5)
 			{
 				_currentMenuScreen.DeselectCurrent();
 				_currentMenuScreen.MoveRight();
@@ -120,6 +130,7 @@ namespace SimonsGame.Menu
 		public void RestartGame()
 		{
 			_manager.RestartGame();
+			_player.Level.Initialize();
 		}
 		public void UnPauseGame()
 		{

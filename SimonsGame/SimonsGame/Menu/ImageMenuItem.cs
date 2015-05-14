@@ -13,9 +13,9 @@ namespace SimonsGame.Menu
 		public Texture2D Image { get; set; }
 		private Color _currentColor;
 		public Color _defaultColor;
-		public Color DefaultColor { get { return _defaultColor; } }
+		public Color DefaultColor { get { return _defaultColor; } set { _defaultColor = value; } }
 		public Color _selectedColor;
-		public Color SelectedColor { get { return _selectedColor; } }
+		public Color SelectedColor { get { return _selectedColor; } set { _selectedColor = value; } }
 
 		private SpriteEffects _spriteEffects;
 		public ImageMenuItemButton(Action selectedAcion, Texture2D image, Vector4 bounds, bool isSelected = false, SpriteEffects spriteEffects = SpriteEffects.None)

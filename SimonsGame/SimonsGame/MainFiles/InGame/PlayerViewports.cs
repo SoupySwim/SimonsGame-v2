@@ -28,6 +28,7 @@ namespace SimonsGame.Utility
 		#endregion
 
 		private Player _player;
+		public Player Player { get { return _player; } }
 
 		private PlayerHUD _playerHUD;
 		private Texture2D _backgroundColor; // TODO change to layers of images.
@@ -42,6 +43,7 @@ namespace SimonsGame.Utility
 		private Viewport _viewport;
 		private Vector2 _levelSize;
 		private float _scaledAmount;
+		public float Scale { get { return _scaledAmount; } }
 		#endregion
 
 		public PlayerViewport(Player player, Vector4 viewportBounds, Vector2 levelSize, float scale, GameStateManager manager)
@@ -83,7 +85,7 @@ namespace SimonsGame.Utility
 			ScrollCamera(_viewportBounds / _scaledAmount);
 			Matrix cameraTransform = Matrix.CreateTranslation(-_cameraPosition.X, -_cameraPosition.Y, 0.0f) * scaleMatrix;
 			spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.LinearWrap, DepthStencilState.None, RasterizerState.CullNone, null, cameraTransform);
-			level.DrawInViewport(gameTime, spriteBatch, _viewportBounds / _scaledAmount, _cameraPosition, _player);
+			Vector2 keyboardPlayerMousePosition = level.DrawInViewport(gameTime, spriteBatch, _viewportBounds / _scaledAmount, _cameraPosition, _player);
 			spriteBatch.End();
 
 			spriteBatch.Begin();
@@ -108,15 +110,18 @@ namespace SimonsGame.Utility
 				if (_showWonOverlay < TimeSpan.Zero)
 					_showWonOverlay = TimeSpan.Zero;
 			}
+
+			// If the player is THE mouse and keyboard player, then show the cursor on the top of everything.
+			if (_player != null && _player.UsesMouseAndKeyboard && keyboardPlayerMousePosition != Vector2.Zero)
+				spriteBatch.Draw(MainGame.Cursor, keyboardPlayerMousePosition - _cameraPosition, Color.Red);
 			spriteBatch.End();
 		}
 
-		public void Update(GameTime gameTime, GameStateManagerGameState gameState)
+		public void Update(GameTime gameTime, GameStateManagerGameState gameState, Vector2 newMousePosition)
 		{
+			Vector2 mousePos = newMousePosition - new Vector2(10, 10);
 			if (_playerState == PlayerState.InMenu)
-			{
-				_menuOverlay.Update(gameTime);
-			}
+				_menuOverlay.Update(gameTime, mousePos);
 			if (gameState != GameStateManagerGameState.StartingGame)
 			{
 				PlayerControls controls = GameStateManager.GetControlsForPlayer(_player);

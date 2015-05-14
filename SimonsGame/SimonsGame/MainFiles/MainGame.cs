@@ -37,6 +37,8 @@ namespace SimonsGame
 		private static PlayerManager _playerManager = new PlayerManager();
 		public static PlayerManager PlayerManager { get { return _playerManager; } }
 
+		public static Random Randomizer { get; private set; }
+
 		#region Graphics
 		public static SpriteFont PlainFont;
 		public static SpriteFont PlainFontLarge;
@@ -53,12 +55,14 @@ namespace SimonsGame
 		private static ContentManager _content;
 		#endregion
 
-		private MainGameState _gameState = MainGameState.Menu;
+		private static MainGameState _gameState = MainGameState.Menu;
+		public static MainGameState GameState { get { return _gameState; } }
 
 		public MainGame()
 		{
-			//CurrentWindowSize = new Vector2((float)SystemParameters.WorkArea.Width - 30, (float)SystemParameters.WorkArea.Height - 50);
-			CurrentWindowSize = new Vector2((float)SystemParameters.PrimaryScreenWidth, (float)SystemParameters.PrimaryScreenHeight);
+			Randomizer = new Random();
+			CurrentWindowSize = new Vector2((float)SystemParameters.WorkArea.Width - 30, (float)SystemParameters.WorkArea.Height - 50);
+			//CurrentWindowSize = new Vector2((float)SystemParameters.PrimaryScreenWidth, (float)SystemParameters.PrimaryScreenHeight);
 			graphics = new GraphicsDeviceManager(this);
 			graphics.PreferredBackBufferWidth = (int)CurrentWindowSize.X;
 			graphics.PreferredBackBufferHeight = (int)CurrentWindowSize.Y;
@@ -71,8 +75,8 @@ namespace SimonsGame
 				OpenTK.GameWindow openTKWindow = field.GetValue(Window) as OpenTK.GameWindow;
 				if (openTKWindow != null)
 				{
-					openTKWindow.X = 0;
-					openTKWindow.Y = 0;
+					openTKWindow.X = 10;
+					openTKWindow.Y = 10;
 				}
 
 				//openTKWindow.TopMost
@@ -148,11 +152,11 @@ namespace SimonsGame
 		{
 			// Get all the controls of the players
 			Tuple<MouseProperties, Dictionary<Guid, PlayerControls>> AllControlsTuple = Controls.GetControls(_playerManager);
-
+			Controls.Update(AllControlsTuple.Item2);
 			if (_gameState == MainGameState.Menu)
-				_menuStateManager.Update(gameTime, AllControlsTuple.Item2, AllControlsTuple.Item1.MousePosition);
+				_menuStateManager.Update(gameTime, AllControlsTuple.Item1.MousePosition);
 			else // (_gameState == MainGameState.Game)
-				_gameStateManager.Update(gameTime, AllControlsTuple.Item2, AllControlsTuple.Item1.MousePosition);
+				_gameStateManager.Update(gameTime, AllControlsTuple.Item1.MousePosition);
 
 			base.Update(gameTime);
 		}
@@ -179,9 +183,12 @@ namespace SimonsGame
 
 		public bool StartGame(GameSettings gameSettings)
 		{
+			_gameState = MainGameState.Game;
 			bool didLoadSuccessfully = _gameStateManager.StartNewGame(gameSettings);
-			if (didLoadSuccessfully)
-				_gameState = MainGameState.Game;
+			if (didLoadSuccessfully)// If it loaded, then initialize and start the game already!
+				_gameStateManager.Level.Initialize();
+			else
+				_gameState = MainGameState.Menu;
 			return didLoadSuccessfully;
 		}
 

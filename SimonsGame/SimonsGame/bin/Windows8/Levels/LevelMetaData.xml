@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Levels>
+  <Level LastModifiedOn="2/8/2015 1:32:50 PM" LevelName="Mario1-1" LevelRelativePath="" TeamCount="2" WinCondition="3" ScenarioType="1" X="8800" Y="1920" />
+  <Level LastModifiedOn="1/19/2015 9:01:27 PM" LevelName="Sprint 3 Demo" LevelRelativePath="" TeamCount="2" WinCondition="0" ScenarioType="1" X="2880" Y="2080" />
+  <Level LastModifiedOn="4/3/2015 12:12:18 AM" LevelName="RibbitRipoff" LevelRelativePath="" TeamCount="2" WinCondition="-1" ScenarioType="-1" X="4120" Y="1600" />
+  <Level LastModifiedOn="5/2/2015 1:28:16 AM" LevelName="BigMultiMap" LevelRelativePath="" TeamCount="2" WinCondition="1" ScenarioType="2" X="8000" Y="5160" />
+  <Level LastModifiedOn="1/19/2015 7:20:31 PM" LevelName="Alpha Mario Test" LevelRelativePath="" TeamCount="2" WinCondition="0" ScenarioType="1" X="8000" Y="1920" />
+  <Level LastModifiedOn="2/2/2015 7:58:16 PM" LevelName="Mario1-1 Complete" LevelRelativePath="" TeamCount="2" WinCondition="3" ScenarioType="1" X="8000" Y="1920" />
+  <Level LastModifiedOn="4/27/2015 6:39:09 PM" LevelName="Test Map" LevelRelativePath="" TeamCount="4" WinCondition="0" ScenarioType="1" X="1320" Y="1040" />
+  <Level LastModifiedOn="4/13/2015 11:05:02 PM" LevelName="UnfinishedMap" LevelRelativePath="" TeamCount="4" WinCondition="-1" ScenarioType="-1" X="9680" Y="6400" />
+  <Level LastModifiedOn="4/27/2015 6:29:30 PM" LevelName="Big Level" LevelRelativePath="" TeamCount="4" WinCondition="-1" ScenarioType="-1" X="4840" Y="6400" />
+  <Level LastModifiedOn="5/2/2015 2:14:36 AM" LevelName="TestMapEditor" LevelRelativePath="" TeamCount="2" WinCondition="1" ScenarioType="2" X="16000" Y="5160" />
+</Levels>

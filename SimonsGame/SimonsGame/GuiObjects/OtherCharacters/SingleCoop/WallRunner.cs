@@ -38,9 +38,10 @@ namespace SimonsGame.GuiObjects
 		public WallRunner(Vector2 position, Vector2 hitbox, Group group, Level level, bool movePositive)
 			: base(position, hitbox, group, level, "WallRunner")
 		{
+			_showHealthBar = true;
 			MaxSpeedBase = new Vector2(AverageSpeed.Y, AverageSpeed.Y);
 			AIStateDirection = movePositive ? WallRunnerDirection.MovePositive : WallRunnerDirection.MoveNegative;
-			_healthTotal = 6;
+			_healthTotal = 400;
 			_healthCurrent = _healthTotal;
 			AIStateFace = WallRunnerFace.Top; // ew.
 			MaxSpeed = new Vector2(AverageSpeed.Y, AverageSpeed.Y);
@@ -148,16 +149,16 @@ namespace SimonsGame.GuiObjects
 				AIStateFace = (WallRunnerFace)(((int)AIStateFace + moveFacesNumber) % 4);
 			}
 			else if ((AIStateFace == WallRunnerFace.Left || AIStateFace == WallRunnerFace.Right)
-				&& PrimaryOverlapObjects.ContainsKey(Orientation.Horizontal)
-				&& (_referenceBounds == Vector4.Zero || PrimaryOverlapObjects[Orientation.Horizontal].Bounds != _referenceBounds))
+				&& PrimaryOverlapObjects[Orientation.Horizontal].Any()
+				&& (_referenceBounds == Vector4.Zero || PrimaryOverlapObjects[Orientation.Horizontal].First().Bounds != _referenceBounds))
 			{
-				_referenceBounds = PrimaryOverlapObjects[Orientation.Horizontal].Bounds;
+				_referenceBounds = PrimaryOverlapObjects[Orientation.Horizontal].First().Bounds;
 			}
 			else if ((AIStateFace == WallRunnerFace.Top || AIStateFace == WallRunnerFace.Bottom)
-				&& PrimaryOverlapObjects.ContainsKey(Orientation.Vertical)
-				&& (_referenceBounds == Vector4.Zero || PrimaryOverlapObjects[Orientation.Vertical].Bounds != _referenceBounds))
+				&& PrimaryOverlapObjects[Orientation.Vertical].Any()
+				&& (_referenceBounds == Vector4.Zero || PrimaryOverlapObjects[Orientation.Vertical].First().Bounds != _referenceBounds))
 			{
-				_referenceBounds = PrimaryOverlapObjects[Orientation.Vertical].Bounds;
+				_referenceBounds = PrimaryOverlapObjects[Orientation.Vertical].First().Bounds;
 			}
 			base.PreUpdate(gameTime);
 		}
