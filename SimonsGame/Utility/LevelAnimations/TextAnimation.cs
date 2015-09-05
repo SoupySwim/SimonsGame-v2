@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using SimonsGame.GuiObjects;
 using System;
 using System.Collections.Generic;
@@ -23,20 +24,17 @@ namespace SimonsGame.Utility
 			TextColor = textColor;
 			_animate = animate;
 		}
-		public override void Draw(Microsoft.Xna.Framework.GameTime gameTime, Microsoft.Xna.Framework.Graphics.SpriteBatch spriteBatch)
+		public override void Update(GameTime gameTime)
 		{
 			_tickCount++;
-			//spriteBatch.Begin();
-			spriteBatch.DrawString(MainGame.PlainFont, Text, Position, TextColor);
-			//spriteBatch.End();
 			if (_tickCount >= _tickTotal)
-			{
 				Level.RemoveLevelAnimation(this);
-			}
 			else if (_animate && _tickCount % 3 == 0)
-			{
 				Position = new Vector2(Position.X, Position.Y - 1);
-			}
+		}
+		public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
+		{
+			spriteBatch.DrawString(MainGame.PlainFont, Text, Position, TextColor);
 		}
 	}
 }

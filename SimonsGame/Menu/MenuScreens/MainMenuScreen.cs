@@ -10,13 +10,14 @@ namespace SimonsGame.Menu
 	{
 		protected Vector2 _screenSize;
 		protected MenuStateManager _manager;
-		public MainMenuScreen(MenuStateManager manager)
+		public MainMenuScreen(MenuStateManager manager, Vector2 screenSize)
 		{
 			_manager = manager;
+			_screenSize = screenSize;
 		}
 		public override void MoveBack()
 		{
-			if (timeSpentOnScreen.TotalMilliseconds >= 500)
+			if (_timeSpentOnScreen >= _DELAY_ON_CLICK)
 				_manager.NavigateToPreviousScreen();
 		}
 		protected override void DrawExtra(GameTime gameTime, Microsoft.Xna.Framework.Graphics.SpriteBatch spriteBatch) { } // Default to nothing unless otherwise specified.

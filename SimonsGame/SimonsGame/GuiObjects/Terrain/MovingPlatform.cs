@@ -29,7 +29,7 @@ namespace SimonsGame.GuiObjects
 
 		public MovingPlatform(Vector2 position, Vector2 hitbox, Group group, Level level,
 			bool isVerticalMoving = false, int maxTravelDistance = 600, bool goingPositiveDirection = true)
-			: base(position, hitbox, group, level, "MovingPlatform")
+			: base(position, hitbox, group, level, "Moving Platform")
 		{
 			_verticalMoving = isVerticalMoving;
 			if (goingPositiveDirection == false)
@@ -37,37 +37,37 @@ namespace SimonsGame.GuiObjects
 			_goingPositiveDirection = !goingPositiveDirection;
 			_maxTravelDistance = maxTravelDistance;
 			_background = MainGame.ContentManager.Load<Texture2D>("Test/Platform");
+			AccelerationBase = new Vector2(1);
+			MaxSpeedBase = new Vector2(3, 2.5f);
+			IsMovable = true;
 		}
 		public override float GetXMovement()
 		{
 			if (_verticalMoving)
 				return 0;
 
-			float distance = _goingPositiveDirection ? 3 : -3;
-			_travelDistance += distance;
-			return distance;
+			return _goingPositiveDirection ? 3 : -3;
 		}
 		public override float GetYMovement()
 		{
 			if (!_verticalMoving)
 				return 0;
-			float distance = _goingPositiveDirection ? AverageSpeed.Y / 2 : -AverageSpeed.Y / 2;
-			_travelDistance += distance;
-			return distance;
+			return _goingPositiveDirection ? MaxSpeedBase.Y : -MaxSpeedBase.Y;
 		}
-		public override void AddCustomModifiers(GameTime gameTime, ModifierBase modifyAdd) { }
-		public override void MultiplyCustomModifiers(GameTime gameTime, ModifierBase modifyMult) { }
+
+		public override void PostUpdate(GameTime gameTime) { }
 		public override void PreUpdate(GameTime gameTime)
 		{
-			if (_travelDistance <= 0 || _travelDistance >= _maxTravelDistance)
+			if (_hitBoxColor == Color.Purple)
 			{
-				_goingPositiveDirection = !_goingPositiveDirection;
 			}
+			if (_travelDistance <= 0 || _travelDistance >= _maxTravelDistance)
+				_goingPositiveDirection = !_goingPositiveDirection;
+			_travelDistance += (_goingPositiveDirection ? 1 : -1) * Math.Abs(CurrentMovement.X != 0 ? CurrentMovement.X : CurrentMovement.Y);
 		}
-		public override void PostUpdate(GameTime gameTime) { }
 		public override void PreDraw(GameTime gameTime, Microsoft.Xna.Framework.Graphics.SpriteBatch spriteBatch) { }
 
-		public override void PostDraw(GameTime gameTime, SpriteBatch spriteBatch)
+		public override void PostDraw(GameTime gameTime, SpriteBatch spriteBatch, Player curPlayer)
 		{
 
 			int multX = Size.X < 0 ? -1 : 1;
@@ -79,7 +79,7 @@ namespace SimonsGame.GuiObjects
 					spriteBatch.Draw(_background, new Rectangle((int)(Position.X + addX + multX * w * _projectedWidth), (int)(Position.Y + addY + multY * h), (int)(_projectedWidth), (int)(_projectedHeight)), _hitBoxColor);
 			//spriteBatch.Draw(_background, Position + new Vector2(w * projectedHeight, h * projectedHeight), _hitBoxColor);
 		}
-		public override void ExtraSizeManipulation(Vector2 newSize)
+		public override void ExtraSizeManipulation(ref Vector2 newSize)
 		{
 			float sizeX = Math.Abs(newSize.X);
 			float sizeY = Math.Abs(newSize.Y);
@@ -101,8 +101,8 @@ namespace SimonsGame.GuiObjects
 		public override void SetMovement(GameTime gameTime) { }
 		public override void HitByObject(MainGuiObject mgo, ModifierBase mb)
 		{
-			if (!_verticalMoving && (mgo as PhysicsObject).IsLanded)
-				mgo.Position = new Vector2(mgo.Position.X + (_goingPositiveDirection ? 3 : -3), mgo.Position.Y);
+			//if (!_verticalMoving && (mgo as PhysicsObject).IsLanded)
+			//	mgo.Position = new Vector2(mgo.Position.X + (_goingPositiveDirection ? 3 : -3), mgo.Position.Y);
 		}
 		public override string GetSpecialTitle(ButtonType bType)
 		{

@@ -12,11 +12,11 @@ namespace SimonsGame.Modifiers
 	{
 		protected Func<GameTime, bool> IsExpiredFunction;
 
-		public CustomModifier(Func<GameTime, bool> isExpiredFunc, ModifyType type, MainGuiObject owner, Element element)
+		public CustomModifier(Func<GameTime, bool> isExpiredFunc, ModifyType type, MainGuiObject owner, Tuple<Element, float> element)
 			: base(type, owner, element)
 		{
 		}
-		public CustomModifier(ModifyType type, MainGuiObject owner, Element element)
+		public CustomModifier(ModifyType type, MainGuiObject owner, Tuple<Element, float> element)
 			: base(type, owner, element)
 		{
 			IsExpiredFunction = (g) => false;
@@ -29,7 +29,7 @@ namespace SimonsGame.Modifiers
 		{
 			//nothing needed here.  Must be handled in children.
 		}
-		public override ModifierBase Clone()
+		public override ModifierBase Clone(Guid id)
 		{
 			CustomModifier mod = new CustomModifier(IsExpiredFunction, Type, _owner, Element);
 			if (Type == ModifyType.Add)

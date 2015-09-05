@@ -105,6 +105,8 @@ namespace SimonsGame.Modifiers
 	{
 		private PhysicsObject _character;
 
+		public float Experience { get; set; }
+
 		// Performance Idea: DONE!!
 		// Seperate list with PlayerAbilityInfo.
 		// All other instances only store the Guid.
@@ -142,6 +144,8 @@ namespace SimonsGame.Modifiers
 		// when they stop.
 		private Dictionary<Guid, int> _layoverCounter;
 
+		private Vector2 _vector2One = new Vector2(1);
+
 		// These are the abilities that are currently active on the user.
 		private Dictionary<Guid, ModifierBase> _currentAbilities = new Dictionary<Guid, ModifierBase>();
 		public Dictionary<Guid, ModifierBase> CurrentAbilities { get { return _currentAbilities; } }
@@ -156,6 +160,8 @@ namespace SimonsGame.Modifiers
 			ActiveAbilities = new HashSet<Guid>();
 			AbilityButtonMap = KnownAbilities.Values.SelectMany(ps => ps).ToDictionary(pi => pi, pi => AvailableButtons.None);
 			UsableButtons = usableButtons;
+
+			Experience = 0;
 		}
 
 		public void AddKnownAbility(KnownAbility type, PlayerAbilityInfo abilityInfo)
@@ -175,7 +181,7 @@ namespace SimonsGame.Modifiers
 
 		public void CheckKnownAbilities(GameTime gameTime)
 		{
-
+			Experience += _character.PassiveExperienceGain * _character.PassiveExperienceGainMultiplier;
 			// Check to see if any abilities have been used.
 			foreach (KeyValuePair<KnownAbility, List<Guid>> pair in KnownAbilities)
 			{
@@ -183,17 +189,17 @@ namespace SimonsGame.Modifiers
 				{
 					PlayerAbilityInfo pai = _abilityMap[abilityId];
 					if (ShouldRechargeAbility(abilityId, pai))
-					{
 						_character.UseMana(pai.ReChargeAmount);
-					}
+
 					if (CanUseAbility(abilityId, pai))
 					{
-						ModifierBase currentModifier = pai.Modifier.Clone();
+						ModifierBase currentModifier = pai.Modifier.Clone(pai.GetNextAbilityId());// (pai is MultiPlayerAbilityInfo ? Guid.Empty : pai.Modifier.Id);
 						//currentModifier.Reset();
-						_currentAbilities.Add(pai.GetNextAbilityId(), currentModifier);
+						AddAbility(currentModifier);
+						//_currentAbilities.Add(pai.GetNextAbilityId(), currentModifier);
 
-						if (ShouldStartCooldownImmediately(pai))
-							_coolDownCounter.Add(abilityId, new TimeSpan(1));
+						//if (ShouldStartCooldownImmediately(pai))
+						_coolDownCounter.Add(abilityId, new TimeSpan(1));
 						_character.UseMana(pai.CastAmount);
 					}
 
@@ -218,10 +224,10 @@ namespace SimonsGame.Modifiers
 			}
 		}
 
-		private bool ShouldStartCooldownImmediately(PlayerAbilityInfo playerAbilityInfo)
-		{
-			return playerAbilityInfo is MultiPlayerAbilityInfo;
-		}
+		//private bool ShouldStartCooldownImmediately(PlayerAbilityInfo playerAbilityInfo)
+		//{
+		//	return true;// playerAbilityInfo is MultiPlayerAbilityInfo;
+		//}
 
 		private bool ShouldRechargeAbility(Guid id, PlayerAbilityInfo playerAbilityInfo)
 		{
@@ -234,10 +240,12 @@ namespace SimonsGame.Modifiers
 		}
 		public bool CanUseAbility(Guid id, PlayerAbilityInfo playerAbilityInfo)
 		{
+			Player curPlayer = _character as Player;
 			TimeSpan coolDownTime;
 			return playerAbilityInfo.IsUsable(this)
-				&& playerAbilityInfo.CastAmount <= _character.ManaCurrent
-				&& ((!_coolDownCounter.TryGetValue(playerAbilityInfo.Id, out coolDownTime) || coolDownTime == TimeSpan.Zero) || (playerAbilityInfo.ReChargeAmount > 0 && _layoverCounter.ContainsKey(playerAbilityInfo.Id)));
+				&& (curPlayer == null || !curPlayer.NotAcceptingControls)
+			 && playerAbilityInfo.CastAmount <= _character.ManaCurrent
+			 && ((!_coolDownCounter.TryGetValue(playerAbilityInfo.Id, out coolDownTime) || (playerAbilityInfo is MultiPlayerAbilityInfo && coolDownTime == TimeSpan.Zero)) || (playerAbilityInfo.ReChargeAmount > 0 && _layoverCounter.ContainsKey(playerAbilityInfo.Id)));
 		}
 
 		public void HasExpired(Guid id)
@@ -245,7 +253,7 @@ namespace SimonsGame.Modifiers
 			_currentAbilities.Remove(id);
 			if (_knownAbilityIds.Contains(id))
 			{
-				_coolDownCounter.Add(id, new TimeSpan(1));
+				//_coolDownCounter.Add(id, new TimeSpan(1));
 				_layoverCounter.Add(id, 1);
 			}
 		}
@@ -256,14 +264,29 @@ namespace SimonsGame.Modifiers
 			if (mb == null)
 				return;
 			if (!_currentAbilities.ContainsKey(mb.Id))
+			{
+				if ((mb.Type == ModifyType.Add && mb.KnockBack != Vector2.Zero)
+					|| (mb.Type == ModifyType.Multiply && mb.KnockBack != _vector2One))
+				{
+					foreach (var ability in _currentAbilities.Where(kv => (kv.Value.Type == ModifyType.Add && kv.Value.KnockBack != Vector2.Zero)
+					|| (kv.Value.Type == ModifyType.Multiply && kv.Value.KnockBack != _vector2One)).ToList())
+						_currentAbilities.Remove(ability.Key);//.Value.KnockBack = ability.Value.Type == ModifyType.Add ? Vector2.Zero : _vector2One;
+					if (((_character.CurrentMovement.X < 0 ? -1 : 1) * _character.CurrentMovement.X) > _character.MaxSpeed.X)
+						_character.CurrentMovement.X = 0;
+					_character.CurrentMovement.Y = 0;
+
+				}
 				_currentAbilities.Add(mb.Id, mb);
+			}
 		}
 		public float CoolDownTimer(Guid abilityId)
 		{
-			PlayerAbilityInfo pai = _abilityMap[abilityId];
 			TimeSpan timeInCooldown;
 			if (_coolDownCounter.TryGetValue(abilityId, out timeInCooldown))
+			{
+				PlayerAbilityInfo pai = _abilityMap[abilityId];
 				return (float)(pai.Cooldown.TotalMilliseconds - timeInCooldown.TotalMilliseconds);
+			}
 			return 0;
 		}
 

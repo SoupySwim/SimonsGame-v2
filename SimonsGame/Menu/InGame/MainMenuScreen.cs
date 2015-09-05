@@ -16,8 +16,8 @@ namespace SimonsGame.Menu
 		}
 		public override void MoveBack()
 		{
-			if (timeSpentOnScreen.TotalMilliseconds >= 500)
-				_manager.NavigateToPreviousScreen();
+			//if (_timeSpentOnScreen >= _DELAY_ON_CLICK)
+			//	_manager.NavigateToPreviousScreen();
 		}
 		protected override void DrawExtra(GameTime gameTime, Microsoft.Xna.Framework.Graphics.SpriteBatch spriteBatch) { } // Default to nothing unless otherwise specified.
 	}

@@ -22,12 +22,12 @@ namespace SimonsGame.GuiObjects
 		protected Animation _idleAnimation;
 		private bool _overrideJump = false;
 		public MovingCharacter(Vector2 position, Vector2 hitbox, Group group, Level level, bool moveRight)
-			: base(position, hitbox, group, level, "MovingCharacter")
+			: base(position, hitbox, group, level, "Moving Character")
 		{
 			_showHealthBar = true;
 			MaxSpeedBase = new Vector2(AverageSpeed.X, AverageSpeed.Y);
 			AIState = moveRight ? MoveCharacterAIState.MoveRight : MoveCharacterAIState.MoveLeft;
-			_healthTotal = 600;
+			_healthTotal = 200;
 			_healthCurrent = _healthTotal;
 			_idleAnimation = new Animation(MainGame.ContentManager.Load<Texture2D>("Test/Mover"), 1, false, 80, 160, (Size.X / 80.0f));
 			_animator.Color = Color.LightPink;
@@ -36,7 +36,7 @@ namespace SimonsGame.GuiObjects
 			Dictionary<KnownAbility, List<PlayerAbilityInfo>> abilities = new Dictionary<KnownAbility, List<PlayerAbilityInfo>>();
 
 			List<PlayerAbilityInfo> jumpInfos = new List<PlayerAbilityInfo>();
-			jumpInfos.Add(AbilityBuilder.GetJumpAbility(this, 1.5f));
+			jumpInfos.Add(AbilityBuilder.GetJumpAbility(this, 1.6f));
 
 			abilities.Add(KnownAbility.Jump, jumpInfos);
 			PlayerAbilityInfo jumpPai = jumpInfos.First(ei => ei.Name == "Jump");
@@ -101,7 +101,7 @@ namespace SimonsGame.GuiObjects
 			base.PreUpdate(gameTime);
 		}
 		public override void PreDraw(GameTime gameTime, Microsoft.Xna.Framework.Graphics.SpriteBatch spriteBatch) { }
-		public override void PostDraw(GameTime gameTime, Microsoft.Xna.Framework.Graphics.SpriteBatch spriteBatch) { }
+		public override void PostDraw(GameTime gameTime, Microsoft.Xna.Framework.Graphics.SpriteBatch spriteBatch, Player curPlayer) { }
 		public override void SetMovement(GameTime gameTime) { }
 		public override void HitByObject(MainGuiObject mgo, ModifierBase mb)
 		{

@@ -25,7 +25,7 @@ namespace SimonsGame.GuiObjects.Utility
 			MainGuiObject LandedOnPlatform = _player.PrimaryOverlapObjects[Orientation.Vertical].FirstOrDefault();
 			if (_player.Position == _player.PreviousPosition)
 				_movePositive = !_movePositive;
-			else if (LandedOnPlatform != null 
+			else if (LandedOnPlatform != null
 				&& (_player.Position.X < LandedOnPlatform.Position.X || _player.Position.X + _player.Size.X > LandedOnPlatform.Position.X + LandedOnPlatform.Size.X))
 				_movePositive = !_movePositive;
 			int xMovement = _movePositive ? 1 : -1;

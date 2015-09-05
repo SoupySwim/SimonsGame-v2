@@ -13,22 +13,21 @@ namespace SimonsGame.GuiObjects.ElementalMagic
 {
 	// First draft of Short Range Magic.
 	// First draft will not include type of magic as that comes at a later sprint.
-	public class ShortRangeProjectileMagic : PhysicsObject
+	public class ShortRangeProjectileMagic : PlayerMagicObject
 	{
 		private Texture2D _leaf;
 		private float radians = 0;
-		private Player _player;
+		public ModifierBase DamageDoneOnCollide { get { return _damageDoneOnCollide; } }
 		private ModifierBase _damageDoneOnCollide;
 
 
-		public ShortRangeProjectileMagic(Vector2 position, Vector2 hitbox, Group group, Level level, Vector2 speed, Player player)
-			: base(position, hitbox, group, level, "ShortRangeProjectileMagic")
+		public ShortRangeProjectileMagic(Vector2 position, Vector2 hitbox, Group group, Level level, Vector2 speed, Player player, Tuple<Element, float> element, float damage)
+			: base(position, hitbox, group, level, player, "ShortRangeProjectileMagic", null)
 		{
 			MaxSpeedBase = speed;
-			_leaf = level.Content.Load<Texture2D>("Test/leaf");
-			_damageDoneOnCollide = new TickModifier(1, ModifyType.Add);
-			_damageDoneOnCollide.SetHealthTotal(-2);
-			_player = player;
+			_leaf = MainGame.ContentManager.Load<Texture2D>("Test/leaf");
+			_damageDoneOnCollide = new TickModifier(1, ModifyType.Add, _character, element);
+			_damageDoneOnCollide.SetHealthTotal(damage);
 			Parent = player;
 		}
 
@@ -44,22 +43,29 @@ namespace SimonsGame.GuiObjects.ElementalMagic
 		public override void PostUpdate(GameTime gameTime)
 		{
 			base.PostUpdate(gameTime);
-			Dictionary<Group, List<MainGuiObject>> guiObjects = Level.GetAllGuiObjects().Where(kv => kv.Key != Group.Passable).ToDictionary(kv => kv.Key, kv => kv.Value);
-			IEnumerable<Tuple<DoubleVector2, MainGuiObject>> hitPlatforms = GetHitObjects(guiObjects, this.HitBoxBounds, (mgo) => mgo.Id == _player.Id);
-			if (hitPlatforms.Any()) // Probably apply any effects it would have.
+			MainGuiObject hitMgo = null;
+			var hitObjects = PrimaryOverlapObjects.SelectMany(mgos => mgos.Value);
+			if (hitObjects.Any())
+				hitMgo = hitObjects.FirstOrDefault();
+			else
 			{
-				MainGuiObject mgo = hitPlatforms.First().Item2;
-				mgo.HitByObject(this, _damageDoneOnCollide);
+				IEnumerable<MainGuiObject> guiObjects = Level.GetPossiblyHitEnvironmentObjects(this.Bounds);
+				IEnumerable<Tuple<Vector2, MainGuiObject>> hitPlatforms = GetHitObjects(guiObjects, this.HitBoxBounds).Where(tup => tup.Item2.Id != _character.Id && tup.Item2.Team != Team);
+				hitPlatforms = hitPlatforms.Where(hp => hp.Item2.Team != Team);
+				hitMgo = hitPlatforms.Any() ? hitPlatforms.First().Item2 : null;
+			}
+			if (hitMgo != null) // Probably apply any effects it would have.
+			{
+				hitMgo.HitByObject(this, _damageDoneOnCollide);
 				Level.RemoveGuiObject(this);
 			}
 		}
 
 		public override void PreDraw(GameTime gameTime, Microsoft.Xna.Framework.Graphics.SpriteBatch spriteBatch) { }
 		public override void PreUpdate(GameTime gameTime) { }
-		public override void PostDraw(GameTime gameTime, Microsoft.Xna.Framework.Graphics.SpriteBatch spriteBatch)
+		public override void PostDraw(GameTime gameTime, Microsoft.Xna.Framework.Graphics.SpriteBatch spriteBatch, Player curPlayer)
 		{
 			//spriteBatch.Begin();
-			Rectangle destinationRect = new Rectangle((int)Position.X, (int)Position.Y, (int)Size.X, (int)Size.Y);
 
 			float scale = Size.Y / _leaf.Height;
 			spriteBatch.Draw(_leaf, Position + (Size / 2), null, Color.White, radians, new Vector2(_leaf.Width / 2, _leaf.Height / 2), scale, SpriteEffects.None, 0);
@@ -73,5 +79,13 @@ namespace SimonsGame.GuiObjects.ElementalMagic
 			return false;
 		}
 		public override void HitByObject(MainGuiObject mgo, ModifierBase mb) { }
+		protected override IEnumerable<MainGuiObject> GetAllVerticalPassableGroups(IEnumerable<MainGuiObject> guiObjects)
+		{
+			return guiObjects.Where(mgo => mgo.Team != Parent.Team);
+		}
+		protected override IEnumerable<MainGuiObject> GetAllHorizontalPassableGroups(IEnumerable<MainGuiObject> guiObjects)
+		{
+			return guiObjects.Where(mgo => mgo.Team != Parent.Team);
+		}
 	}
 }

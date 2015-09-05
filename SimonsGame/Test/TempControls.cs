@@ -12,7 +12,7 @@ namespace SimonsGame.Test
 		//This would be read from a file?
 		public static UsableInputMap GetPlayerInput(int playerNumber)
 		{
-			if (playerNumber == 1)
+			if (playerNumber > 0)
 			{
 				ControllerUsableInputMap inputMap = new ControllerUsableInputMap();
 				inputMap.IsAi = false;
@@ -25,8 +25,9 @@ namespace SimonsGame.Test
 				inputMap.Add(AvailableButtons.LeftBumper, (int)Buttons.LeftShoulder);
 				inputMap.Add(AvailableButtons.RightBumper, (int)Buttons.RightShoulder);
 				inputMap.Add(AvailableButtons.Start, (int)Buttons.Start);
+				inputMap.Add(AvailableButtons.Start2, (int)Buttons.Start);
 				inputMap.Add(AvailableButtons.Select, (int)Buttons.Back);
-				inputMap.PlayerIndex = PlayerIndex.One;
+				inputMap.PlayerIndex = playerNumber == 1 ? PlayerIndex.One : PlayerIndex.Two; // Three players for now
 
 				return inputMap;
 			}
@@ -37,12 +38,13 @@ namespace SimonsGame.Test
 				inputMap.Add(AvailableButtons.Action, (int)Keys.Q);
 				inputMap.Add(AvailableButtons.Secondary, (int)Keys.E);
 				inputMap.Add(AvailableButtons.Third, (int)Keys.Z);
-				inputMap.Add(AvailableButtons.Fourth, (int)Keys.X);
+				inputMap.Add(AvailableButtons.Fourth, (int)Keys.LeftShift);
 				inputMap.Add(AvailableButtons.LeftTrigger, (int)Keys.D1);
 				inputMap.Add(AvailableButtons.RightTrigger, (int)Keys.D2);
-				inputMap.Add(AvailableButtons.LeftBumper, (int)Keys.D3);
+				inputMap.Add(AvailableButtons.LeftBumper, (int)Keys.LeftControl);
 				inputMap.Add(AvailableButtons.RightBumper, (int)Keys.D4);
 				inputMap.Add(AvailableButtons.Start, (int)Keys.Enter);
+				inputMap.Add(AvailableButtons.Start2, (int)Keys.Escape);
 				inputMap.Add(AvailableButtons.Select, (int)Keys.RightShift);
 				inputMap.Up = Keys.W;
 				inputMap.Down = Keys.S;

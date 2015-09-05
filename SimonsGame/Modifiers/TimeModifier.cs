@@ -1,8 +1,10 @@
 ﻿using Microsoft.Xna.Framework;
+using SimonsGame.GuiObjects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using SimonsGame.Utility;
 
 namespace SimonsGame.Modifiers
 {
@@ -10,8 +12,8 @@ namespace SimonsGame.Modifiers
 	{
 		private TimeSpan _gameTimeLimit;
 		private TimeSpan _currentGameCount;
-		public TimeModifier(TimeSpan gameTicks, ModifyType type)
-			: base(type)
+		public TimeModifier(TimeSpan gameTicks, ModifyType type, MainGuiObject owner, Tuple<Element, float> element)
+			: base(type, owner, element)
 		{
 			_gameTimeLimit = gameTicks;
 			_currentGameCount = TimeSpan.Zero;
@@ -25,14 +27,16 @@ namespace SimonsGame.Modifiers
 		{
 			_currentGameCount = TimeSpan.Zero;
 		}
-		public override ModifierBase Clone()
+		public override ModifierBase Clone(Guid id)
 		{
-			TimeModifier mod = new TimeModifier(_gameTimeLimit, Type);
+			TimeModifier mod = new TimeModifier(_gameTimeLimit, Type, _owner, Element);
 			if (Type == ModifyType.Add)
 				mod = (TimeModifier)(mod + this);
 			else
 				mod = (TimeModifier)(mod * this);
 			return mod;
 		}
+		public override long GetTickCount() { return (long)(_gameTimeLimit.Milliseconds * (60.0f / 1000)); }
+		public override void SetTickCount(long value) { _gameTimeLimit = new TimeSpan(0, 0, 0, 0, (int)((1000.0f / 60) * value)); }
 	}
 }

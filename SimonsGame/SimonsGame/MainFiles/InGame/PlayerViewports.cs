@@ -7,6 +7,8 @@ using System.Linq;
 using System.Text;
 using SimonsGame.Extensions;
 using SimonsGame.Menu;
+using SimonsGame.Menu.MenuScreens;
+using SimonsGame.Menu.InGame;
 
 namespace SimonsGame.Utility
 {
@@ -15,8 +17,9 @@ namespace SimonsGame.Utility
 		private enum PlayerState
 		{
 			PlayGame, // If no menus are open, then we are in this state.
-			InMenu // If we are in the main in game menu, then we are in this state.
+			InMenu, // If we are in the main in game menu, then we are in this state.
 			//ShortcutMenu // If we activated the shortcut menu, then we are in this state.
+			ShortcutMenu
 		}
 
 		#region Overlay
@@ -25,6 +28,9 @@ namespace SimonsGame.Utility
 		private InGameMenu _menuOverlay;
 		private InGameOverlay _wonOverlay;
 		private TimeSpan _showWonOverlay = TimeSpan.Zero;
+		private ShortcutMenu _shortcutMenu;
+		private InGameMenu _startupOverlay;
+		public StartupChoiceMenu StartupOverlay;
 		#endregion
 
 		private Player _player;
@@ -66,13 +72,34 @@ namespace SimonsGame.Utility
 			_wonOverlay = new InGameOverlay("You Won!", overlaySize, MainGame.PlainFontLarge);
 			_menuOverlay = new InGameMenu(_player, new Vector4(10, 10, viewportBounds.Z - 20, viewportBounds.W - 20), manager);
 
+
+			// So, the hover bounds must be width of 100, but we gotta make sure it meets with the
+			// end of the all magic pane and doesn't extend past 50px from the end of the screen.
+			Vector4 inGameStatusMenuBounds = new Vector4(_menuOverlay.Bounds.X, _menuOverlay.Bounds.Y, _menuOverlay.Bounds.Z, _menuOverlay.Bounds.W * .85f);
+			float hoverX = _menuOverlay.Bounds.X + _menuOverlay.Bounds.W - 220;
+			float hoverX2 = _menuOverlay.Bounds.X + inGameStatusMenuBounds.W - 20;
+			hoverX = hoverX > hoverX2 ? hoverX2 : hoverX;
+			Vector4 allMagicHoverBounds = new Vector4(hoverX, _menuOverlay.Bounds.Y, _menuOverlay.Bounds.Z, 180);
+			InGameStatusMenu statusMenu = new InGameStatusMenu(inGameStatusMenuBounds, _player, allMagicHoverBounds);
+			_menuOverlay.SetupScreen(new MainInGameMenu(_menuOverlay, _menuOverlay.Bounds, statusMenu));
+
+			StartupOverlay = new StartupChoiceMenu(player, new Vector4(10, 10, viewportBounds.Z - 20, viewportBounds.W - 20));
+			_startupOverlay = new InGameMenu(_player, new Vector4(10, 10, viewportBounds.Z - 20, viewportBounds.W - 20), manager);
+			_startupOverlay.SetupScreen(StartupOverlay);
+
+
+			_shortcutMenu = new ShortcutMenu(_player, new Vector4(10, 10, viewportBounds.Z - 20, viewportBounds.W - 20));
+			_startupOverlay.SetupScreen(StartupOverlay);
+
 			_playerState = PlayerState.PlayGame;
 
 		}
+
 		public void SetCountdown(TimeSpan timeLeft)
 		{
 			_countdownOverlay.Text = string.Format("Ready?\r\n{0:0.0} seconds", timeLeft.TotalSeconds);
 		}
+
 		public void Draw(GameTime gameTime, SpriteBatch spriteBatch, Level level, GameStateManagerGameState gameState)
 		{
 			spriteBatch.GraphicsDevice.Viewport = _viewport;
@@ -91,17 +118,15 @@ namespace SimonsGame.Utility
 			spriteBatch.Begin();
 			_playerHUD.Draw(gameTime, spriteBatch);
 
-
-			//if (gameState == GameStateManagerGameState.Paused)
-			//{
-			//	_pauseOverlay.Draw(gameTime, spriteBatch);
-			//}
-			//else
-			if (gameState == GameStateManagerGameState.StartingGame)
+			if (gameState == GameStateManagerGameState.PreGame)
+				_startupOverlay.Draw(gameTime, spriteBatch);
+			else if (gameState == GameStateManagerGameState.StartingGame)
 				_countdownOverlay.Draw(gameTime, spriteBatch);
 
 			if (_playerState == PlayerState.InMenu)
 				_menuOverlay.Draw(gameTime, spriteBatch);
+			else if (_playerState == PlayerState.ShortcutMenu)
+				_shortcutMenu.Draw(gameTime, spriteBatch);
 
 			if (_showWonOverlay != TimeSpan.Zero)
 			{
@@ -122,11 +147,17 @@ namespace SimonsGame.Utility
 			Vector2 mousePos = newMousePosition - new Vector2(10, 10);
 			if (_playerState == PlayerState.InMenu)
 				_menuOverlay.Update(gameTime, mousePos);
-			if (gameState != GameStateManagerGameState.StartingGame)
+
+			if (gameState == GameStateManagerGameState.PreGame)
+			{
+				if (GameStateManager.GetPreviousControlsForPlayer(_player) != null)
+					_startupOverlay.Update(gameTime, mousePos);
+			}
+			else if (gameState != GameStateManagerGameState.StartingGame)
 			{
 				PlayerControls controls = GameStateManager.GetControlsForPlayer(_player);
 				PlayerControls prevControls = GameStateManager.GetControlsForPlayer(_player);
-				bool toggleMenuState = Controls.PressedDown(_player.Id, AvailableButtons.Start);
+				bool toggleMenuState = Controls.PressedDown(_player.Id, AvailableButtons.Start | AvailableButtons.Start2);
 				if (toggleMenuState && _playerState == PlayerState.InMenu)
 				{
 					_playerState = PlayerState.PlayGame;
@@ -136,6 +167,22 @@ namespace SimonsGame.Utility
 				{
 					_playerState = PlayerState.InMenu;
 					_player.NotAcceptingControls = true;
+				}
+				if (_playerState == PlayerState.PlayGame && Controls.AllControls[_player.Id].OpenShortcutMenu)
+				{
+					_playerState = PlayerState.ShortcutMenu;
+					_shortcutMenu.OpenShortcutMenu();
+				}
+				if (_playerState == PlayerState.ShortcutMenu)
+				{
+					_player.NotAcceptingControls = true;
+					if (!Controls.AllControls[_player.Id].OpenShortcutMenu)
+						_playerState = PlayerState.PlayGame;
+					_shortcutMenu.Update(gameTime);
+				}
+				else
+				{
+					_player.NotAcceptingControls = false;
 				}
 			}
 		}

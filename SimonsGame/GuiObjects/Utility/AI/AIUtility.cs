@@ -22,26 +22,23 @@ namespace SimonsGame.GuiObjects.Utility
 
 		public PlayerControls GetAiControls(PlayerControls previousControls)
 		{
-			MainGuiObject LandedOnPlatform;
+			MainGuiObject LandedOnPlatform = _player.PrimaryOverlapObjects[Orientation.Vertical].FirstOrDefault();
 			if (_player.Position == _player.PreviousPosition)
 				_movePositive = !_movePositive;
-			else if (_player.PrimaryOverlapObjects.TryGetValue(Orientation.Vertical, out LandedOnPlatform)
+			else if (LandedOnPlatform != null
 				&& (_player.Position.X < LandedOnPlatform.Position.X || _player.Position.X + _player.Size.X > LandedOnPlatform.Position.X + LandedOnPlatform.Size.X))
 				_movePositive = !_movePositive;
 			int xMovement = _movePositive ? 1 : -1;
 
-
-
-
 			AvailableButtons pressedButtons = AvailableButtons.Default;
 			_sprint3TickCounter++;
 
-			Player closestPlayer = _player.Level.Players.Where(pl => pl.Key != _player.Id).Select(pl => pl.Value).OrderBy(pl => { Vector2 diff = (pl.Center - _player.Center); return Math.Sqrt(diff.X * diff.X + diff.Y * diff.Y); }).FirstOrDefault();
+			Player closestPlayer = _player.Level.Players.Where(pl => pl.Key != _player.Id && (_player.Team == Team.None || pl.Value.Team != _player.Team)).Select(pl => pl.Value).OrderBy(pl => { Vector2 diff = (pl.Center - _player.Center); return Math.Sqrt(diff.X * diff.X + diff.Y * diff.Y); }).FirstOrDefault();
 
 			LongRangeElementalMagicAbility lrm = (LongRangeElementalMagicAbility)_player.AbilityManager.CurrentAbilities.Select(kv => kv.Value).FirstOrDefault(m => m is LongRangeElementalMagicAbility);
 
 			if (lrm != null && lrm.TestMagic != null && closestPlayer != null
-				&& MainGuiObject.GetIntersectionDepth(closestPlayer.Bounds, lrm.TestMagic.HitBoxBounds) != DoubleVector2.Zero)
+				&& MainGuiObject.GetIntersectionDepth(closestPlayer.Bounds, lrm.TestMagic.HitBoxBounds) != Vector2.Zero)
 			{
 				pressedButtons = pressedButtons | AvailableButtons.RightBumper;
 			}

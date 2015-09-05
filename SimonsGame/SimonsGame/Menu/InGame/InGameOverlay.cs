@@ -12,7 +12,9 @@ namespace SimonsGame.Menu
 	{
 		public string Text;
 		private Vector4 _bounds;
+		public Vector4 Bounds { get { return _bounds; } }
 		private SpriteFont _usedFont;
+		private Color _backgroundColor = new Color(.1f, .1f, .1f, .75f);
 		public InGameOverlay(string textToDisplay, Vector4 bounds, SpriteFont usedFont = null)
 		{
 			Text = textToDisplay;
@@ -24,7 +26,7 @@ namespace SimonsGame.Menu
 		{
 			Vector2 stringSize = _usedFont.MeasureString(Text);
 			Vector2 stringPosition = new Vector2(_bounds.X + _bounds.W / 2 - stringSize.X / 2, _bounds.Y + _bounds.Z / 2 - stringSize.Y / 2);
-			spriteBatch.Draw(MainGame.SingleColor, _bounds.ToRectangle(), new Color(.1f, .1f, .1f, .75f));
+			spriteBatch.Draw(MainGame.SingleColor, _bounds.ToRectangle(), _backgroundColor);
 			if (Text != "")
 				spriteBatch.DrawString(_usedFont, Text, stringPosition, Color.White);
 		}

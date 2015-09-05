@@ -25,6 +25,20 @@ namespace SimonsGame
 			});
 			return guid;
 		}
+		public void RemovePlayer(Guid id)
+		{
+			_playerInputMap.Remove(id);
+			_playerInfoMap.Remove(id);
+		}
+
+		public void RemoveAllAiPlayers()
+		{
+			_playerInputMap.Where(kv => kv.Value.IsAi).ToList().ForEach(kv => RemovePlayer(kv.Key));
+		}
+		public void RemoveAllPlayers()
+		{
+			_playerInputMap.ToList().ForEach(kv => RemovePlayer(kv.Key));
+		}
 	}
 
 	public class UsableInputMap : Dictionary<AvailableButtons, int>

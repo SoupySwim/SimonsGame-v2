@@ -7,16 +7,20 @@ using System.Text;
 
 namespace SimonsGame.Menu
 {
-	public abstract class MenuItem
+	public abstract class MenuItemButton
 	{
 		public bool IsHighLighted { get; set; }
 		private Action _selectedAcion;
 		public Action SelectedAcion { get { return _selectedAcion; } }
 		public Vector4 Bounds { get; set; }
-		public MenuItem(Action selectedAcion, Vector4 bounds)
+		public Vector4 TotalBounds { get { return Bounds + new Vector4(-Padding.X / 2, -Padding.Y / 2, Padding.Y, Padding.X); } }
+		public Vector2 Padding { get; set; }
+		public MenuItemButton(Action selectedAcion, Vector4 bounds) : this(selectedAcion, bounds, Vector2.Zero) { }
+		public MenuItemButton(Action selectedAcion, Vector4 bounds, Vector2 padding)
 		{
 			_selectedAcion = selectedAcion;
 			Bounds = bounds;
+			Padding = padding;
 		}
 		public abstract void HasBeenHighlighted();
 		public abstract void HasBeenDeHighlighted();
@@ -26,5 +30,8 @@ namespace SimonsGame.Menu
 		{
 			_selectedAcion();
 		}
+		public virtual void OverrideColor(Color color) { }
+
+		public virtual bool IsStuck(Direction2D direction) { return false; }
 	}
 }

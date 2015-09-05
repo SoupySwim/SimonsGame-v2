@@ -12,7 +12,7 @@ namespace SimonsGame.Modifiers
 	{
 		private TimeSpan _gameTimeLimit;
 		private TimeSpan _currentGameCount;
-		public TimeModifier(TimeSpan gameTicks, ModifyType type, MainGuiObject owner, Element element)
+		public TimeModifier(TimeSpan gameTicks, ModifyType type, MainGuiObject owner, Tuple<Element, float> element)
 			: base(type, owner, element)
 		{
 			_gameTimeLimit = gameTicks;
@@ -27,7 +27,7 @@ namespace SimonsGame.Modifiers
 		{
 			_currentGameCount = TimeSpan.Zero;
 		}
-		public override ModifierBase Clone()
+		public override ModifierBase Clone(Guid id)
 		{
 			TimeModifier mod = new TimeModifier(_gameTimeLimit, Type, _owner, Element);
 			if (Type == ModifyType.Add)

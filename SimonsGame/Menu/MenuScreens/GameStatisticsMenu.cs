@@ -14,22 +14,22 @@ namespace SimonsGame.Menu.MenuScreens
 		private string _endGameStatistics = "";
 		private Vector2 _textPosition;
 		public GameStatisticsMenu(MenuStateManager manager, Vector2 screenSize)
-			: base(manager)
+			: base(manager, screenSize)
 		{
-			_menuLayout = new MenuItem[1][];
-			_menuLayout[0] = new MenuItem[1];
-			_screenSize = screenSize;
-			_menuLayout[0][0] = new TextMenuItem(new Action(() => { _manager.NavigateToPreviousScreen(); }), "Done",
-				"Done".GetTextBoundsByCenter(MainGame.PlainFont, new Vector2(_screenSize.X / 2, 20)), true);
+			_menuLayout = new MenuItemButton[1][];
+			_menuLayout[0] = new MenuItemButton[1];
+			_menuLayout[0][0] = new TextMenuItemButton(new Action(() => { _manager.NavigateToPreviousScreen(); }), "Done",
+				"Done".GetTextBoundsByCenter(MainGame.PlainFont, new Vector2(_screenSize.X / 2, 40)), new Vector2(60, 30), true);
 		}
 		public void PopulateGameStatistics(GameStatistics gameStatistics)
 		{
 			_endGameStatistics = gameStatistics.Highlights.Aggregate("", (endString, highlight) =>
 				{
-					string currentString = string.Format("At {0} seconds {1} by Player 1.", highlight.TimeOccured, highlight.Description, highlight.Character.Name);
+					string currentString = string.Format("At {0} seconds {1} by {2}.", highlight.TimeOccured, highlight.Description, highlight.Character.Name);
 					return endString == "" ? currentString : endString + "\r\n" + currentString;
 				});
 			_textPosition = _endGameStatistics.GetTextBoundsByCenter(MainGame.PlainFont, _screenSize / 2).GetPosition();
+			_timeSpentOnScreen = new TimeSpan(0, 0, 0, 0, -500);
 		}
 		protected override void DrawExtra(GameTime gameTime, SpriteBatch spriteBatch)
 		{

@@ -6,6 +6,7 @@ using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework;
 using SimonsGame.GuiObjects;
 using SimonsGame.Utility;
+using System.Diagnostics;
 
 namespace SimonsGame
 {
@@ -15,6 +16,8 @@ namespace SimonsGame
 		public float YMovement { get; set; }
 		public Func<Player, Vector2> GetAim { get; set; }
 		public AvailableButtons PressedButtons { get; set; }
+		public bool IsJumping { get; set; }
+		public bool OpenShortcutMenu { get; set; }
 	}
 
 	public class MouseProperties
@@ -43,8 +46,9 @@ namespace SimonsGame
 		LeftBumper = 64,
 		RightBumper = 128,
 		Start = 256,
-		Select = 512,
-		None = 1024, // This can/should never be selected.
+		Start2 = 512,
+		Select = 1024,
+		None = 2048, // This can/should never be selected.
 	}
 	public enum Direction2D
 	{
@@ -79,6 +83,10 @@ namespace SimonsGame
 		{
 			KeyboardState keyboardState = Keyboard.GetState();
 			MouseProperties mouseProperties = GetMouseProperties();
+			if (keyboardState.IsKeyDown(Keys.F4))
+				GameStateManager.SlowMotionDebug = true;
+			if (keyboardState.IsKeyDown(Keys.F5))
+				GameStateManager.SlowMotionDebug = false;
 
 			return new Tuple<MouseProperties, Dictionary<Guid, PlayerControls>>(mouseProperties, playerManager.PlayerInputMap.Keys.ToDictionary(id => id, id =>
 			{
@@ -96,7 +104,10 @@ namespace SimonsGame
 						else if (keyboardState.IsKeyDown(keyInputMap.Left))
 							playerControls.XMovement = -1;
 						if (keyboardState.IsKeyDown(keyInputMap.Up))
+						{
 							playerControls.YMovement = -1;
+							playerControls.IsJumping = true;
+						}
 						else if (keyboardState.IsKeyDown(keyInputMap.Down))
 							playerControls.YMovement = 1;
 
@@ -119,29 +130,73 @@ namespace SimonsGame
 
 						// Hack for now.
 						if (mouseProperties.LeftClickDown)
-						{
 							playerControls.PressedButtons = playerControls.PressedButtons | AvailableButtons.RightTrigger;
-						}
 						if (mouseProperties.RightClickDown)
-						{
 							playerControls.PressedButtons = playerControls.PressedButtons | AvailableButtons.RightBumper;
-						}
 						if (mouseProperties.MiddleClickDown)
-						{
 							playerControls.PressedButtons = playerControls.PressedButtons | AvailableButtons.LeftTrigger;
-						}
+
+						playerControls.OpenShortcutMenu = keyboardState.IsKeyDown(Keys.LeftAlt);
 					}
 					else if (inputMap is ControllerUsableInputMap)
 					{
-						ControllerUsableInputMap controllerInputMap = (ControllerUsableInputMap)inputMap;
-						GamePadState gamePadState = GamePad.GetState(controllerInputMap.PlayerIndex);
+						ControllerUsableInputMap controllerInputMap = inputMap as ControllerUsableInputMap;
+						GamePadState gamePadState = GamePad.GetState(controllerInputMap.PlayerIndex, GamePadDeadZone.None);
+						Vector2 leftStick = gamePadState.ThumbSticks.Left;
+						if (Math.Abs(leftStick.X) < .5f)
+							leftStick.X = 0;
+						if (Math.Abs(leftStick.Y) < .3f)
+							leftStick.Y = 0;
 
-						playerControls.GetAim = (p) => gamePadState.ThumbSticks.Right * new Vector2(1, -1);
+						Vector2 rightStick = gamePadState.ThumbSticks.Right;
+						if (Math.Abs(rightStick.X) < .25f && Math.Abs(rightStick.Y) < .25f)
+						{
+							rightStick.X = 0;
+							rightStick.Y = 0;
+						}
 
-						playerControls.XMovement = gamePadState.ThumbSticks.Left.X;
-						playerControls.YMovement = gamePadState.ThumbSticks.Left.Y < 0
-							 ? -gamePadState.ThumbSticks.Left.Y
-							 : (gamePadState.IsButtonDown((Buttons)controllerInputMap[AvailableButtons.LeftBumper]) ? -1f : 0f);
+						playerControls.GetAim = (p) =>
+						{
+							// Check if right stick is doing anything.
+							double aimer = Math.Pow(rightStick.X, 2) + Math.Pow(rightStick.Y, 2);
+							if (aimer > .95)
+								return rightStick * new Vector2(1, -1);
+
+							// If not, check if left stick is doing anything.
+							aimer = Math.Pow(gamePadState.ThumbSticks.Left.X, 2) + Math.Pow(gamePadState.ThumbSticks.Left.Y, 2);
+							if (aimer > .95)
+								return gamePadState.ThumbSticks.Left * new Vector2(1, -1);
+
+							// If not, aim in straight line in front of player.
+							return p.IsMovingRight ? new Vector2(1, 0) : new Vector2(-1, 0);
+						};
+
+						if (leftStick.X == 0)
+						{
+							if (gamePadState.DPad.Left == ButtonState.Pressed)
+								playerControls.XMovement = -1;
+							else if (gamePadState.DPad.Right == ButtonState.Pressed)
+								playerControls.XMovement = 1;
+						}
+						else
+						{
+							playerControls.XMovement = leftStick.X;
+						}
+
+						if (leftStick.Y == 0)
+						{
+							if (gamePadState.DPad.Up == ButtonState.Pressed)
+								playerControls.YMovement = -1;
+							else if (gamePadState.DPad.Down == ButtonState.Pressed)
+								playerControls.YMovement = 1;
+						}
+						else
+						{
+							playerControls.YMovement = -leftStick.Y;
+						}
+
+						playerControls.OpenShortcutMenu = gamePadState.DPad.Up == ButtonState.Pressed;
+						playerControls.IsJumping = gamePadState.IsButtonDown((Buttons)controllerInputMap[AvailableButtons.Action]) || gamePadState.IsButtonDown((Buttons)controllerInputMap[AvailableButtons.LeftBumper]);
 						playerControls.PressedButtons = inputMap.Aggregate(AvailableButtons.Default, (ab, kv) => gamePadState.IsButtonDown((Buttons)kv.Value) ? ab |= kv.Key : ab);
 					}
 					return playerControls;
@@ -217,43 +272,33 @@ namespace SimonsGame
 		}
 		public static bool PressedDown(PlayerControls controls, PlayerControls previousControls, AvailableButtons button)
 		{
-			return (((previousControls.PressedButtons & button) != button)
-				&& ((controls.PressedButtons & button) == button));
+			return (((previousControls.PressedButtons & button) == AvailableButtons.Default)
+				&& ((controls.PressedButtons & button) != AvailableButtons.Default));
 		}
 		public static bool ReleasedDown(PlayerControls controls, PlayerControls previousControls, AvailableButtons button)
 		{
-			return (((controls.PressedButtons & button) != button)
-				&& ((previousControls.PressedButtons & button) == button));
+			return (((controls.PressedButtons & button) == AvailableButtons.Default)
+				&& ((previousControls.PressedButtons & button) != AvailableButtons.Default));
 		}
 		public static bool PressingDown(PlayerControls controls, PlayerControls previousControls, AvailableButtons button)
 		{
-			return (((controls.PressedButtons & button) == button)
-				&& ((previousControls.PressedButtons & button) == button));
+			return (((controls.PressedButtons & button) != AvailableButtons.Default)
+				&& ((previousControls.PressedButtons & button) != AvailableButtons.Default));
 		}
 		public static bool PressedDirectionDown(PlayerControls controls, PlayerControls previousControls, Direction2D controlDirection, double threshold = .5)
 		{
 			bool goingThatDirection = true;
 			if (controlDirection.HasFlag(Direction2D.Up))
-			{
 				goingThatDirection &= controls.YMovement < -threshold && previousControls.YMovement >= -threshold;
-			}
 			if (controlDirection.HasFlag(Direction2D.Down))
-			{
 				goingThatDirection &= controls.YMovement > threshold && previousControls.YMovement <= threshold;
-			}
 			if (controlDirection.HasFlag(Direction2D.Left))
-			{
 				goingThatDirection &= controls.XMovement < -threshold && previousControls.XMovement >= -threshold;
-			}
 			if (controlDirection.HasFlag(Direction2D.Right))
-			{
 				goingThatDirection &= controls.XMovement > threshold && previousControls.XMovement <= threshold;
-			}
-
 
 			return goingThatDirection;
 		}
-
 
 		public static void Update(Dictionary<Guid, PlayerControls> allControls)
 		{

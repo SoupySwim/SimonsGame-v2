@@ -20,6 +20,8 @@ namespace SimonsGame.GuiObjects.Utility
 		Color _color;
 		public Color Color { get { return _color == Color.Transparent ? Color.White : _color; } set { _color = value; } }
 
+		private float _radians;
+
 		/// <summary>
 		/// Gets the index of the current frame in the animation.
 		/// </summary>
@@ -34,8 +36,12 @@ namespace SimonsGame.GuiObjects.Utility
 		/// <summary>
 		/// Gets a texture origin at the bottom center of each frame.
 		/// </summary>
-		public Vector2 Origin { get { return new Vector2(Animation.Scale * Animation.FrameWidth / 2.0f, Animation.Scale * Animation.FrameHeight / 2.0f); } }
+		public Vector2 Origin { get { return Animation.Scale * Animation.FrameWidth / 2.0f; } }//new Vector2(Animation.Scale.X * Animation.FrameWidth / 2.0f, Animation.Scale.Y * Animation.FrameHeight / 2.0f); } }
 
+		public void HideAnimations()
+		{
+			PlayAnimation(null);
+		}
 		/// <summary>
 		/// Begins or continues playback of an animation.
 		/// </summary>
@@ -47,13 +53,13 @@ namespace SimonsGame.GuiObjects.Utility
 
 			// Start the new animation.
 			this._animation = animation;
-			this._frameIndex = 0;
-			this._time = 0.0f;
+			ResetAnimation();
 		}
 		public void ResetAnimation()
 		{
 			this._frameIndex = 0;
 			this._time = 0.0f;
+			this._radians = 0;
 		}
 		public bool IsAnimating(Animation animation)
 		{
@@ -69,12 +75,13 @@ namespace SimonsGame.GuiObjects.Utility
 				return; //throw new NotSupportedException("No animation is currently playing.");
 
 			// Calculate the source rectangle of the current frame.
-			Rectangle source = new Rectangle(FrameIndex * Animation.FrameWidth, 0, Animation.FrameWidth, Animation.FrameHeight);
-			Rectangle destination = new Rectangle((int)position.X, (int)position.Y, (int)(Animation.FrameWidth * Animation.Scale), (int)(Animation.FrameHeight * Animation.Scale));
+			Rectangle source = new Rectangle((int)(FrameIndex * Animation.FrameWidth), 0, (int)Animation.FrameWidth, (int)Animation.FrameHeight);
+			Rectangle destination = new Rectangle((int)(position.X + (Animation.ActualSize.X / 2.0f)), (int)(position.Y + (Animation.ActualSize.Y / 2.0)), (int)(Animation.ActualSize.X), (int)(Animation.ActualSize.Y));
 
 			// Draw the current frame.
 			//spriteBatch.Draw(Animation.Texture, position, source, Color, 0.0f, Origin, scale * Animation.Scale, spriteEffects, 0.0f);
-			spriteBatch.Draw(Animation.Texture, destination, source, Color, 0.0f, new Vector2(0f, 0f), spriteEffects, 0.0f);
+			spriteBatch.Draw(Animation.Texture, position + Animation.ActualSize / 2.0f, source, Color, _radians, Animation.FrameSize / 2.0f, Animation.Scale, spriteEffects, 0.0f);
+			_radians += Animation.RotateAmount;
 		}
 		public void Update(GameTime gameTime)
 		{

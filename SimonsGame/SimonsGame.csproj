@@ -81,6 +81,9 @@
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="mscorlib" />
+    <Reference Include="OpenTK, Version=1.1.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\OpenTK.1.1.1589.5942\lib\NET40\OpenTK.dll</HintPath>
+    </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
@@ -97,39 +100,98 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GuiObjects\BaseClasses\AffectedSpace.cs" />
+    <Compile Include="GuiObjects\BaseClasses\GuiConnector.cs" />
+    <Compile Include="GuiObjects\BaseClasses\CreepBase.cs" />
+    <Compile Include="GuiObjects\BaseClasses\GenericBoss.cs" />
     <Compile Include="GuiObjects\BaseClasses\GuiVariables.cs" />
+    <Compile Include="GuiObjects\BaseClasses\Interfaces\ITeleportable.cs" />
+    <Compile Include="GuiObjects\BaseClasses\Interfaces\IInteractable.cs" />
+    <Compile Include="GuiObjects\BaseClasses\MagicObject.cs" />
     <Compile Include="GuiObjects\BaseClasses\MainGuiObject.cs" />
     <Compile Include="GuiObjects\BaseClasses\PhysicsObject.cs" />
+    <Compile Include="GuiObjects\Terrain\Button.cs" />
+    <Compile Include="GuiObjects\Utility\GuiThenClause.cs" />
+    <Compile Include="GuiObjects\Utility\GuiIfClause.cs" />
+    <Compile Include="GuiObjects\Utility\GuiFunction.cs" />
+    <Compile Include="Menu\InGame\ShortcutMenu.cs" />
+    <Compile Include="Menu\InGame\StartupChoiceMenu.cs" />
+    <Compile Include="Modifiers\Abilities\Miscellaneous\PullAbility.cs" />
+    <Compile Include="Modifiers\Abilities\Miscellaneous\HealSelf.cs" />
+    <Compile Include="GuiObjects\ElementalMagic\Non-PlayerMagic\TurretAttack.cs" />
     <Compile Include="GuiObjects\ElementalMagic\ShortRangeProjectileMagic.cs" />
     <Compile Include="GuiObjects\ElementalMagic\SurroundRangeMagic.cs" />
     <Compile Include="GuiObjects\ElementalMagic\LongRangeMagic.cs" />
     <Compile Include="GuiObjects\ElementalMagic\ShortRangeMeleeMagic.cs" />
     <Compile Include="GuiObjects\Level.cs" />
+    <Compile Include="GuiObjects\Modifiers\AbilityObject.cs" />
+    <Compile Include="GuiObjects\Modifiers\PowerUp.cs" />
+    <Compile Include="GuiObjects\Modifiers\PowerUpBuilder.cs" />
+    <Compile Include="GuiObjects\OtherCharacters\Global\Bosses\CreepBoss.cs" />
     <Compile Include="GuiObjects\OtherCharacters\Global\HealthCreep.cs" />
+    <Compile Include="GuiObjects\OtherCharacters\Global\LargeCreep.cs" />
+    <Compile Include="GuiObjects\OtherCharacters\Global\NeutralCreep.cs" />
+    <Compile Include="GuiObjects\OtherCharacters\Global\ObjectSpawner.cs" />
+    <Compile Include="GuiObjects\OtherCharacters\MultiplayerVersus\MinionLarge.cs" />
+    <Compile Include="GuiObjects\OtherCharacters\MultiplayerVersus\MinionFlying.cs" />
+    <Compile Include="GuiObjects\OtherCharacters\MultiplayerVersus\MinionNormal.cs" />
+    <Compile Include="GuiObjects\OtherCharacters\MultiplayerVersus\StandardBase.cs" />
+    <Compile Include="GuiObjects\OtherCharacters\MultiplayerVersus\StandardTurret.cs" />
+    <Compile Include="GuiObjects\OtherCharacters\SingleCoop\ElementalCharacter.cs" />
+    <Compile Include="GuiObjects\OtherCharacters\SingleCoop\FlyingCreature.cs" />
     <Compile Include="GuiObjects\OtherCharacters\SingleCoop\MovingCharacter.cs" />
     <Compile Include="GuiObjects\OtherCharacters\SingleCoop\WallRunner.cs" />
     <Compile Include="GuiObjects\Player\Player.cs" />
+    <Compile Include="GuiObjects\Terrain\FinishLineFlagPole.cs" />
+    <Compile Include="GuiObjects\Terrain\SmallKeyObject.cs" />
+    <Compile Include="GuiObjects\Terrain\LockedBarrier.cs" />
+    <Compile Include="GuiObjects\Terrain\Spike.cs" />
+    <Compile Include="GuiObjects\Terrain\Teleporter.cs" />
+    <Compile Include="GuiObjects\Terrain\JumpPad.cs" />
+    <Compile Include="GuiObjects\Terrain\Ladder.cs" />
     <Compile Include="GuiObjects\Terrain\MovingPlatform.cs" />
+    <Compile Include="GuiObjects\Terrain\Block.cs" />
     <Compile Include="GuiObjects\Terrain\Platform.cs" />
     <Compile Include="GuiObjects\Utility\AI\AIUtility.cs" />
     <Compile Include="GuiObjects\Utility\Animator.cs" />
     <Compile Include="GuiObjects\Utility\GraphicsUtility.cs" />
+    <Compile Include="GuiObjects\Zones\GenericZone.cs" />
+    <Compile Include="GuiObjects\Zones\BehaviorZone.cs" />
+    <Compile Include="GuiObjects\Zones\JungleCreepZone.cs" />
+    <Compile Include="MainFiles\AllGameSettings.cs" />
     <Compile Include="MainFiles\Controls.cs" />
     <Compile Include="MainFiles\GameStateManager.cs" />
     <Compile Include="MainFiles\InGame\GameSettings.cs" />
     <Compile Include="MainFiles\InGame\GameStatistics.cs" />
+    <Compile Include="MainFiles\ObtainableItems\ObtainableItem.cs" />
     <Compile Include="MainFiles\InGame\PlayerHUD.cs" />
     <Compile Include="MainFiles\MainGame.cs" />
+    <Compile Include="MainFiles\ObtainableItems\SmallKey.cs" />
     <Compile Include="MainFiles\PlayerManager.cs" />
     <Compile Include="MainFiles\Program.cs" />
+    <Compile Include="MapEditor\MapEditorItem.cs" />
+    <Compile Include="MapEditor\MapEditorLeftPanel.cs" />
+    <Compile Include="MapEditor\MapEditorIOManager.cs" />
+    <Compile Include="MapEditor\MapEditorTopPanel.cs" />
+    <Compile Include="MapEditor\MapEditorRightPanel.cs" />
+    <Compile Include="MapEditor\MapEditorShortcutHandler.cs" />
+    <Compile Include="MapEditor\MapLoaderTopPanel.cs" />
     <Compile Include="Menu\ImageMenuItem.cs" />
     <Compile Include="Menu\InGame\InGameMenu.cs" />
-    <Compile Include="Menu\InGame\InGameMenuScreens\MainInGameMenu.cs" />
+    <Compile Include="Menu\InGame\InGameMenuPartialView.cs" />
+    <Compile Include="Menu\InGame\InGameMenuScreens\StatusMenu\InGameStatusMenu.cs" />
+    <Compile Include="Menu\InGame\InGameMenuScreens\StatusMenu\AllMagicPane.cs" />
+    <Compile Include="Menu\InGame\InGameMenuScreens\StatusMenu\LevelUpPane.cs" />
+    <Compile Include="Menu\InGame\InGameMenuScreens\StatusMenu\SelectedPane.cs" />
+    <Compile Include="Menu\InGame\MainInGameMenu.cs" />
     <Compile Include="Menu\InGame\InGameOverlay.cs" />
     <Compile Include="Menu\InGame\MainMenuScreen.cs" />
     <Compile Include="Menu\MenuScreens\MainMenuScreen.cs" />
     <Compile Include="Menu\MenuItem.cs" />
     <Compile Include="Menu\MenuScreen.cs" />
+    <Compile Include="Menu\MenuScreens\MapEditorAddMap.cs" />
+    <Compile Include="Menu\MenuScreens\MapEditorEditMap.cs" />
+    <Compile Include="Menu\MenuScreens\MapEditorLoadMap.cs" />
     <Compile Include="Menu\MenuScreens\MapEditorMenu.cs" />
     <Compile Include="Menu\MenuScreens\MultiPlayerMenu.cs" />
     <Compile Include="Menu\MenuScreens\SinglePlayerMenu.cs" />
@@ -137,23 +199,33 @@
     <Compile Include="Menu\MenuScreens\GameStatisticsMenu.cs" />
     <Compile Include="Menu\MenuScreens\StartScreen.cs" />
     <Compile Include="Menu\MenuStateManager.cs" />
+    <Compile Include="Menu\InvisibleInGameOverlayMenuItem.cs" />
     <Compile Include="Menu\TextMenuItem.cs" />
     <Compile Include="Modifiers\Abilities\AbilityBuilder.cs" />
     <Compile Include="Modifiers\Abilities\AbilityManager.cs" />
-    <Compile Include="Modifiers\Abilities\LongRangeElementalMagicAbility.cs" />
-    <Compile Include="Modifiers\Abilities\ShortRangeProjectileElementalMagicAbility.cs" />
-    <Compile Include="Modifiers\Abilities\SurroundRangeElementalMagicAbility.cs" />
-    <Compile Include="Modifiers\Abilities\ShortRangeMeleeElementalMagicAbility.cs" />
+    <Compile Include="Modifiers\Abilities\Elemental\ProjectileElementalMagicAbility.cs" />
+    <Compile Include="Modifiers\Abilities\Elemental\LongRangeElementalMagicAbility.cs" />
+    <Compile Include="Modifiers\Abilities\Miscellaneous\BlinkAbility.cs" />
+    <Compile Include="Modifiers\Abilities\NonPlayerAbilities\TurretAttackAbility.cs" />
+    <Compile Include="GuiObjects\ElementalMagic\ProjectileElementalMagic.cs" />
+    <Compile Include="Modifiers\Abilities\Elemental\ShortRangeProjectileElementalMagicAbility.cs" />
+    <Compile Include="Modifiers\Abilities\Elemental\SurroundRangeElementalMagicAbility.cs" />
+    <Compile Include="Modifiers\Abilities\Elemental\ShortRangeMeleeElementalMagicAbility.cs" />
     <Compile Include="Modifiers\Abilities\SingleJump.cs" />
-    <Compile Include="Modifiers\Combos\AbilityCombo.cs" />
+    <Compile Include="Modifiers\AbilityModifier.cs" />
+    <Compile Include="Modifiers\AffectedSpaces\JumpPadAbility.cs" />
     <Compile Include="Modifiers\CustomModifier.cs" />
     <Compile Include="Modifiers\EmptyModifier.cs" />
     <Compile Include="Modifiers\ModifierBase.cs" />
     <Compile Include="Modifiers\TickModifier.cs" />
     <Compile Include="Modifiers\TimeModifier.cs" />
-    <Compile Include="Test\LevelBuilder.cs" />
     <Compile Include="Test\TempControls.cs" />
+    <Compile Include="Test\TempObject.cs" />
     <Compile Include="Utility\Extensions\GuiExtensions.cs" />
+    <Compile Include="Utility\Extensions\MainGuiObjectExtensions.cs" />
+    <Compile Include="Utility\Extensions\MiscExtensions.cs" />
+    <Compile Include="Utility\LevelAnimations\AnimatedLevelAnimation.cs" />
+    <Compile Include="Utility\LevelAnimations\LineAnimation.cs" />
     <Compile Include="Utility\ObjectAnimations\Animation.cs" />
     <Compile Include="Utility\ObjectAnimations\AnimationUtility.cs" />
     <Compile Include="Utility\Elements.cs" />
@@ -161,8 +233,11 @@
     <Compile Include="Utility\LevelAnimations\LevelAnimation.cs" />
     <Compile Include="Utility\LevelAnimations\TextAnimation.cs" />
     <Compile Include="MainFiles\InGame\PlayerViewports.cs" />
+    <Compile Include="Utility\ObjectAnimations\GlobalGuiObjects.cs" />
+    <Compile Include="Utility\ObjectAnimations\TickTimer.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="ClassDiagram1.cd" />
     <None Include="Diagrams\GuiObjects.cd" />
     <None Include="Diagrams\MainGuiObject_Update.sequencediagram" />
     <None Include="Diagrams\PhysicsObject_PostUpdate.sequencediagram" />
@@ -205,10 +280,19 @@
       <DependentUpon>WallRunner_PreUpdate.sequencediagram</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Menu\MenuScreens\Extra\" />
+  </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\XNA Game Studio\Microsoft.Xna.GameStudio.targets" />
   <Import Project="..\..\packages\MonoGame.Binaries.3.2.0\build\net40\MonoGame.Binaries.targets" Condition="Exists('..\..\packages\MonoGame.Binaries.3.2.0\build\net40\MonoGame.Binaries.targets')" />
+  <PropertyGroup>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PreBuildEvent>xcopy /y $(ProjectDir)sdl.dll $(ProjectDir)$(OutDir)</PreBuildEvent>
+  </PropertyGroup>
   <!--
       To modify your build process, add your task inside one of the targets below and uncomment it. 
       Other similar extension points exist, see Microsoft.Common.targets.

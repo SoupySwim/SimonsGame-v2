@@ -34,5 +34,13 @@ Content\Test\LevelUpButton.xnb
 Content\Test\LargeCreep.xnb
 Content\Test\BatFly.xnb
 Content\Test\BatIdle.xnb
+Content\Test\MinionFlying.xnb
+Content\Test\MinionFlyingFrame.xnb
+Content\Sprites\PlayerSprites\TempPlayer\Blob.xnb
+Content\Test\LightningBolt.xnb
+Content\Test\Hammer.xnb
+Content\Test\IfClause.xnb
+Content\Test\ThenClause.xnb
 Content\Fonts\PlainFont.xnb
 Content\Fonts\PlainFontLarge.xnb
+Content\Fonts\PlainFontSmall.xnb

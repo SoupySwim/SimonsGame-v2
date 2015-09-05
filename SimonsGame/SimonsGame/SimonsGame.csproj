@@ -101,6 +101,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="GuiObjects\BaseClasses\AffectedSpace.cs" />
+    <Compile Include="GuiObjects\BaseClasses\GuiConnector.cs" />
+    <Compile Include="GuiObjects\BaseClasses\CreepBase.cs" />
     <Compile Include="GuiObjects\BaseClasses\GenericBoss.cs" />
     <Compile Include="GuiObjects\BaseClasses\GuiVariables.cs" />
     <Compile Include="GuiObjects\BaseClasses\Interfaces\ITeleportable.cs" />
@@ -108,7 +110,14 @@
     <Compile Include="GuiObjects\BaseClasses\MagicObject.cs" />
     <Compile Include="GuiObjects\BaseClasses\MainGuiObject.cs" />
     <Compile Include="GuiObjects\BaseClasses\PhysicsObject.cs" />
-    <Compile Include="GuiObjects\ElementalMagic\HealSelf.cs" />
+    <Compile Include="GuiObjects\Terrain\Button.cs" />
+    <Compile Include="GuiObjects\Utility\GuiThenClause.cs" />
+    <Compile Include="GuiObjects\Utility\GuiIfClause.cs" />
+    <Compile Include="GuiObjects\Utility\GuiFunction.cs" />
+    <Compile Include="Menu\InGame\ShortcutMenu.cs" />
+    <Compile Include="Menu\InGame\StartupChoiceMenu.cs" />
+    <Compile Include="Modifiers\Abilities\Miscellaneous\PullAbility.cs" />
+    <Compile Include="Modifiers\Abilities\Miscellaneous\HealSelf.cs" />
     <Compile Include="GuiObjects\ElementalMagic\Non-PlayerMagic\TurretAttack.cs" />
     <Compile Include="GuiObjects\ElementalMagic\ShortRangeProjectileMagic.cs" />
     <Compile Include="GuiObjects\ElementalMagic\SurroundRangeMagic.cs" />
@@ -123,8 +132,12 @@
     <Compile Include="GuiObjects\OtherCharacters\Global\LargeCreep.cs" />
     <Compile Include="GuiObjects\OtherCharacters\Global\NeutralCreep.cs" />
     <Compile Include="GuiObjects\OtherCharacters\Global\ObjectSpawner.cs" />
+    <Compile Include="GuiObjects\OtherCharacters\MultiplayerVersus\MinionLarge.cs" />
+    <Compile Include="GuiObjects\OtherCharacters\MultiplayerVersus\MinionFlying.cs" />
+    <Compile Include="GuiObjects\OtherCharacters\MultiplayerVersus\MinionNormal.cs" />
     <Compile Include="GuiObjects\OtherCharacters\MultiplayerVersus\StandardBase.cs" />
     <Compile Include="GuiObjects\OtherCharacters\MultiplayerVersus\StandardTurret.cs" />
+    <Compile Include="GuiObjects\OtherCharacters\SingleCoop\ElementalCharacter.cs" />
     <Compile Include="GuiObjects\OtherCharacters\SingleCoop\FlyingCreature.cs" />
     <Compile Include="GuiObjects\OtherCharacters\SingleCoop\MovingCharacter.cs" />
     <Compile Include="GuiObjects\OtherCharacters\SingleCoop\WallRunner.cs" />
@@ -168,6 +181,7 @@
     <Compile Include="Menu\InGame\InGameMenuPartialView.cs" />
     <Compile Include="Menu\InGame\InGameMenuScreens\StatusMenu\InGameStatusMenu.cs" />
     <Compile Include="Menu\InGame\InGameMenuScreens\StatusMenu\AllMagicPane.cs" />
+    <Compile Include="Menu\InGame\InGameMenuScreens\StatusMenu\LevelUpPane.cs" />
     <Compile Include="Menu\InGame\InGameMenuScreens\StatusMenu\SelectedPane.cs" />
     <Compile Include="Menu\InGame\MainInGameMenu.cs" />
     <Compile Include="Menu\InGame\InGameOverlay.cs" />
@@ -206,10 +220,12 @@
     <Compile Include="Modifiers\TickModifier.cs" />
     <Compile Include="Modifiers\TimeModifier.cs" />
     <Compile Include="Test\TempControls.cs" />
+    <Compile Include="Test\TempObject.cs" />
     <Compile Include="Utility\Extensions\GuiExtensions.cs" />
     <Compile Include="Utility\Extensions\MainGuiObjectExtensions.cs" />
     <Compile Include="Utility\Extensions\MiscExtensions.cs" />
     <Compile Include="Utility\LevelAnimations\AnimatedLevelAnimation.cs" />
+    <Compile Include="Utility\LevelAnimations\LineAnimation.cs" />
     <Compile Include="Utility\ObjectAnimations\Animation.cs" />
     <Compile Include="Utility\ObjectAnimations\AnimationUtility.cs" />
     <Compile Include="Utility\Elements.cs" />
@@ -218,6 +234,7 @@
     <Compile Include="Utility\LevelAnimations\TextAnimation.cs" />
     <Compile Include="MainFiles\InGame\PlayerViewports.cs" />
     <Compile Include="Utility\ObjectAnimations\GlobalGuiObjects.cs" />
+    <Compile Include="Utility\ObjectAnimations\TickTimer.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="ClassDiagram1.cd" />

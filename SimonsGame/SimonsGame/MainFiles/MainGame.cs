@@ -40,6 +40,7 @@ namespace SimonsGame
 		public static Random Randomizer { get; private set; }
 
 		#region Graphics
+		public static SpriteFont PlainFontSmall;
 		public static SpriteFont PlainFont;
 		public static SpriteFont PlainFontLarge;
 		GraphicsDeviceManager graphics;
@@ -109,7 +110,6 @@ namespace SimonsGame
 			//_playerManager.AddPlayer(TempControls.GetPlayerInput(0));
 			//_playerManager.AddPlayer(new UsableInputMap() { IsAi = true });
 			//_playerManager.AddPlayer(new UsableInputMap() { IsAi = true });
-
 			base.Initialize();
 		}
 
@@ -122,6 +122,7 @@ namespace SimonsGame
 			// Create a new SpriteBatch, which can be used to draw textures.
 			_spriteBatch = new SpriteBatch(GraphicsDevice);
 			ContentManager.RootDirectory = "Content";
+			PlainFontSmall = ContentManager.Load<SpriteFont>("Fonts/PlainFontSmall");
 			PlainFont = ContentManager.Load<SpriteFont>("Fonts/PlainFont");
 			PlainFontLarge = ContentManager.Load<SpriteFont>("Fonts/PlainFontLarge");
 			_gameStateManager = new GameStateManager(Services, this, GraphicsDevice.Viewport);

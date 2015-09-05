@@ -18,6 +18,12 @@ namespace SimonsGame.GuiObjects
 		private float _projectedHeight;
 		private float _heightCap;
 		private int _repeatXCount;
+		private bool _isTeamPlatform = false;
+
+		#region Hidden Area
+		private bool _isHiddenArea = false;
+		private List<Team> _visibleToTeams = new List<Team>();
+		#endregion
 
 		#region Drop Logic
 		private bool _doesDrop;
@@ -35,22 +41,15 @@ namespace SimonsGame.GuiObjects
 		{
 			AdditionalGroupChange(group, group);
 			_background = MainGame.ContentManager.Load<Texture2D>("Test/Platform");
-			ExtraSizeManipulation(hitbox);
+			ExtraSizeManipulation(ref hitbox);
 			_doesDrop = false;
 			_dropTimeTotal = 30;
 			_dropTimeCurrent = 0;
 			_respawnTimeTotal = -1;
 		}
-		public override float GetXMovement()
-		{
-			return 0;
-		}
-		public override float GetYMovement()
-		{
-			return 0;
-		}
-		public override void AddCustomModifiers(GameTime gameTime, ModifierBase modifyAdd) { }
-		public override void MultiplyCustomModifiers(GameTime gameTime, ModifierBase modifyMult) { }
+		public override float GetXMovement() { return 0; }
+		public override float GetYMovement() { return 0; }
+
 		public override void PreUpdate(GameTime gameTime) { }
 		public override void PostUpdate(GameTime gameTime)
 		{
@@ -91,25 +90,39 @@ namespace SimonsGame.GuiObjects
 					}
 				}
 			}
+
+
+			if (_isHiddenArea)
+			{
+				_visibleToTeams = Level.GetAllCharacterObjects(Bounds).Where(mgo => mgo.Group != Group.Passable && mgo.GetIntersectionDepth(this) != Vector2.Zero).Select(mgo => mgo.Team).Distinct().ToList();
+			}
 		}
 		public override void PreDraw(GameTime gameTime, SpriteBatch spriteBatch) { }
-		public override void PostDraw(GameTime gameTime, SpriteBatch spriteBatch)
+		public override void PostDraw(GameTime gameTime, SpriteBatch spriteBatch, Player curPlayer)
 		{
-			if (_xOffsetDueToDrop != 0)
-			{
-			}
 			if (_respawnTimeCurrent > 0) // If we aren't currently drawn on screen, return!
 				return;
+			Rectangle rect = new Rectangle(0, 0, 0, 0);
+			Color drawColor = _hitBoxColor;
+			if ((curPlayer != null && _visibleToTeams.Contains(curPlayer.Team)) || (_isHiddenArea && MainGame.GameState != MainGame.MainGameState.Game))
+				drawColor = Color.Lerp(_hitBoxColor, Color.Transparent, .75f);
 			int multX = Size.X < 0 ? -1 : 1;
 			int multY = Size.Y < 0 ? -1 : 1;
 			int addX = Size.X < 0 ? (int)-_projectedWidth : 0;
 			int addY = Size.Y < 0 ? (int)-_projectedWidth : 0;
 			for (float h = 0; h < _heightCap; h += _projectedHeight)
 				for (int w = 0; w < _repeatXCount; w++)
-					spriteBatch.Draw(_background, new Rectangle((int)(Position.X + +_xOffsetDueToDrop + addX + multX * w * _projectedWidth), (int)(Position.Y + _yOffsetDueToDrop + addY + multY * h), (int)(_projectedWidth), (int)(_projectedHeight)), _hitBoxColor);
+				{
+					rect.X = (int)(Position.X + +_xOffsetDueToDrop + addX + multX * w * _projectedWidth);
+					rect.Y = (int)(Position.Y + _yOffsetDueToDrop + addY + multY * h);
+					rect.Width = (int)(_projectedWidth);
+					rect.Height = (int)(_projectedHeight);
+					spriteBatch.Draw(_background, rect, drawColor);
+				}
 			//spriteBatch.Draw(_background, Position + new Vector2(w * projectedHeight, h * projectedHeight), _hitBoxColor);
 		}
-		public override void ExtraSizeManipulation(Vector2 newSize)
+
+		public override void ExtraSizeManipulation(ref Vector2 newSize)
 		{
 			float sizeX = Math.Abs(newSize.X);
 			float sizeY = Math.Abs(newSize.Y);
@@ -131,7 +144,7 @@ namespace SimonsGame.GuiObjects
 		public override void SetMovement(GameTime gameTime) { }
 		public override void HitByObject(MainGuiObject mgo, ModifierBase mb)
 		{
-			if (_doesDrop && _dropTimeCurrent == 0)
+			if (_doesDrop && _dropTimeCurrent == 0 && Group != Group.Passable)
 			{
 				_dropTimeCurrent = 1;
 				_xOffsetDueToDrop = 2;
@@ -139,21 +152,55 @@ namespace SimonsGame.GuiObjects
 		}
 		protected override void AdditionalGroupChange(Group _group, Group newGroup)
 		{
-			switch (newGroup)
-			{
-				case Group.ImpassableIncludingMagic:
-					_hitBoxColor = Color.SandyBrown;
-					break;
-				case Group.Impassable:
-					_hitBoxColor = Color.Khaki;
-					break;
-				default:
-					_hitBoxColor = Color.Wheat;
-					break;
-			}
+			ChangePlatformColorBasedOnGroup(newGroup);
 			base.AdditionalGroupChange(_group, newGroup);
 		}
+		private void ChangePlatformColorBasedOnGroup(Group newGroup)
+		{
+			if (!_isTeamPlatform)
+			{
+				DrawImportant = 0;
+				switch (newGroup)
+				{
+					case Group.ImpassableIncludingMagic:
+						_hitBoxColor = Color.SandyBrown;
+						break;
+					case Group.Impassable:
+						_hitBoxColor = Color.Khaki;
+						break;
+					default:
+						_hitBoxColor = Color.Wheat;
+						break;
+				}
+			}
+			if (_isHiddenArea)
+			{
+				DrawImportant = 10;
+				_hitBoxColor = Color.Lerp(Color.CornflowerBlue, Color.Black, .15f);
+			}
+		}
 		protected override bool ShowHitBox() { return false; }
+
+		public override bool IsHitBy(MainGuiObject mgo)
+		{
+			return !_isHiddenArea && (!_isTeamPlatform || mgo.Team != Team);
+		}
+
+		public override void SwitchTeam(Team newTeam)
+		{
+			_team = newTeam;
+			if (_isTeamPlatform)
+			{
+				DrawImportant = 1;
+				_hitBoxColor = Color.Lerp(TeamColorMap[newTeam], Color.Transparent, .4f);
+			}
+
+			if (_isHiddenArea)
+			{
+				DrawImportant = 10;
+				_hitBoxColor = Color.Lerp(Color.CornflowerBlue, Color.Black, .15f);
+			}
+		}
 
 		#region Map Editor
 
@@ -163,6 +210,10 @@ namespace SimonsGame.GuiObjects
 				return "Dropping";
 			if (bType == ButtonType.SpecialToggle2)
 				return "Respawn Time";
+			if (bType == ButtonType.SpecialToggle3)
+				return "Team Platform";
+			if (bType == ButtonType.SpecialToggle4)
+				return "IsBushes";
 			return base.GetSpecialTitle(bType);
 		}
 
@@ -172,6 +223,10 @@ namespace SimonsGame.GuiObjects
 				return _doesDrop ? "Yes" : "No";
 			if (bType == ButtonType.SpecialToggle2)
 				return _respawnTimeTotal == -1 ? "Never" : (_respawnTimeTotal / 60).ToString();
+			if (bType == ButtonType.SpecialToggle3)
+				return _isTeamPlatform ? "Yes" : "No";
+			if (bType == ButtonType.SpecialToggle4)
+				return _isHiddenArea ? "Yes" : "No";
 			return base.GetSpecialText(bType);
 		}
 
@@ -190,6 +245,23 @@ namespace SimonsGame.GuiObjects
 				else
 					_respawnTimeTotal = MathHelper.Clamp(_respawnTimeTotal + (moveRight ? 300 : -300), 300, 3600);
 			}
+			if (bType == ButtonType.SpecialToggle3)
+			{
+				_isTeamPlatform = !_isTeamPlatform;
+				if (!_isTeamPlatform)
+					ChangePlatformColorBasedOnGroup(Group);
+				else
+					SwitchTeam(Team);
+			}
+			if (bType == ButtonType.SpecialToggle4)
+			{
+				_isHiddenArea = !_isHiddenArea;
+				if (_isHiddenArea)
+				{
+					DrawImportant = 10;
+					_hitBoxColor = Color.Lerp(Color.CornflowerBlue, Color.Black, .15f);
+				}
+			}
 			base.ModifySpecialText(bType, moveRight);
 		}
 		public override int GetSpecialValue(ButtonType bType) // For Saving the object
@@ -198,6 +270,10 @@ namespace SimonsGame.GuiObjects
 				return _doesDrop ? 1 : 0;
 			if (bType == ButtonType.SpecialToggle2)
 				return _respawnTimeTotal;
+			if (bType == ButtonType.SpecialToggle3)
+				return _isTeamPlatform ? 1 : 0;
+			if (bType == ButtonType.SpecialToggle4)
+				return _isHiddenArea ? 1 : 0;
 			return base.GetSpecialValue(bType);
 		}
 		public override void SetSpecialValue(ButtonType bType, int value) // For Loading the object
@@ -206,6 +282,24 @@ namespace SimonsGame.GuiObjects
 				_doesDrop = value == 1;
 			if (bType == ButtonType.SpecialToggle2)
 				_respawnTimeTotal = value;
+			if (bType == ButtonType.SpecialToggle3)
+			{
+				_isTeamPlatform = value == 1;
+				if (!_isTeamPlatform)
+					ChangePlatformColorBasedOnGroup(Group);
+				else
+					SwitchTeam(Team);
+			}
+			if (bType == ButtonType.SpecialToggle4)
+			{
+				_isHiddenArea = value == 1;
+				if (_isHiddenArea)
+				{
+					DrawImportant = 10;
+					_hitBoxColor = Color.Lerp(Color.CornflowerBlue, Color.Black, .15f);
+					Group = Group.Passable;
+				}
+			}
 			base.SetSpecialValue(bType, value);
 		}
 

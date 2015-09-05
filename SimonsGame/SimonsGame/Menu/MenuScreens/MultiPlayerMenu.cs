@@ -31,7 +31,16 @@ namespace SimonsGame.Menu.MenuScreens
 			_menuLayout[1][0] = new TextMenuItemButton(() => { }, "Online",
 				"Online".GetTextBoundsByCenter(MainGame.PlainFont, new Vector2(_screenSize.X / 2 - 70, _screenSize.Y / 2 - 40)), Color.Black, Color.White, new Vector2(40, 40), true);
 
-			_menuLayout[1][1] = new TextMenuItemButton(() => { }, "Co-op",
+			_menuLayout[1][1] = new TextMenuItemButton(() =>
+			{
+				_manager.StartGame(new GameSettings()
+					{
+						AllowAIScreens = true,
+						PauseStopsGame = false,
+						MapName = "Test Map",
+						LevelFileMetaData = MapEditorIOManager.GetMetadataForLevel("Test Map")
+					});
+			}, "Co-op",
 				"Co-op".GetTextBoundsByCenter(MainGame.PlainFont, new Vector2(_screenSize.X / 2 + 70, _screenSize.Y / 2 - 40)), Color.Black, Color.White, new Vector2(60, 40), false);
 
 			_menuLayout[2][0] = new TextMenuItemButton(() => { }, "Custom",
@@ -43,8 +52,16 @@ namespace SimonsGame.Menu.MenuScreens
 					{
 						AllowAIScreens = true,
 						PauseStopsGame = false,
-						MapName = "Sprint 3 Demo",
-						LevelFileMetaData = MapEditorIOManager.GetMetadataForLevel("Sprint 3 Demo")
+						MapName = "SmallMultiplayer",
+						LevelFileMetaData = MapEditorIOManager.GetMetadataForLevel("SmallMultiplayer"),
+						ExperienceGainIntervals = new List<ExperienceGain>()
+						{
+							new ExperienceGain() { Amount = 40.00f/3600, StartTime = new TimeSpan(0,0,0) },
+							new ExperienceGain() { Amount = 48.00f/3600, StartTime = new TimeSpan(0,5,0) },
+							new ExperienceGain() { Amount = 57.60f/3600, StartTime = new TimeSpan(0,10,0) },
+							new ExperienceGain() { Amount = 69.12f/3600, StartTime = new TimeSpan(0,15,0) },
+							new ExperienceGain() { Amount = 69.12f/3600, StartTime = new TimeSpan(0,20,0) },
+						}
 					});
 			}, "Practice",
 				"Practice".GetTextBoundsByCenter(MainGame.PlainFont, new Vector2(_screenSize.X / 2 + 70, _screenSize.Y / 2 + 40)), Color.Black, Color.White, new Vector2(28, 40), false);

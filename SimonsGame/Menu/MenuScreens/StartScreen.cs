@@ -11,13 +11,13 @@ namespace SimonsGame.Menu.MenuScreens
 	public class StartScreen : MainMenuScreen
 	{
 		public StartScreen(MenuStateManager manager, Vector2 screenSize)
-			: base(manager)
+			: base(manager, screenSize)
 		{
-			_menuLayout = new MenuItem[1][];
-			_menuLayout[0] = new MenuItem[1];
+			_menuLayout = new MenuItemButton[1][];
+			_menuLayout[0] = new MenuItemButton[1];
 			_screenSize = screenSize;
-			_menuLayout[0][0] = new TextMenuItem(new Action(() => { _manager.NavigateToScreen(MenuStateManager.ScreenType.MainGameMenu); }), "Press Start",
-				"Press Start".GetTextBoundsByCenter(MainGame.PlainFont, new Vector2(_screenSize.X / 2, _screenSize.Y / 2)), true);
+			_menuLayout[0][0] = new TextMenuItemButton(new Action(() => { _manager.NavigateToScreen(MenuStateManager.ScreenType.MainGameMenu); }), "Press Start",
+				"Press Start".GetTextBoundsByCenter(MainGame.PlainFont, new Vector2(_screenSize.X / 2, _screenSize.Y / 2)), new Vector2(40, 40), true);
 		}
 
 	}

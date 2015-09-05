@@ -119,7 +119,7 @@ namespace SimonsGame.Menu
 							_currentMenuScreen.SelectCurrent();
 						}
 					}
-					else if (Controls.PressedDown(playerControls, previousControls, AvailableButtons.Start))
+					else if (Controls.PressedDown(playerControls, previousControls, AvailableButtons.Start | AvailableButtons.Start2))
 					{
 						if (_showMessage)
 							_showMessage = false;

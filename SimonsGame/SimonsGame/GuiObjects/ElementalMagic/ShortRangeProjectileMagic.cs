@@ -21,7 +21,7 @@ namespace SimonsGame.GuiObjects.ElementalMagic
 		private ModifierBase _damageDoneOnCollide;
 
 
-		public ShortRangeProjectileMagic(Vector2 position, Vector2 hitbox, Group group, Level level, Vector2 speed, Player player, Element element, float damage)
+		public ShortRangeProjectileMagic(Vector2 position, Vector2 hitbox, Group group, Level level, Vector2 speed, Player player, Tuple<Element, float> element, float damage)
 			: base(position, hitbox, group, level, player, "ShortRangeProjectileMagic", null)
 		{
 			MaxSpeedBase = speed;
@@ -49,7 +49,7 @@ namespace SimonsGame.GuiObjects.ElementalMagic
 				hitMgo = hitObjects.FirstOrDefault();
 			else
 			{
-				IEnumerable<MainGuiObject> guiObjects = Level.GetPossiblyHitEnvironmentObjects(this);
+				IEnumerable<MainGuiObject> guiObjects = Level.GetPossiblyHitEnvironmentObjects(this.Bounds);
 				IEnumerable<Tuple<Vector2, MainGuiObject>> hitPlatforms = GetHitObjects(guiObjects, this.HitBoxBounds).Where(tup => tup.Item2.Id != _character.Id && tup.Item2.Team != Team);
 				hitPlatforms = hitPlatforms.Where(hp => hp.Item2.Team != Team);
 				hitMgo = hitPlatforms.Any() ? hitPlatforms.First().Item2 : null;
@@ -63,7 +63,7 @@ namespace SimonsGame.GuiObjects.ElementalMagic
 
 		public override void PreDraw(GameTime gameTime, Microsoft.Xna.Framework.Graphics.SpriteBatch spriteBatch) { }
 		public override void PreUpdate(GameTime gameTime) { }
-		public override void PostDraw(GameTime gameTime, Microsoft.Xna.Framework.Graphics.SpriteBatch spriteBatch)
+		public override void PostDraw(GameTime gameTime, Microsoft.Xna.Framework.Graphics.SpriteBatch spriteBatch, Player curPlayer)
 		{
 			//spriteBatch.Begin();
 
@@ -81,11 +81,11 @@ namespace SimonsGame.GuiObjects.ElementalMagic
 		public override void HitByObject(MainGuiObject mgo, ModifierBase mb) { }
 		protected override IEnumerable<MainGuiObject> GetAllVerticalPassableGroups(IEnumerable<MainGuiObject> guiObjects)
 		{
-			return guiObjects.ToList().Where(mgo => mgo.Team != Parent.Team);
+			return guiObjects.Where(mgo => mgo.Team != Parent.Team);
 		}
 		protected override IEnumerable<MainGuiObject> GetAllHorizontalPassableGroups(IEnumerable<MainGuiObject> guiObjects)
 		{
-			return guiObjects.ToList().Where(mgo => mgo.Team != Parent.Team);
+			return guiObjects.Where(mgo => mgo.Team != Parent.Team);
 		}
 	}
 }

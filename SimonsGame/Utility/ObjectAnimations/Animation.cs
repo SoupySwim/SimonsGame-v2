@@ -9,25 +9,17 @@ namespace SimonsGame.Utility
 {
 	public class Animation
 	{
-		public Animation(Texture2D texture, float frameTime, bool isLooping, int width, int height, float scale)
-		{
-			this._texture = texture;
-			this._frameTime = frameTime;
-			this._isLooping = isLooping;
-			_frameBounds = new Point(width, height);
-			_scale = scale;
-		}
 		/// <summary>
 		/// All frames in the animation arranged horizontally.
 		/// </summary>
 		private Texture2D _texture;
 		public Texture2D Texture { get { return _texture; } }
 
-		private float _scale;
-		public float Scale { get { return _scale; } }
-		private Point _frameBounds;
-		public int FrameWidth { get { return _frameBounds.X; } }
-		public int FrameHeight { get { return _frameBounds.Y; } }
+		public Vector2 Scale { get; set; }
+		public float FrameWidth { get { return FrameSize.X; } }
+		public float FrameHeight { get { return FrameSize.Y; } }
+		public Vector2 FrameSize;
+		public Vector2 ActualSize { get { return FrameSize * Scale; } }
 
 		/// <summary>
 		/// Duration of time to show each frame.
@@ -45,8 +37,20 @@ namespace SimonsGame.Utility
 		/// <summary>
 		/// Gets the number of frames in the animation.
 		/// </summary>
-		public int FrameCount { get { return Texture.Width / FrameWidth; } }
+		public int FrameCount { get { return (int)(Texture.Width / FrameWidth); } }
 
+		public float RotateAmount { get; set; }
 
+		public Animation(Texture2D texture, float frameTime, bool isLooping, int width, int height, float scale)
+			: this(texture, frameTime, isLooping, width, height, new Vector2(scale)) { }
+		public Animation(Texture2D texture, float frameTime, bool isLooping, int width, int height, Vector2 scale, float rotateAmount = 0)
+		{
+			this._texture = texture;
+			this._frameTime = frameTime;
+			this._isLooping = isLooping;
+			FrameSize = new Vector2(width, height);
+			Scale = scale;
+			RotateAmount = rotateAmount;
+		}
 	}
 }

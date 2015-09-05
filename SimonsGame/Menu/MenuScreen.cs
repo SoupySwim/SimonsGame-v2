@@ -9,8 +9,9 @@ namespace SimonsGame.Menu
 {
 	public abstract class MenuScreen
 	{
-		protected MenuItem[][] _menuLayout;
-		protected TimeSpan timeSpentOnScreen = TimeSpan.Zero;
+		protected MenuItemButton[][] _menuLayout;
+		protected TimeSpan _timeSpentOnScreen = TimeSpan.Zero;
+		protected static TimeSpan _DELAY_ON_CLICK = new TimeSpan(0, 0, 0, 0, 200);
 		protected int X, Y;
 		public MenuScreen()
 		{
@@ -21,21 +22,29 @@ namespace SimonsGame.Menu
 		public Vector2 Size { get; set; }
 		public void MoveUp()
 		{
-			Y = Y == 0 ? _menuLayout.Count() - 1 : Y - 1; // wrap around
-			X = _menuLayout[Y].Count() > X ? X : _menuLayout[Y].Count() - 1; // If there's a spot then use it, otherwise go to the end of row.
+			if (!_menuLayout[Y][X].IsStuck(Direction2D.Up))
+			{
+				Y = Y == 0 ? _menuLayout.Count() - 1 : Y - 1; // wrap around
+				X = _menuLayout[Y].Count() > X ? X : _menuLayout[Y].Count() - 1; // If there's a spot then use it, otherwise go to the end of row.
+			}
 		}
 		public void MoveDown()
 		{
-			Y = Y == _menuLayout.Count() - 1 ? 0 : Y + 1; // wrap around
-			X = _menuLayout[Y].Count() > X ? X : _menuLayout[Y].Count() - 1; // If there's a spot then use it, otherwise go to the end of row.
+			if (!_menuLayout[Y][X].IsStuck(Direction2D.Down))
+			{
+				Y = Y == _menuLayout.Count() - 1 ? 0 : Y + 1; // wrap around
+				X = _menuLayout[Y].Count() > X ? X : _menuLayout[Y].Count() - 1; // If there's a spot then use it, otherwise go to the end of row.
+			}
 		}
 		public void MoveLeft()
 		{
-			X = X == 0 ? _menuLayout[Y].Count() - 1 : X - 1; // wrap around
+			if (!_menuLayout[Y][X].IsStuck(Direction2D.Left))
+				X = X == 0 ? _menuLayout[Y].Count() - 1 : X - 1; // wrap around
 		}
 		public void MoveRight()
 		{
-			X = X == _menuLayout[Y].Count() - 1 ? 0 : X + 1; // wrap around
+			if (!_menuLayout[Y][X].IsStuck(Direction2D.Right))
+				X = X == _menuLayout[Y].Count() - 1 ? 0 : X + 1; // wrap around
 		}
 		public abstract void MoveBack();
 
@@ -48,9 +57,10 @@ namespace SimonsGame.Menu
 			_menuLayout[Y][X].HasBeenHighlighted();
 		}
 
-		public void PressEnter()
+		public virtual void PressEnter()
 		{
-			_menuLayout[Y][X].CallAction();
+			if (_timeSpentOnScreen >= _DELAY_ON_CLICK)
+				_menuLayout[Y][X].CallAction();
 		}
 		public void PressAction()
 		{
@@ -58,28 +68,30 @@ namespace SimonsGame.Menu
 		}
 		public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
 		{
-			foreach (MenuItem[] menuItems in _menuLayout)
+			foreach (MenuItemButton[] menuItems in _menuLayout)
 			{
-				foreach (MenuItem menuItem in menuItems)
+				foreach (MenuItemButton menuItem in menuItems)
 				{
 					menuItem.Draw(gameTime, spriteBatch);
 				}
 			}
 			DrawExtra(gameTime, spriteBatch);
-			timeSpentOnScreen += gameTime.ElapsedGameTime; // TODO add an update function...
+			_timeSpentOnScreen += gameTime.ElapsedGameTime; // TODO add an update function...
 		}
 
 		protected abstract void DrawExtra(GameTime gameTime, SpriteBatch spriteBatch);
 
-		public void HandleMouseEvent(Vector2 newMousePosition)
+		public virtual void HandleMouseEvent(GameTime gameTime, Vector2 newMousePosition)
 		{
+			if (_timeSpentOnScreen < _DELAY_ON_CLICK)
+				return;
 			for (int y = 0; y < _menuLayout.Count(); y++)
 			{
 				for (int x = 0; x < _menuLayout[y].Count(); x++)
 				{
-					MenuItem currentItem = _menuLayout[y][x];
-					if (currentItem.Bounds.X < newMousePosition.X && currentItem.Bounds.X + currentItem.Bounds.W > newMousePosition.X &&
-						currentItem.Bounds.Y < newMousePosition.Y && currentItem.Bounds.Y + currentItem.Bounds.Z > newMousePosition.Y)
+					MenuItemButton currentItem = _menuLayout[y][x];
+					if (currentItem.TotalBounds.X < newMousePosition.X && currentItem.TotalBounds.X + currentItem.TotalBounds.W > newMousePosition.X &&
+						currentItem.TotalBounds.Y < newMousePosition.Y && currentItem.TotalBounds.Y + currentItem.TotalBounds.Z > newMousePosition.Y)
 					{
 						DeselectCurrent();
 						X = x;
@@ -92,7 +104,7 @@ namespace SimonsGame.Menu
 
 		public void BlurScreen()
 		{
-			timeSpentOnScreen = TimeSpan.Zero;
+			_timeSpentOnScreen = TimeSpan.Zero;
 		}
 		// Possibly add a focus screen.
 

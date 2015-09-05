@@ -13,7 +13,7 @@ namespace SimonsGame.Modifiers
 		private long _gameTickLimit;
 		private long _currentGameTick;
 
-		public TickModifier(long gameTicks, ModifyType type, MainGuiObject owner, Element element)
+		public TickModifier(long gameTicks, ModifyType type, MainGuiObject owner, Tuple<Element, float> element)
 			: base(type, owner, element)
 		{
 			_gameTickLimit = gameTicks;
@@ -28,7 +28,7 @@ namespace SimonsGame.Modifiers
 		{
 			_currentGameTick = 0;
 		}
-		public override ModifierBase Clone()
+		public override ModifierBase Clone(Guid id)
 		{
 			TickModifier mod = new TickModifier(_gameTickLimit, Type, _owner, Element);
 			if (Type == ModifyType.Add)

@@ -30,6 +30,7 @@ namespace SimonsGame.Menu
 		{
 			_selectedAcion();
 		}
+		public virtual void OverrideColor(Color color) { }
 
 		public virtual bool IsStuck(Direction2D direction) { return false; }
 	}

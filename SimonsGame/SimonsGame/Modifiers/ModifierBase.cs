@@ -15,7 +15,6 @@ namespace SimonsGame.Modifiers
 	}
 	public abstract class ModifierBase : GuiVariables
 	{
-		public Element Element { get; set; }
 		public ModifyType Type { get; set; }
 		public bool StopGravity { get; set; }
 		protected bool _hasReachedEnd = false;
@@ -23,16 +22,18 @@ namespace SimonsGame.Modifiers
 		protected MainGuiObject _owner;
 		public MainGuiObject Owner { get { return _owner; } set { _owner = value; } }
 		public bool PreventControls { get; set; }
+		public Tuple<Element, float> Element { get; set; }
 
-		#region abstract functions
+		#region Abstract Functions
 
 		public abstract bool IsExpired(GameTime gameTime);
 		public abstract void Reset();
-		public abstract ModifierBase Clone();
+		public ModifierBase Clone() { return Clone(Guid.Empty); }
+		public abstract ModifierBase Clone(Guid id);
 
 		#endregion
 
-		public ModifierBase(ModifyType type, MainGuiObject owner, Element element)
+		public ModifierBase(ModifyType type, MainGuiObject owner, Tuple<Element, float> element)
 			: base()
 		{
 			_guid = Guid.NewGuid();
@@ -41,6 +42,7 @@ namespace SimonsGame.Modifiers
 			if (type == ModifyType.Multiply)
 			{
 				Movement = new Vector2(1, 1);
+				KnockBack = new Vector2(1, 1);
 				Acceleration = new Vector2(1, 1);
 				MaxSpeed = new Vector2(1, 1);
 				CurrentMovement = new Vector2(1, 1);
@@ -48,10 +50,6 @@ namespace SimonsGame.Modifiers
 			}
 			_owner = owner;
 			Element = element;
-		}
-		public void SetHealthTotal(float newHealth)
-		{
-			_healthTotal = newHealth;
 		}
 
 		public abstract long GetTickCount();
@@ -62,6 +60,7 @@ namespace SimonsGame.Modifiers
 			if (a.Type != b.Type)
 				return a;
 			a.Movement = new Vector2(a.Movement.X + b.Movement.X, a.Movement.Y + b.Movement.Y);
+			a.KnockBack = new Vector2(a.KnockBack.X + b.KnockBack.X, a.KnockBack.Y + b.KnockBack.Y);
 			a.Acceleration = new Vector2(a.Acceleration.X + b.Acceleration.X, a.Acceleration.Y + b.Acceleration.Y);
 			a.MaxSpeed = new Vector2(a.MaxSpeed.X + b.MaxSpeed.X, a.MaxSpeed.Y + b.MaxSpeed.Y);
 			a.CurrentMovement = new Vector2(a.CurrentMovement.X + b.CurrentMovement.X, a.CurrentMovement.Y + b.CurrentMovement.Y);
@@ -78,6 +77,7 @@ namespace SimonsGame.Modifiers
 			if (a.Type != b.Type)
 				return a;
 			a.Movement = new Vector2(a.Movement.X * b.Movement.X, a.Movement.Y * b.Movement.Y);
+			a.KnockBack = new Vector2(a.KnockBack.X * b.KnockBack.X, a.KnockBack.Y * b.KnockBack.Y);
 			a.Acceleration = new Vector2(a.Acceleration.X * b.Acceleration.X, a.Acceleration.Y * b.Acceleration.Y);
 			a.MaxSpeed = new Vector2(a.MaxSpeed.X * b.MaxSpeed.X, a.MaxSpeed.Y * b.MaxSpeed.Y);
 			a.CurrentMovement = new Vector2(a.CurrentMovement.X * b.CurrentMovement.X, a.CurrentMovement.Y * b.CurrentMovement.Y);

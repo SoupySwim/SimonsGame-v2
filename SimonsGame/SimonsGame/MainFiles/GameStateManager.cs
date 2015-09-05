@@ -13,6 +13,7 @@ using SimonsGame.MainFiles;
 using SimonsGame.MainFiles.InGame;
 using SimonsGame.MapEditor;
 using SimonsGame.Menu;
+using SimonsGame.Menu.MenuScreens;
 
 namespace SimonsGame
 {
@@ -20,7 +21,8 @@ namespace SimonsGame
 	{
 		InGame,
 		Paused,
-		StartingGame
+		StartingGame,
+		PreGame
 	}
 	public class GameStateManager
 	{
@@ -28,7 +30,8 @@ namespace SimonsGame
 		#region DegubArea
 		public static bool ShowHitBoxes { get; set; }
 		public static TimeSpan GameTimer = TimeSpan.Zero;
-		public static bool GameTimerRunning = false;
+		public static bool SlowMotionDebug = false;
+		private static int _slowMotionCounter = 0;
 		#endregion
 
 		#region GameState
@@ -97,12 +100,12 @@ namespace SimonsGame
 
 			if (gameSettings.AllowAIScreens)
 			{
-				float viewportW = MainGame.CurrentWindowSize.X / 2 - 10;
+				float viewportW = Level.Players.Count() > 2 ? MainGame.CurrentWindowSize.X / 2 - 10 : MainGame.CurrentWindowSize.X - 10;
 				float viewportH = MainGame.CurrentWindowSize.Y / 2 - 10;
 				Vector4[] viewportBounds = new Vector4[]
 			{
 				new Vector4(5, 5, viewportH, viewportW),
-				new Vector4(MainGame.CurrentWindowSize.X / 2 + 5, 5, viewportH, viewportW),
+				Level.Players.Count() > 2 ?new Vector4(MainGame.CurrentWindowSize.X / 2 + 5, 5, viewportH, viewportW) : new Vector4( 5, MainGame.CurrentWindowSize.Y / 2 + 5, viewportH, viewportW),
 				new Vector4(5, MainGame.CurrentWindowSize.Y / 2 + 5, viewportH, viewportW),
 				new Vector4(MainGame.CurrentWindowSize.X / 2 + 5, MainGame.CurrentWindowSize.Y / 2 + 5, viewportH, viewportW)
 			};
@@ -124,58 +127,97 @@ namespace SimonsGame
 				var player = Level.Players.Select(kv => kv.Value).Where(p => !p.IsAi).FirstOrDefault() ?? Level.Players.Select(kv => kv.Value).FirstOrDefault();
 				if (player == null)
 					return false;
-				_playerViewports = new Dictionary<Guid, PlayerViewport>() { { player.Id, new PlayerViewport(player, new Vector4(0, 0, MainGame.CurrentWindowSize.Y, MainGame.CurrentWindowSize.X), Level.Size, .945f, this) } };
+				_playerViewports = new Dictionary<Guid, PlayerViewport>() { { player.Id, new PlayerViewport(player, new Vector4(0, 0, MainGame.CurrentWindowSize.Y, MainGame.CurrentWindowSize.X), Level.Size, 1.2945f, this) } };
 			}
 
-			_gameState = GameStateManagerGameState.StartingGame;
+			_gameState = GameStateManagerGameState.PreGame;
 			_countdownToStartGame = _countdownToStartGameMax;
 			GameTimer = TimeSpan.Zero;
-			Player.Sprint3TestScore = 0;
 
 			TogglePause = false;
 			_gameStatistics = new GameStatistics();
 			return true;
 		}
+
+		private void InitializePlayerChoices()
+		{
+			foreach (var kv in _playerViewports)
+			{
+				Player player = kv.Value.Player;
+				StartupChoiceMenu startChoices = kv.Value.StartupOverlay;
+
+				player.SelectPassiveExperienceGain(startChoices.SelectedExperienceGain);
+				player.SelectSelfUpgrade(startChoices.SelectedSelfUpgrade);
+				player.SelectBaseAttack(startChoices.SelectedBaseAttack);
+			}
+		}
+
+
 		public void Update(GameTime gameTime, Vector2 newMousePosition)
 		{
-			// Update Controls
-			SetAiControls(Controls.PreviousControls);
-			_mousePosition = newMousePosition;
-
-			foreach (KeyValuePair<Guid, PlayerViewport> playerViewport in _playerViewports)
-				playerViewport.Value.Update(gameTime, _gameState, newMousePosition);
-
-			switch (_gameState)
+			if (SlowMotionDebug)
 			{
-				case GameStateManagerGameState.InGame:
-					if (GameTimerRunning)
+				_slowMotionCounter++;
+				if (_slowMotionCounter == 61)
+					_slowMotionCounter = 0;
+			}
+			if (!SlowMotionDebug || _slowMotionCounter == 60) // Everything in game goes in here!
+			{
+				// Update Controls
+				SetAiControls(Controls.PreviousControls);
+				_mousePosition = newMousePosition;
+
+				foreach (KeyValuePair<Guid, PlayerViewport> playerViewport in _playerViewports)
+					playerViewport.Value.Update(gameTime, _gameState, newMousePosition);
+
+				switch (_gameState)
+				{
+					case GameStateManagerGameState.InGame:
 						GameTimer += gameTime.ElapsedGameTime;
-					else if (GameTimer == TimeSpan.Zero && Controls.PreviousControls.Values.First().XMovement > 0)
-						GameTimerRunning = true;
 
-					Level.Update(gameTime);
-					// Test if Game is finished.
+						ExperienceGain newInterval = null;
+						foreach (ExperienceGain egInterval in _gameSettings.ExperienceGainIntervals)
+						{
+							if (egInterval.StartTime < GameTimer)
+								newInterval = egInterval;
+						}
+						if (newInterval != null)
+						{
+							_gameSettings.ExperienceGainIntervals.Remove(newInterval);
+							foreach (var kv in Level.Players)
+								kv.Value.UpdatePassiveExperienceGain(newInterval);
+						}
 
-					// Test if paused.
-					if (_gameSettings.PauseStopsGame && TestIfPaused())
-						_gameState = GameStateManagerGameState.Paused;
-					break;
-				case GameStateManagerGameState.Paused:
-					// Nothing to update yet... Probably will update some animation in the future.
-					if (_gameSettings.PauseStopsGame && TestIfPaused())
-						_gameState = GameStateManagerGameState.InGame;
-					break;
-				case GameStateManagerGameState.StartingGame:
-					_countdownToStartGame -= gameTime.ElapsedGameTime;
-					if (_countdownToStartGame <= TimeSpan.Zero)
-					{
-						_gameState = GameStateManagerGameState.InGame;
-						GameTimerRunning = true;
-					}
-					foreach (KeyValuePair<Guid, PlayerViewport> playerViewport in _playerViewports)
-						playerViewport.Value.SetCountdown(_countdownToStartGame);
+						Level.Update(gameTime);
+						// Test if Game is finished.
 
-					break;
+						// Test if paused.
+						if (_gameSettings.PauseStopsGame && TestIfPaused())
+							_gameState = GameStateManagerGameState.Paused;
+						break;
+					case GameStateManagerGameState.Paused:
+						// Nothing to update yet... Probably will update some animation in the future.
+						if (_gameSettings.PauseStopsGame && TestIfPaused())
+							_gameState = GameStateManagerGameState.InGame;
+						break;
+					case GameStateManagerGameState.StartingGame:
+						_countdownToStartGame -= gameTime.ElapsedGameTime;
+						if (_countdownToStartGame <= TimeSpan.Zero)
+						{
+							_gameState = GameStateManagerGameState.InGame;
+						}
+						foreach (KeyValuePair<Guid, PlayerViewport> playerViewport in _playerViewports)
+							playerViewport.Value.SetCountdown(_countdownToStartGame);
+
+						break;
+					case GameStateManagerGameState.PreGame:
+						if (_playerViewports.Aggregate(true, (seed, kv) => seed && kv.Value.StartupOverlay.IsReady))
+						{
+							InitializePlayerChoices();
+							_gameState = GameStateManagerGameState.StartingGame;
+						}
+						break;
+				}
 			}
 		}
 		public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
@@ -224,7 +266,7 @@ namespace SimonsGame
 
 		public bool TestIfPaused()
 		{
-			bool togglePuase = TogglePause || (Controls.PreviousControls != null && Controls.AllControls.Any(pcTuple => Controls.PressedDown(pcTuple.Value, Controls.PreviousControls[pcTuple.Key], AvailableButtons.Start)));
+			bool togglePuase = TogglePause || (Controls.PreviousControls != null && Controls.AllControls.Any(pcTuple => Controls.PressedDown(pcTuple.Value, Controls.PreviousControls[pcTuple.Key], AvailableButtons.Start | AvailableButtons.Start2)));
 			TogglePause = false;
 			return togglePuase;
 		}

@@ -12,6 +12,8 @@ using SimonsGame.MainFiles.InGame;
 using SimonsGame.MapEditor;
 using SimonsGame.MainFiles;
 using SimonsGame.GuiObjects.Zones;
+using System.Diagnostics;
+using SimonsGame.Utility.ObjectAnimations;
 
 namespace SimonsGame.GuiObjects
 {
@@ -26,13 +28,23 @@ namespace SimonsGame.GuiObjects
 		Zone,
 	}
 
+	public enum GuiObjectState
+	{
+		// Normal will be as you'd expect.  Things attack you, walk around, you are affected by gravity, ect.
+		Normal,
+
+		// Teleport will ignore almost all input and transfer you to your destination... quickly.
+		Teleport
+	}
+
 	public abstract class MainGuiObject : GuiVariables
 	{
 		public string Name;
 		// Return an empty MainGuiObject, void of any important data.  It's a placeholder.
 		public static MainGuiObject EmptyVessel { get { return null; } }
 
-
+		// TEST
+		//public static float PrinterTotal { get; set; }
 
 		// How much mana you have currently
 		protected float _manaCurrent;
@@ -40,7 +52,9 @@ namespace SimonsGame.GuiObjects
 
 		// How much health you have currently
 		protected float _healthCurrent;
-		public float HealthCurrent { get { return _healthCurrent; } }
+		public float HealthCurrent { get { return _healthCurrent; } set { _healthCurrent = value; } }
+
+		public float RegenAmount { get; set; }
 
 		protected GuiObjectType _objectType;
 		public GuiObjectType ObjectType { get { return _objectType; } }
@@ -52,6 +66,22 @@ namespace SimonsGame.GuiObjects
 
 		protected MainGuiObject _lastTargetHitBy;
 
+		protected Color _healthBarColor = new Color(0, 1, 0, .4f);
+
+		private float _levelAnimationDamage;
+
+		protected GuiObjectState _objState = GuiObjectState.Normal;
+
+		// This is for functions in a map.
+		public bool IsActiveForFunction = false;
+
+		#region State Variables
+		private Vector2 _teleportDestination = Vector2.Zero; // For Center
+		private Vector2 _teleportBy = Vector2.Zero;
+		public TickTimer _teleportTickTimer;
+
+		#endregion
+
 		#region Graphics
 		public Vector2 Position;
 		protected Vector2 _previousPosition;
@@ -61,12 +91,14 @@ namespace SimonsGame.GuiObjects
 		// In the future, this will be used to animate the object.
 		protected Animator _animator;
 
+		public int DrawImportant { get; set; }
+
 		//  _____
 		// |     |
 		// |  *  |  <--- Center Position
 		// |_____|
-		public Vector2 Center { get { return Position + (_size / 2); } set { Position = new Vector2(value.X - _size.X / 2, value.Y - _size.Y / 2); } }
-		public Vector2 Size { get { return _size; } set { ExtraSizeManipulation(value); _size = value; } }
+		public Vector2 Center { get { return Position + (_size / 2); } set { Position = value - (_size / 2); } }
+		public Vector2 Size { get { return _size; } set { ExtraSizeManipulation(ref value); _size = value; } }
 		protected Vector2 _size;
 		public Texture2D HitboxImage;
 		protected Color _hitBoxColor = new Color(1f, 1f, 1f, .8f);
@@ -98,6 +130,7 @@ namespace SimonsGame.GuiObjects
 		#region MovementBase
 		// Percentage of MaxSpeeds an object will move in one tick.
 		public Vector2 MovementBase { get; set; }
+		public Vector2 KnockBackBase { get; set; }
 
 		// Percentage of movement an object can gain in one tick.  Base is 1
 		public Vector2 AccelerationBase { get; set; }
@@ -125,6 +158,9 @@ namespace SimonsGame.GuiObjects
 
 		public Level Level { get; set; }
 
+		// Elemental info!
+		public Dictionary<Element, float> ElementLevel { get; set; }
+		public Dictionary<Element, float> ElementBase { get; set; }
 
 		// A projectile may have a parent object.
 		public MainGuiObject Parent { get; set; }
@@ -138,23 +174,24 @@ namespace SimonsGame.GuiObjects
 		public abstract void PreUpdate(GameTime gameTime);
 		public abstract void PostUpdate(GameTime gameTime);
 		public abstract void PreDraw(GameTime gameTime, SpriteBatch spriteBatch);
-		public abstract void PostDraw(GameTime gameTime, SpriteBatch spriteBatch);
+		public abstract void PostDraw(GameTime gameTime, SpriteBatch spriteBatch, Player curPlayer);
 		public abstract void SetMovement(GameTime gameTime);
 		public abstract float GetXMovement();
 		public abstract float GetYMovement();
-		public abstract void AddCustomModifiers(GameTime gameTime, ModifierBase modifyAdd);
-		public abstract void MultiplyCustomModifiers(GameTime gameTime, ModifierBase modifyMult);
 		public abstract void HitByObject(MainGuiObject mgo, ModifierBase mb);
 		protected virtual void AdditionalGroupChange(Group _group, Group newGroup) { }
-		public virtual void ExtraSizeManipulation(Vector2 newSize) { }
+		public virtual void ExtraSizeManipulation(ref Vector2 newSize) { }
 		public virtual void SwitchTeam(Team newTeam)
 		{
 			_team = newTeam;
 		}
+		public virtual List<ModifierBase> AddCustomModifiers(GameTime gameTime, ModifierBase modifyAdd) { return new List<ModifierBase>(); }
+		public virtual void MultiplyCustomModifiers(GameTime gameTime, ModifierBase modifyMult) { }
 		#endregion
 
 		public MainGuiObject(Vector2 position, Vector2 hitbox, Group group, Level level, string name)
 		{
+			_teleportTickTimer = new TickTimer(10, () => { _objState = GuiObjectState.Normal; FinishTeleport(); }, false);
 			IsStunned = false;
 			_guid = Guid.NewGuid();
 			Position = position;
@@ -168,19 +205,30 @@ namespace SimonsGame.GuiObjects
 
 			// Init to 0 (non-movable objects)
 			MovementBase = new Vector2(0f, 0f);
-			AccelerationBase = new Vector2(0f, 0f);
 			CurrentMovementBase = new Vector2(0f, 0f);
 			MaxSpeedBase = new Vector2(0);
-			AccelerationBase = new Vector2(1f);
+			AccelerationBase = new Vector2(1);
 			_healthTotal = 1;
 			_healthCurrent = _healthTotal;
 			_objectType = GuiObjectType.Environment;
 			Name = name;
 			_lastTargetHitBy = null;
-			_team = Team.Neutral; // default to homeless for now...
+			_team = Team.None; // default to homeless for now...
 			ObtainableItems = new List<ObtainableItem>();
 			IsMovable = (ObjectType != GuiObjectType.Environment && ObjectType != GuiObjectType.Structure) || this.GetType().IsSubclassOf(typeof(PhysicsObject));
 			ZoneIds = new HashSet<Guid>();
+			ElementBase = new Dictionary<Element, float>()
+			{
+				{Element.Normal, 0},
+				{Element.Plant, 0},
+				{Element.Water, 0},
+				{Element.Fire, 0},
+				{Element.Lightning, 0},
+				{Element.Metal, 0},
+				{Element.Rock, 0},
+			};
+			ElementLevel = ElementBase.ToDictionary(kv => kv.Key, kv => kv.Value);
+			DrawImportant = 0;
 		}
 
 		public object Clone()
@@ -195,102 +243,218 @@ namespace SimonsGame.GuiObjects
 			if (_healthCurrent <= 0)
 			{
 				Died();
-				if (ObjectType == GuiObjectType.Character && !(this is HealthCreep)) // All characters except health creeps.
-				{
-					if (Player.Sprint3TestScore == 0)
-					{
-						Level.GameStateManager.AddHighLight(new GameHighlight()
-						{
-							Description = "First Kill",
-							Character = _lastTargetHitBy,
-							TimeOccured = GameStateManager.GameTimer
-						});
-					}
-					if (!Level.GetAllCharacterObjects().Any(g => !(g is HealthCreep) && !(g is Player))
-						&& Level.GameStateManager.WinCondition == MainFiles.WinCondition.DefeatAllEnemies)
-					{
-						Level.GameStateManager.AddHighLight(new GameHighlight()
-						{
-							Description = string.Format("Finished with Score = {0}", Player.Sprint3TestScore),
-							Character = _lastTargetHitBy,
-							TimeOccured = GameStateManager.GameTimer
-						});
-						Level.FinishedGame(_lastTargetHitBy);
-					}
-					Player.Sprint3TestScore += (float)GameStateManager.GameTimer.TotalMilliseconds;
-				}
-				else if (GetType().IsAssignableFrom(typeof(StandardBase))
-					&& Level.GetAllStructures().Count(g => g.GetType().IsAssignableFrom(typeof(StandardBase))) < 2 // Assuming one base is left, or the only base was destroyed
-					&& Level.GameStateManager.WinCondition == MainFiles.WinCondition.DefeatBase)
-				{
-					Level.GameStateManager.AddHighLight(new GameHighlight()
-					{
-						Description = string.Format("Finished with Score = {0}", Player.Sprint3TestScore),
-						Character = _lastTargetHitBy,
-						TimeOccured = GameStateManager.GameTimer
-					});
-					Level.FinishedGame(_lastTargetHitBy);
-				}
-				else if (this is Player)
-				{
-					Level.GameStateManager.AddHighLight(new GameHighlight()
-					{
-						Description = this.Name + " Got Defeated",
-						Character = _lastTargetHitBy,
-						TimeOccured = GameStateManager.GameTimer
-					});
-				}
+				CheckGameConditionsOnDeath();
 				return;
 			}
 			// Apply modifiers.
 			ModifierBase modifyAdd = new EmptyModifier(ModifyType.Add, this);
 			ModifierBase modifyMult = new EmptyModifier(ModifyType.Multiply, this);
-			AddCustomModifiers(gameTime, modifyAdd);
+			List<ModifierBase> appliedAttacks = AddCustomModifiers(gameTime, modifyAdd);
 			MultiplyCustomModifiers(gameTime, modifyMult);
 			IsStunned = modifyAdd.PreventControls || modifyMult.PreventControls;
 
 			Movement = MovementBase;
-			Acceleration = AccelerationBase;
-			MaxSpeed = MaxSpeedBase;
-			CurrentMovement = CurrentMovementBase;
+			MaxSpeed = (MaxSpeedBase + modifyAdd.MaxSpeed) * modifyMult.MaxSpeed;
+			KnockBack = (KnockBackBase + modifyAdd.KnockBack) * modifyMult.KnockBack;
+			Acceleration = (AccelerationBase + modifyAdd.Acceleration) * modifyMult.Acceleration * MaxSpeed;
+			Acceleration.X = Math.Abs(Acceleration.X);
+			Acceleration.Y = Math.Abs(Acceleration.Y);
+
+			//CurrentMovement = CurrentMovementBase;
+			_healthCurrent = Math.Min(_healthCurrent + RegenAmount, _healthTotal);
 			float healthPrior = _healthCurrent;
 
-			// Target hit by has to actually deal damage...
-			if (Math.Abs(modifyAdd.HealthTotal) + 1 > modifyMult.HealthTotal) // 1 is not greater than 1
-				_lastTargetHitBy = modifyAdd.Owner;
-			else if (modifyMult.HealthTotal != 1)
-				_lastTargetHitBy = modifyMult.Owner;
+			// The following line only accounts for healing.  Damage is done below this line.
+			_healthCurrent = MathHelper.Clamp(_healthCurrent + modifyAdd.HealthTotal, 0, HealthTotal); // Don't amplify healing... yet!
 
-			_healthCurrent = MathHelper.Clamp((_healthCurrent + modifyAdd.HealthTotal) * modifyMult.HealthTotal, 0, HealthTotal);
-			float healthDifference = healthPrior - _healthCurrent;
-			if (healthDifference > 0)
-				Level.AddLevelAnimation(new TextAnimation("" + (healthPrior - _healthCurrent), Color.Red, Level, new Vector2(Center.X, Position.Y - 30)));
-			else if (healthDifference < -20) // Don't show the little guys  Should probably add them up...
-				Level.AddLevelAnimation(new TextAnimation("" + (_healthCurrent - healthPrior), Color.Green, Level, new Vector2(Center.X, Position.Y - 30)));
+			float largestDamageDone = 1;
+			foreach (ModifierBase attack in appliedAttacks)
+			{
+				float damageDone = ApplyDamage(attack);
+				if (damageDone < largestDamageDone) // damage is a negative number to health... remember that!
+				{
+					_lastTargetHitBy = attack.Owner;
+					largestDamageDone = damageDone;
+				}
+				_healthCurrent = MathHelper.Clamp(_healthCurrent + damageDone, 0, HealthTotal);
+			}
+
+			_levelAnimationDamage += healthPrior - _healthCurrent;
 
 			PreUpdate(gameTime);
 			_previousPosition = Position;
-
 			SetMovement(gameTime);
 			float xCurMove = ((IsStunned ? 0 : GetXMovement()) + modifyAdd.Movement.X) * modifyMult.Movement.X;
 			float yCurMove = ((IsStunned ? 0 : GetYMovement()) + modifyAdd.Movement.Y) * modifyMult.Movement.Y;
-			CurrentMovement = new Vector2((float)xCurMove, (float)yCurMove); // only do this if you aren't stunned!
-			Position = new Vector2(Position.X + CurrentMovement.X, Position.Y + CurrentMovement.Y);
+			xCurMove = (xCurMove < 0 ? -1 : 1) * Math.Min(Math.Abs(xCurMove), Acceleration.X);
+			yCurMove = (yCurMove < 0 ? -1 : 1) * Math.Min(Math.Abs(yCurMove), Acceleration.Y);
+			//if (this is Player && xCurMove > 4)
+			//{
+			//}
+
+			// If you're going faster than the max speed, then all we can do is slow down
+			if (Math.Abs(CurrentMovement.X) > Math.Abs(MaxSpeed.X))
+			{
+				CurrentMovement.X += CurrentMovement.X < 0 ? _knockBackRecoveryAcceleration : -_knockBackRecoveryAcceleration; // ? Acceleration.X : -Acceleration.X;
+				if (xCurMove < 0 && CurrentMovement.X > 0 ||
+					xCurMove > 0 && CurrentMovement.X < 0)
+					CurrentMovement.X = CurrentMovement.X + xCurMove;
+			}
+			else
+			{
+				// If we are moving, but not accelerating, we should decelerate.
+				if (CurrentMovement.X != 0 && xCurMove == 0)
+					xCurMove = xCurMove != 0 ? xCurMove : (CurrentMovement.X < 0 ? -Math.Max(CurrentMovement.X, -Acceleration.X) : -Math.Min(CurrentMovement.X, Acceleration.X));
+				CurrentMovement.X = xCurMove + CurrentMovement.X;
+				CurrentMovement.X = CurrentMovement.X < 0 ? Math.Max(CurrentMovement.X, MaxSpeed.X < 0 ? MaxSpeed.X : -MaxSpeed.X) : Math.Min(CurrentMovement.X, MaxSpeed.X < 0 ? -MaxSpeed.X : MaxSpeed.X);
+			}
+			if (Math.Abs(CurrentMovement.Y) > Math.Abs(MaxSpeed.Y))
+			{
+				CurrentMovement.Y += CurrentMovement.Y < 0 ? _knockBackRecoveryAcceleration : -_knockBackRecoveryAcceleration; //Acceleration.Y : -Acceleration.Y;
+				if (yCurMove < 0 && CurrentMovement.Y > 0 ||
+					yCurMove > 0 && CurrentMovement.Y < 0)
+					CurrentMovement.Y = CurrentMovement.Y + yCurMove;
+			}
+			else
+			{
+				// If we are moving, but not accelerating, we should decelerate.
+				if (CurrentMovement.Y != 0 && yCurMove == 0)
+					yCurMove = yCurMove != 0 ? yCurMove : (CurrentMovement.Y < 0 ? -Math.Max(CurrentMovement.Y, -Acceleration.Y) : -Math.Min(CurrentMovement.Y, Acceleration.Y));
+				CurrentMovement.Y = yCurMove + CurrentMovement.Y;
+				CurrentMovement.Y = CurrentMovement.Y < 0 ? Math.Max(CurrentMovement.Y, MaxSpeed.Y < 0 ? MaxSpeed.Y : -MaxSpeed.Y) : Math.Min(CurrentMovement.Y, MaxSpeed.Y < 0 ? -MaxSpeed.Y : MaxSpeed.Y);
+			}
+
+			// Only knock back objects that can move.
+			if (IsMovable)
+			{
+				if (KnockBack.X != 0)
+					CurrentMovement.X = (Math.Sign(CurrentMovement.X) == Math.Sign(KnockBack.X) ? CurrentMovement.X : 0) + KnockBack.X;
+				if (KnockBack.Y != 0)
+					CurrentMovement.Y = (Math.Sign(CurrentMovement.Y) == Math.Sign(KnockBack.Y) ? CurrentMovement.Y : 0) + KnockBack.Y;
+			}
+
+			if (_objState == GuiObjectState.Normal)
+			{
+				if (IsMovable || MaxSpeedBase != Vector2.Zero) // Added second check for things that are supposed to move (push ability).
+					Position = Position + CurrentMovement; //new Vector2(Position.X + CurrentMovement.X, Position.Y + CurrentMovement.Y);
+				else
+					Movement = Vector2.Zero;
+			}
+			else if (_objState == GuiObjectState.Teleport)
+			{
+				Center = Center - _teleportBy;
+				_teleportTickTimer.Update(gameTime);
+			}
 
 			_animator.Update(gameTime);
 
 			PostUpdate(gameTime);
 		}
 
-		protected virtual void Died()
+		private float ApplyDamage(ModifierBase modifier)
 		{
-			Level.RemoveGuiObject(this);
-			GenericZone zone = Level.GetAllZones().FirstOrDefault(z => ZoneIds.Contains(z.Id)); // Can't have behavior zones within jungle zones...
-			if (zone != null)
-				zone.CharacterDied(this);
+			// Don't worry about it if it doesn't matter.  May override for buffs.
+			float damageAmount = modifier.HealthTotal;
+			if (damageAmount == 0)
+				return 0;
+
+			Element affectedElement = modifier.Element.Item1;
+			// If the attack is Normal, then ignore modifiers, nothing changes!
+			if (affectedElement == Element.Normal)
+				return damageAmount;
+
+			float affectedElementDone = modifier.Element.Item2;
+			float affectedElementAmount = ElementLevel[affectedElement];
+			float affectedElementBase = ElementBase[affectedElement];
+			float affectedElementAverage = (affectedElementAmount + affectedElementBase) / 2.0f;
+
+			//Element relatedElement = affectedElement.GetRelatedElement();
+			//float relatedElementAmount = ElementLevel[relatedElement];
+
+			Element counterElement = affectedElement.GetCounterElement();
+			float counterElementAmount = ElementLevel[counterElement];
+
+			Element softCounterElement = affectedElement.GetSoftCounterElement();
+			float softCounterElementAmount = ElementLevel[softCounterElement];
+
+
+			float damagePercentage = Math.Abs(damageAmount / (_healthTotal / 2.0f)); // 60% of total health attack will be 120% multiplier!
+
+			// First, let's change the magic amount of the affected element.
+			// It's unaffected if the attack is less potent.
+			float increaseAmount = affectedElementDone > affectedElementAverage ? affectedElementDone - affectedElementAverage : 0;
+			ElementLevel[affectedElement] += increaseAmount * damagePercentage;
+			float damageMultiplier = 1 + damagePercentage * (affectedElementDone > affectedElementAmount
+				? affectedElementDone - affectedElementAmount // .4 - .3 = .1 increase multiplied by damagerPercentage of damage is applied
+				: (affectedElementDone - affectedElementAmount) / 2); // (.4 - .5 = -.1) / 2 = .05 descrease multiplied by damagerPercentage of damage is applied
+
+			// Now let's look at it's counters
+			float percentDamageCountered = GetPercentageCountered(counterElementAmount, affectedElementDone);
+			damageMultiplier -= percentDamageCountered * 2.0f / 3.0f; // Main counter can counter up to 2/3 of percentDamageCountered.
+			float percentDamageSoftCountered = GetPercentageCountered(softCounterElementAmount, affectedElementDone);
+			damageMultiplier -= percentDamageSoftCountered / 3.0f; // Soft counter can counter up to 1/3 of percentDamageCountered.
+
+			// TODO must affect counters negatively.
+
+			return damageAmount * damageMultiplier;
 		}
 
-		public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
+		private float GetPercentageCountered(float counterElementAmount, float affectedElementDone)
+		{
+			float percentDamageCountered = 0;
+			float baseLargeCountered = Math.Min(counterElementAmount - affectedElementDone, affectedElementDone + 1);
+			float baseCountered = counterElementAmount - (affectedElementDone / 2.0f); // Max will be affectedElementDone because of first if statement
+
+			// You've countered this well
+			if (baseLargeCountered >= 0)
+				percentDamageCountered = (.5f * baseLargeCountered) + .25f; // Can counter up to 75%!
+			// You at least counter something...!
+			else if (baseCountered >= 0)
+				percentDamageCountered = .25f * baseCountered; // Can counter up to 25%!
+
+			return percentDamageCountered;
+		}
+
+		private void CheckGameConditionsOnDeath()
+		{
+			if (ObjectType == GuiObjectType.Character && !(this is HealthCreep)) // All characters except health creeps.
+			{
+				if (!Level.GetAllCharacterObjects(Bounds).Any(g => !(g is HealthCreep) && !(g is Player))
+					&& Level.GameStateManager.WinCondition == MainFiles.WinCondition.DefeatAllEnemies)
+				{
+					Level.GameStateManager.AddHighLight(new GameHighlight()
+					{
+						Description = string.Format("had the finishing blow"),
+						Character = _lastTargetHitBy,
+						TimeOccured = GameStateManager.GameTimer
+					});
+					Level.FinishedGame(_lastTargetHitBy);
+				}
+			}
+			else if (GetType().IsAssignableFrom(typeof(StandardBase))
+				&& Level.GetAllStructures().Count(g => g.GetType().IsAssignableFrom(typeof(StandardBase))) < 2 // Assuming one base is left, or the only base was destroyed
+				&& Level.GameStateManager.WinCondition == MainFiles.WinCondition.DefeatBase)
+			{
+				Level.GameStateManager.AddHighLight(new GameHighlight()
+				{
+					Description = string.Format("had the finishing blow"),
+					Character = _lastTargetHitBy,
+					TimeOccured = GameStateManager.GameTimer
+				});
+				Level.FinishedGame(_lastTargetHitBy);
+			}
+			else if (this is Player)
+			{
+				Level.GameStateManager.AddHighLight(new GameHighlight()
+				{
+					Description = this.Name + " Got Defeated",
+					Character = _lastTargetHitBy,
+					TimeOccured = GameStateManager.GameTimer
+				});
+			}
+		}
+
+		public void Draw(GameTime gameTime, SpriteBatch spriteBatch, Player curPlayer = null)
 		{
 			PreDraw(gameTime, spriteBatch);
 			//spriteBatch.Begin();
@@ -307,7 +471,14 @@ namespace SimonsGame.GuiObjects
 
 			//spriteBatch.End();
 
-			PostDraw(gameTime, spriteBatch);
+			PostDraw(gameTime, spriteBatch, curPlayer);
+		}
+
+		public void GetLevelAnimations()
+		{
+			if (_levelAnimationDamage != 0)
+				Level.AddLevelAnimation(new TextAnimation(string.Format("{0:0.0}", Math.Abs(_levelAnimationDamage)), _levelAnimationDamage > 0 ? Color.Red : Color.Green, Level, new Vector2(Center.X, Position.Y - 30)));
+			_levelAnimationDamage = 0;
 		}
 
 		#region HealthBarInfo
@@ -322,7 +493,7 @@ namespace SimonsGame.GuiObjects
 
 		protected virtual Vector4 GetHealthBarBounds()
 		{
-			return new Vector4(Bounds.X, Bounds.Y, 10, Bounds.W);
+			return new Vector4(Bounds.X, (float)Math.Round(Bounds.Y, 3), 8, Bounds.W);
 		}
 		#endregion
 
@@ -331,7 +502,7 @@ namespace SimonsGame.GuiObjects
 			return CurrentMovement.X >= 0 ? SpriteEffects.None : SpriteEffects.FlipHorizontally;
 		}
 
-		// on a base to base case for debugging purposes.
+		// On a base to base case for debugging purposes.
 		protected virtual bool ShowHitBox() { return true; }
 
 		#region Mana Usage
@@ -341,7 +512,7 @@ namespace SimonsGame.GuiObjects
 		}
 		public void RestoreMana(float amount)
 		{
-			_manaCurrent = Math.Min(_manaCurrent + amount, _manaTotal); // Cannot go above max.
+			_manaCurrent = Math.Min(_manaCurrent + amount, ManaTotal); // Cannot go above max.
 		}
 		#endregion
 
@@ -411,7 +582,7 @@ namespace SimonsGame.GuiObjects
 					{
 						float platWidth = mgo.Size.X;
 						bool movingLeft = _previousPosition.X > nextBounds.X;
-						select = bounds != Vector2.Zero && Math.Abs(bounds.X) > 0 && Math.Abs(bounds.X) <= platWidth;
+						select = bounds != Vector2.Zero && Math.Abs(bounds.X) > 0; // && Math.Abs(bounds.X) <= platWidth; // Removed last check because it's possible to go past the platform, but still need to stop at it.
 					}
 				}
 				return new { bounds = bounds, select = select, obj = mgo };
@@ -440,7 +611,7 @@ namespace SimonsGame.GuiObjects
 			float minDistanceX = halfWidthA + halfWidthB;
 
 			// If we are not intersecting at all, return (0, 0).
-			if (Math.Abs(distanceX) >= minDistanceX)
+			if ((distanceX < 0 ? -1 * distanceX : distanceX) >= minDistanceX)
 				return Vector2.Zero;
 
 			float halfHeightA = rectA.Z / 2.0f;
@@ -475,7 +646,27 @@ namespace SimonsGame.GuiObjects
 		}
 		#endregion
 
+		public IEnumerable<T> GetObtainableItemsOfType<T>() where T : ObtainableItem
+		{
+			return ObtainableItems.OfType<T>();//.Where(oi => oi.GetType() == obtainableItemType);
+		}
 
+		public override bool Equals(Object obj1)
+		{
+			if (obj1 == null && this == null)
+				return true;
+			MainGuiObject mgo1 = obj1 as MainGuiObject;
+			if (mgo1 == null || this == null)
+				return false;
+			return mgo1.Id == this.Id;
+		}
+
+		public override int GetHashCode()
+		{
+			return base.GetHashCode();
+		}
+
+		#region virtual functions
 		public virtual bool CanPushObjects()
 		{
 			return IsMovable && Group != Group.Passable;
@@ -507,10 +698,6 @@ namespace SimonsGame.GuiObjects
 			if (bType == ButtonType.Direction && value == 1)
 				SwitchDirections();
 		}
-		public IEnumerable<T> GetObtainableItemsOfType<T>() where T : ObtainableItem
-		{
-			return ObtainableItems.OfType<T>();//.Where(oi => oi.GetType() == obtainableItemType);
-		}
 
 		public void UseKey(SmallKey key)
 		{
@@ -529,5 +716,66 @@ namespace SimonsGame.GuiObjects
 		}
 
 		public virtual void TriggerBehavior(BehaviorZone _behaviorZone) { }
+
+		public virtual void PlayTeleportAnimation() { }
+		public virtual void FinishTeleport() { }
+		public virtual void Initialize() { }
+
+		protected virtual void Died()
+		{
+			Level.RemoveGuiObject(this);
+			GenericZone zone;
+			//= Level.GetAllZones().FirstOrDefault(z => ZoneIds.Contains(z.Id)); // Can't have behavior zones within jungle zones...
+			//if (zone != null)
+			//	zone.CharacterDied(this);
+			if (ZoneIds.Any() && Level.GetAllZones().TryGetValue(ZoneIds.FirstOrDefault(), out zone))
+				zone.CharacterDied(this);
+			foreach (ObtainableItem item in ObtainableItems)
+			{
+				Type carrierType = item.CarrierType;
+				if (carrierType != null)
+				{
+					Vector2 itemSize = item.DefaultSize;
+					Level.AddGuiObject(Activator.CreateInstance(carrierType, new object[] { this, item }) as MainGuiObject);
+				}
+			}
+		}
+
+		public virtual bool IsHitBy(MainGuiObject mgo)
+		{
+			return true;
+		}
+
+		public virtual void FinalizeSize() // in map editor
+		{
+			Vector2 newPosition = Position;
+			Vector2 newSize = Size;
+			if (Size.X < 0)
+			{
+				newPosition.X = Position.X + Size.X;
+				newSize.X = Math.Abs(Size.X);
+			}
+			if (Size.Y < 0)
+			{
+				newPosition.Y = Position.Y + Size.Y;
+				newSize.Y = Math.Abs(Size.Y);
+			}
+			Position = newPosition;
+			Size = newSize;
+		}
+
+		#endregion
+
+		public void TeleportTo(Vector2 position, int teleportTickCount = 10, bool showAnimation = false)
+		{
+			_objState = GuiObjectState.Teleport;
+			_teleportBy = (Center - position) / teleportTickCount;
+			_teleportDestination = position;
+			_teleportTickTimer.TickTotal = teleportTickCount;
+			_teleportTickTimer.Restart();
+			if (showAnimation)
+				PlayTeleportAnimation();
+		}
+
 	}
 }

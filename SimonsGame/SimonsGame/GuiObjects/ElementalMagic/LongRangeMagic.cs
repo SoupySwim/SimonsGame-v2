@@ -23,7 +23,7 @@ namespace SimonsGame.GuiObjects.ElementalMagic
 		public ModifierBase DamageDoneOnDetonate { get { return _damageDoneOnDetonate; } }
 		private ModifierBase _damageDoneOnDetonate;
 
-		public LongRangeMagic(Vector2 position, Vector2 hitbox, Group group, Level level, Vector2 speed, float damage, Element element, Player player)
+		public LongRangeMagic(Vector2 position, Vector2 hitbox, Group group, Level level, Vector2 speed, float damage, Tuple<Element, float> element, Player player)
 			: base(position, hitbox, group, level, player, "LongRangeMagic", null)
 		{
 			MaxSpeedBase = speed;
@@ -42,7 +42,7 @@ namespace SimonsGame.GuiObjects.ElementalMagic
 		}
 
 		public override void PreDraw(GameTime gameTime, Microsoft.Xna.Framework.Graphics.SpriteBatch spriteBatch) { }
-		public override void PostDraw(GameTime gameTime, Microsoft.Xna.Framework.Graphics.SpriteBatch spriteBatch)
+		public override void PostDraw(GameTime gameTime, Microsoft.Xna.Framework.Graphics.SpriteBatch spriteBatch, Player curPlayer)
 		{
 			//spriteBatch.Begin();
 

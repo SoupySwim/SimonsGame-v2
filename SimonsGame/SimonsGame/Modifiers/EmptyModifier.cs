@@ -11,18 +11,18 @@ namespace SimonsGame.Modifiers
 	public class EmptyModifier : ModifierBase
 	{
 		public EmptyModifier(ModifyType type, MainGuiObject owner)
-			: base(type, owner, Element.Normal)
+			: base(type, owner, new Tuple<Element, float>(Utility.Element.Normal, 0))
 		{
 		}
 		public override bool IsExpired(GameTime gameTime)
 		{
-			return false;
+			return true;
 		}
 		public override void Reset()
 		{
 			// nothing happening here...
 		}
-		public override ModifierBase Clone()
+		public override ModifierBase Clone(Guid id)
 		{
 			return new EmptyModifier(Type, _owner);
 		}

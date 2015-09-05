@@ -12,32 +12,30 @@ namespace SimonsGame.Menu
 	{
 		public string Text { get; set; }
 		private Color _currentColor;
-		public Color _defaultColor;
-		public Color DefaultColor { get { return _defaultColor; } }
-		public Color _selectedColor;
-		public Color SelectedColor { get { return _selectedColor; } }
+		public Color DefaultColor;
+		public Color SelectedColor;
 		public TextMenuItemButton(Action selectedAcion, string text, Vector4 bounds, Vector2 padding, bool isSelected = false)
 			: this(selectedAcion, text, bounds, new Color(1f, 1f, 1f), new Color(240, 50, 50), padding, isSelected) { }
 		public TextMenuItemButton(Action selectedAcion, string text, Vector4 bounds, Color defaultColor, Color selectedColor, Vector2 padding, bool isSelected = false)
 			: base(selectedAcion, bounds, padding)
 		{
-			_defaultColor = defaultColor;
-			_selectedColor = selectedColor;
+			DefaultColor = defaultColor;
+			SelectedColor = selectedColor;
 			_currentColor = isSelected ? selectedColor : defaultColor;
 			IsHighLighted = isSelected;
 			Text = text;
 		}
 		public override void HasBeenHighlighted()
 		{
-			_currentColor = _selectedColor;
+			_currentColor = SelectedColor;
 			IsHighLighted = true;
 		}
 		public override void HasBeenDeHighlighted()
 		{
-			_currentColor = _defaultColor;
+			_currentColor = DefaultColor;
 			IsHighLighted = false;
 		}
-		public void OverrideColor(Color color)
+		public override void OverrideColor(Color color)
 		{
 			_currentColor = color;
 		}
