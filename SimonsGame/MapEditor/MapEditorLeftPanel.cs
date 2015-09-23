@@ -97,6 +97,7 @@ namespace SimonsGame.MapEditor
 					GuiObjectClass.GuiThenClause,
 					GuiObjectClass.JungleCreepZone,
 					GuiObjectClass.BehaviorZone,
+					GuiObjectClass.StoryZone,
 				}
 			},
 		};
@@ -146,6 +147,7 @@ namespace SimonsGame.MapEditor
 			_menuItems.Add(new LeftPanelChoice("Test/NewAbility", GuiObjectClass.AbilityObject, Color.White, "New Ability"));
 			_menuItems.Add(new LeftPanelChoice("Test/SingleColor", GuiObjectClass.JungleCreepZone, Color.Lerp(Color.Purple, new Color(1, 1, 1, 0), .5f), "Jungle Zone"));
 			_menuItems.Add(new LeftPanelChoice("Test/SingleColor", GuiObjectClass.BehaviorZone, Color.LightGray, "Behavior Zone"));
+			_menuItems.Add(new LeftPanelChoice("Test/SingleColor", GuiObjectClass.StoryZone, Color.Black, "Story Zone"));
 
 
 			_currentMenuItems = _menuItems.ToList();
@@ -341,5 +343,6 @@ namespace SimonsGame.MapEditor
 		GuiIfClause,
 		GuiThenClause,
 		Aggregate,
+		StoryZone,
 	}
 }

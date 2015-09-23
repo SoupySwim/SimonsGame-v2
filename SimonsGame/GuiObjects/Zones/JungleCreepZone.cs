@@ -30,7 +30,7 @@ namespace SimonsGame.GuiObjects.Zones
 		}
 		public override void Initialize(Level level)
 		{
-			var guiObjects = level.GetAllCharacterObjects(Bounds).Where(mgo => MainGuiObject.GetIntersectionDepth(mgo.Bounds, Bounds) != Vector2.Zero);
+			var guiObjects = level.GetAllMovableCharacters(Bounds).Where(mgo => MainGuiObject.GetIntersectionDepth(mgo.Bounds, Bounds) != Vector2.Zero);
 			_creepsStartingPosition.Clear();
 			_creepsLivingStatus.Clear();
 			_creepObjectStore.Clear();

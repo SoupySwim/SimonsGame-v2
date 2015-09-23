@@ -106,6 +106,8 @@ namespace SimonsGame.Menu
 		{
 			_timeSpentOnScreen = TimeSpan.Zero;
 		}
+
+		public virtual void OpenMenu() { }
 		// Possibly add a focus screen.
 
 	}

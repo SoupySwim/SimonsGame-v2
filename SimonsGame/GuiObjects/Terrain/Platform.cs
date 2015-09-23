@@ -94,7 +94,7 @@ namespace SimonsGame.GuiObjects
 
 			if (_isHiddenArea)
 			{
-				_visibleToTeams = Level.GetAllCharacterObjects(Bounds).Where(mgo => mgo.Group != Group.Passable && mgo.GetIntersectionDepth(this) != Vector2.Zero).Select(mgo => mgo.Team).Distinct().ToList();
+				_visibleToTeams = Level.GetAllMovableCharacters(Bounds).Where(mgo => mgo.Group != Group.Passable && mgo.GetIntersectionDepth(this) != Vector2.Zero).Select(mgo => mgo.Team).Distinct().ToList();
 			}
 		}
 		public override void PreDraw(GameTime gameTime, SpriteBatch spriteBatch) { }

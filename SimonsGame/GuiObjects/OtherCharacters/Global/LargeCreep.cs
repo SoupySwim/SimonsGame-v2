@@ -139,7 +139,7 @@ namespace SimonsGame.GuiObjects.OtherCharacters.Global
 			}
 			_abilityManager.AddAbility(mb);
 		}
-		public override Vector2 GetAim()
+		public override Vector2 GetAimOverride()
 		{
 			if (_lastTargetHitBy != null)
 			{

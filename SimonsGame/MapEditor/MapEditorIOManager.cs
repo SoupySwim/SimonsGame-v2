@@ -383,6 +383,8 @@ namespace SimonsGame.MapEditor
 					return new JungleCreepZone(position, size, level);
 				case GuiObjectClass.BehaviorZone:
 					return new BehaviorZone(position, size, level, Team);
+				case GuiObjectClass.StoryZone:
+					return new StoryZone(position, level);
 
 			}
 			return null;

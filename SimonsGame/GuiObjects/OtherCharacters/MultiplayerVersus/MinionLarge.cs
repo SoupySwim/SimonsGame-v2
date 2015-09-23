@@ -134,7 +134,7 @@ namespace SimonsGame.GuiObjects
 			return AIState == MinionLargeAIState.MoveLeft;
 		}
 
-		public override Vector2 GetAim()
+		public override Vector2 GetAimOverride()
 		{
 			if (_targetedObject != null)
 				return new Vector2(_targetedObject.Center.X < Center.X ? -1 : 1, 0);
@@ -150,7 +150,7 @@ namespace SimonsGame.GuiObjects
 			else
 			{
 				bool wasNull = _targetedObject == null;
-				_targetedObject = Level.GetAllCharacterObjects(Bounds).Concat(Level.GetPossiblyHitEnvironmentObjects(Bounds + _hitBounds).Where(mgo => mgo.ObjectType == GuiObjectType.Structure && mgo.Team != Team)).Where(c => c.Team != Team && c.Team > Team.Neutral)
+				_targetedObject = Level.GetAllMovableCharacters(Bounds).Concat(Level.GetPossiblyHitEnvironmentObjects(Bounds + _hitBounds).Where(mgo => mgo.ObjectType == GuiObjectType.Structure && mgo.Team != Team)).Where(c => c.Team != Team && c.Team > Team.Neutral)
 					.Select(mgo => new { mgo = mgo, distance = this.DistanceBetween(mgo) })
 					.Where(tup => tup.distance <= _targetDistance && tup.mgo.Position.Y < Position.Y + Size.Y && tup.mgo.Position.Y + tup.mgo.Size.Y > Position.Y).OrderBy(tup => tup.distance).Select(tup => tup.mgo).FirstOrDefault();
 

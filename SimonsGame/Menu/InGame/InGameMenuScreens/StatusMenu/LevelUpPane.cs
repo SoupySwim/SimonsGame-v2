@@ -205,7 +205,7 @@ namespace SimonsGame.Menu.InGame
 			spriteBatch.DrawLine(_lineStart, _lineEnd, Color.Black);
 
 			// draw own experience.
-			spriteBatch.DrawString(MainGame.PlainFont, _parent.Player.AbilityManager.Experience.ToString(), new Vector2(Bounds.X + Bounds.W - 22, Bounds.Y + 2), Color.Black);
+			spriteBatch.DrawString(MainGame.PlainFont, string.Format("{0:0}", _parent.Player.AbilityManager.Experience), new Vector2(Bounds.X + Bounds.W - 22, Bounds.Y + 2), Color.Black);
 
 			if (SelectedMagicName != "")
 			{

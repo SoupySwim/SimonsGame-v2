@@ -37,7 +37,15 @@ namespace SimonsGame.Menu.MenuScreens
 				GameSettings settings = new GameSettings()
 				{
 					AllowAIScreens = false,
-					PauseStopsGame = true
+					PauseStopsGame = true,
+					ExperienceGainIntervals = new List<ExperienceGain>()
+						{
+							new ExperienceGain() { Amount = 40.00f/3600, StartTime = new TimeSpan(0,0,0) },
+							new ExperienceGain() { Amount = 48.00f/3600, StartTime = new TimeSpan(0,5,0) },
+							new ExperienceGain() { Amount = 57.60f/3600, StartTime = new TimeSpan(0,10,0) },
+							new ExperienceGain() { Amount = 69.12f/3600, StartTime = new TimeSpan(0,15,0) },
+							new ExperienceGain() { Amount = 69.12f/3600, StartTime = new TimeSpan(0,20,0) },
+						}
 				};
 				settings.LevelFileMetaData = MapEditorIOManager.GetMetadataForLevel(settings.MapName); // get the default map for quick match for now.
 				_manager.StartGame(settings);

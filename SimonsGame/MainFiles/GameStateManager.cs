@@ -14,6 +14,8 @@ using SimonsGame.MainFiles.InGame;
 using SimonsGame.MapEditor;
 using SimonsGame.Menu;
 using SimonsGame.Menu.MenuScreens;
+using SimonsGame.Test;
+using SimonsGame.Story;
 
 namespace SimonsGame
 {
@@ -24,6 +26,7 @@ namespace SimonsGame
 		StartingGame,
 		PreGame
 	}
+
 	public class GameStateManager
 	{
 
@@ -36,6 +39,13 @@ namespace SimonsGame
 
 		#region GameState
 		private GameStateManagerGameState _gameState;
+
+		private ScenarioType ScenarioType { get { return _gameSettings.LevelFileMetaData.ScenarioType; } }
+		private bool _isMultiplayer = false;
+
+		private bool _containsStory = false;
+		private StoryBoard StoryBoard;
+
 
 		private TimeSpan _countdownToStartGameMax = new TimeSpan(0, 0, 1);
 		private TimeSpan _countdownToStartGame;
@@ -72,6 +82,7 @@ namespace SimonsGame
 		private GameStatistics _gameStatistics;
 		private GameSettings _gameSettings;
 		public WinCondition WinCondition { get { return _gameSettings.LevelFileMetaData.WinCondition; } }
+		public List<ExperienceGain> ExperienceGainIntervals { get; set; }
 		#endregion
 
 		private MainGame _game;
@@ -93,12 +104,18 @@ namespace SimonsGame
 		public bool StartNewGame(GameSettings gameSettings)
 		{
 			_gameSettings = gameSettings;
+			_isMultiplayer = _gameSettings.LevelFileMetaData.ScenarioType == MainFiles.ScenarioType.MultiPlayerChallenge || _gameSettings.LevelFileMetaData.ScenarioType == MainFiles.ScenarioType.MultiPlayerCompetitive;
+
+			_containsStory = _gameSettings.LevelFileMetaData.ScenarioType == MainFiles.ScenarioType.MultiPlayerChallenge
+				|| _gameSettings.LevelFileMetaData.ScenarioType == MainFiles.ScenarioType.SinglePlayerStory
+				|| _gameSettings.LevelFileMetaData.ScenarioType == MainFiles.ScenarioType.SinglePlayerChallenge;
+
+			ExperienceGainIntervals = _gameSettings.ExperienceGainIntervals.ToList();
 			//TODO move level to somewhere more meaningful...
 			Level = MapEditorIOManager.DeserializeLevelFromFile(gameSettings.MapName, this);// Test.LevelBuilder.BuildLevel3(MainGame.CurrentWindowSize + new Vector2(MainGame.CurrentWindowSize.X * .8f, MainGame.CurrentWindowSize.Y * .75f), this);
 			_aiUtilityMap = Level.Players.Where(p => p.Value.IsAi).Select(p => new { key = p.Key, value = new AIUtility(p.Value) }).ToDictionary(p => p.key, p => p.value);
 
-
-			if (gameSettings.AllowAIScreens)
+			if (_isMultiplayer && gameSettings.AllowAIScreens)
 			{
 				float viewportW = Level.Players.Count() > 2 ? MainGame.CurrentWindowSize.X / 2 - 10 : MainGame.CurrentWindowSize.X - 10;
 				float viewportH = MainGame.CurrentWindowSize.Y / 2 - 10;
@@ -130,13 +147,21 @@ namespace SimonsGame
 				_playerViewports = new Dictionary<Guid, PlayerViewport>() { { player.Id, new PlayerViewport(player, new Vector4(0, 0, MainGame.CurrentWindowSize.Y, MainGame.CurrentWindowSize.X), Level.Size, 1.2945f, this) } };
 			}
 
-			_gameState = GameStateManagerGameState.PreGame;
+			_gameState = _gameSettings.LevelFileMetaData.ScenarioType == MainFiles.ScenarioType.MultiPlayerCompetitive ? GameStateManagerGameState.PreGame : GameStateManagerGameState.StartingGame;
 			_countdownToStartGame = _countdownToStartGameMax;
 			GameTimer = TimeSpan.Zero;
 
 			TogglePause = false;
-			_gameStatistics = new GameStatistics();
+			_gameStatistics = new GameStatistics(Level);
 			return true;
+		}
+
+		public void InitializeLevel()
+		{
+			Level.Initialize();
+
+			if (_containsStory)
+				StoryBoard = TempStory.GetTempStoryBoard(Level);
 		}
 
 		private void InitializePlayerChoices()
@@ -175,15 +200,22 @@ namespace SimonsGame
 					case GameStateManagerGameState.InGame:
 						GameTimer += gameTime.ElapsedGameTime;
 
+						if (_containsStory)
+						{
+							StoryBoard.Update(gameTime);
+							if (StoryBoard.IsStoryComplete()) // If the story is done, then let the players go for it!
+								_containsStory = false;
+						}
+
 						ExperienceGain newInterval = null;
-						foreach (ExperienceGain egInterval in _gameSettings.ExperienceGainIntervals)
+						foreach (ExperienceGain egInterval in ExperienceGainIntervals)
 						{
 							if (egInterval.StartTime < GameTimer)
 								newInterval = egInterval;
 						}
 						if (newInterval != null)
 						{
-							_gameSettings.ExperienceGainIntervals.Remove(newInterval);
+							ExperienceGainIntervals.Remove(newInterval);
 							foreach (var kv in Level.Players)
 								kv.Value.UpdatePassiveExperienceGain(newInterval);
 						}
@@ -215,6 +247,8 @@ namespace SimonsGame
 						{
 							InitializePlayerChoices();
 							_gameState = GameStateManagerGameState.StartingGame;
+							foreach (var viewport in _playerViewports)
+								viewport.Value.StartupOverlay.IsReady = false; // In case you restart the game...
 						}
 						break;
 				}
@@ -225,7 +259,7 @@ namespace SimonsGame
 			spriteBatch.GraphicsDevice.Viewport = _baseViewport;
 
 			foreach (KeyValuePair<Guid, PlayerViewport> playerViewport in _playerViewports)
-				playerViewport.Value.Draw(gameTime, spriteBatch, Level, _gameState);
+				playerViewport.Value.Draw(gameTime, spriteBatch, Level, _gameState, _containsStory ? StoryBoard : null);
 			spriteBatch.GraphicsDevice.Viewport = _baseViewport;
 			//switch (_gameState)
 			//{

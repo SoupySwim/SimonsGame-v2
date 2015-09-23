@@ -123,7 +123,7 @@ namespace SimonsGame.GuiObjects
 			return AIState == MoveCharacterAIState.MoveLeft;
 		}
 
-		public override Vector2 GetAim()
+		public override Vector2 GetAimOverride()
 		{
 			return new Vector2(AIState == MoveCharacterAIState.MoveLeft ? -1 : 1, 0);
 		}

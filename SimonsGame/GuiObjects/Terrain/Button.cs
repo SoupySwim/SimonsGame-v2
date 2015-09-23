@@ -15,7 +15,7 @@ namespace SimonsGame.GuiObjects
 	{
 		// This is when a button is pressed, it will stay down forever.
 		private bool _neverRestart = false;
-		private int _minTimer = 11;
+		private int _minTimer = 3;
 		private TickTimer _timeActive;
 		public Button(Vector2 position, Vector2 size, Level level)
 			: base(position, size, level, "Button")
@@ -54,7 +54,7 @@ namespace SimonsGame.GuiObjects
 
 		public override IEnumerable<Tuple<Vector2, MainGuiObject>> GetAffectedObjects()
 		{
-			return GetHitObjects(Level.GetAllCharacterObjects(Bounds).Concat(Level.GetAllUnPassableEnvironmentObjects(Bounds).Where(mgo => mgo.IsMovable)), Bounds).Where(kv => kv.Item2.Id != Id);
+			return GetHitObjects(Level.GetAllMovableCharacters(Bounds).Concat(Level.GetAllUnPassableEnvironmentObjects(Bounds).Where(mgo => mgo.IsMovable)), Bounds).Where(kv => kv.Item2.Id != Id);
 		}
 
 		#region Crap Stuff

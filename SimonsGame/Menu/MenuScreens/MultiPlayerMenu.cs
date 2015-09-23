@@ -38,7 +38,15 @@ namespace SimonsGame.Menu.MenuScreens
 						AllowAIScreens = true,
 						PauseStopsGame = false,
 						MapName = "Test Map",
-						LevelFileMetaData = MapEditorIOManager.GetMetadataForLevel("Test Map")
+						LevelFileMetaData = MapEditorIOManager.GetMetadataForLevel("Test Map"),
+						ExperienceGainIntervals = new List<ExperienceGain>()
+						{
+							new ExperienceGain() { Amount = 40.00f/3600, StartTime = new TimeSpan(0,0,0) },
+							new ExperienceGain() { Amount = 48.00f/3600, StartTime = new TimeSpan(0,5,0) },
+							new ExperienceGain() { Amount = 57.60f/3600, StartTime = new TimeSpan(0,10,0) },
+							new ExperienceGain() { Amount = 69.12f/3600, StartTime = new TimeSpan(0,15,0) },
+							new ExperienceGain() { Amount = 69.12f/3600, StartTime = new TimeSpan(0,20,0) },
+						}
 					});
 			}, "Co-op",
 				"Co-op".GetTextBoundsByCenter(MainGame.PlainFont, new Vector2(_screenSize.X / 2 + 70, _screenSize.Y / 2 - 40)), Color.Black, Color.White, new Vector2(60, 40), false);

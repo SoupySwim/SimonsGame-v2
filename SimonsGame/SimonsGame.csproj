@@ -114,6 +114,9 @@
     <Compile Include="GuiObjects\Utility\GuiThenClause.cs" />
     <Compile Include="GuiObjects\Utility\GuiIfClause.cs" />
     <Compile Include="GuiObjects\Utility\GuiFunction.cs" />
+    <Compile Include="GuiObjects\Zones\StoryZone.cs" />
+    <Compile Include="MainFiles\InGame\StoryBoard.cs" />
+    <Compile Include="Menu\InGame\InGameOverlay.cs" />
     <Compile Include="Menu\InGame\ShortcutMenu.cs" />
     <Compile Include="Menu\InGame\StartupChoiceMenu.cs" />
     <Compile Include="Modifiers\Abilities\Miscellaneous\PullAbility.cs" />
@@ -184,7 +187,7 @@
     <Compile Include="Menu\InGame\InGameMenuScreens\StatusMenu\LevelUpPane.cs" />
     <Compile Include="Menu\InGame\InGameMenuScreens\StatusMenu\SelectedPane.cs" />
     <Compile Include="Menu\InGame\MainInGameMenu.cs" />
-    <Compile Include="Menu\InGame\InGameOverlay.cs" />
+    <Compile Include="Menu\InGame\TextOverhead.cs" />
     <Compile Include="Menu\InGame\MainMenuScreen.cs" />
     <Compile Include="Menu\MenuScreens\MainMenuScreen.cs" />
     <Compile Include="Menu\MenuItem.cs" />
@@ -221,6 +224,7 @@
     <Compile Include="Modifiers\TimeModifier.cs" />
     <Compile Include="Test\TempControls.cs" />
     <Compile Include="Test\TempObject.cs" />
+    <Compile Include="Test\TempStory.cs" />
     <Compile Include="Utility\Extensions\GuiExtensions.cs" />
     <Compile Include="Utility\Extensions\MainGuiObjectExtensions.cs" />
     <Compile Include="Utility\Extensions\MiscExtensions.cs" />

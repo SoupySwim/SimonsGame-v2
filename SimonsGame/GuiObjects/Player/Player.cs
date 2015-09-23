@@ -19,7 +19,7 @@ namespace SimonsGame.GuiObjects
 		protected Animation _runAnimation;
 		protected Animation _teleportAnimation;
 		public bool IsMovingRight = true;
-		public List<float> _experienceMultipliers;
+		public List<float> _experienceMultipliers = new List<float>();
 
 		private Vector2 _startingPosition;
 		private bool _isAi;
@@ -127,7 +127,7 @@ namespace SimonsGame.GuiObjects
 			if (experienceChoice == ExperienceGainChoice.Early)
 			{
 				_experienceMultipliers = new List<float> { 4, 1 };
-				_abilityManager.Experience = 0;
+				_abilityManager.Experience -= 150;
 			}
 			else if (experienceChoice == ExperienceGainChoice.Late)
 				_experienceMultipliers = new List<float> { 1, 2, 2, 2, 1 };
@@ -142,13 +142,7 @@ namespace SimonsGame.GuiObjects
 			}
 			else if (attackChoice == BaseAttackChoice.ShortRange)
 			{
-				pai = AbilityBuilder.GetBaseLongRangeElementAbility(this, "Test/leaf", 0, 40);
-				pai.Name = "Daft";
-				pai.Cooldown = new TimeSpan(0, 0, 0, 0, 500);
-				pai.Modifier.Speed = 6f;
-				pai.Modifier.Damage = -40;
-				pai.Modifier.Element = new Tuple<Element, float>(Element.Plant, .25f);
-				pai.Modifier.SetSize(new Vector2(30, 30));
+				pai = AbilityBuilder.GetDaftAbility(this);
 			}
 
 			_abilityManager.AddKnownAbility(KnownAbility.Elemental, pai);
@@ -184,7 +178,8 @@ namespace SimonsGame.GuiObjects
 		public override void PreUpdate(GameTime gameTime)
 		{
 			base.PreUpdate(gameTime);
-			VerticalPass = Controls.AllControls[_guid].YMovement > .5;
+			if (!NotAcceptingControls)
+				VerticalPass = Controls.AllControls[_guid].YMovement > .5;
 		}
 		public override void PostUpdate(GameTime gameTime)
 		{
@@ -198,11 +193,21 @@ namespace SimonsGame.GuiObjects
 		{
 			if (_objState == GuiObjectState.Normal && Controls.AllControls != null && Controls.AllControls.ContainsKey(_guid))
 			{
-				PlayerControls controls = Controls.AllControls[_guid];
-				if (IsStunned || NotAcceptingControls || controls.XMovement == 0)
-					_animator.PlayAnimation(_idleAnimation);
+				if (CompletelyStopAllActivity)
+				{
+					if (CurrentMovement.X == 0)
+						_animator.PlayAnimation(_idleAnimation);
+					if (CurrentMovement.X != 0)
+						_animator.PlayAnimation(_runAnimation);
+				}
 				else
-					_animator.PlayAnimation(_runAnimation);
+				{
+					PlayerControls controls = Controls.AllControls[_guid];
+					if (IsStunned || NotAcceptingControls || controls.XMovement == 0)
+						_animator.PlayAnimation(_idleAnimation);
+					else
+						_animator.PlayAnimation(_runAnimation);
+				}
 			}
 		}
 
@@ -245,7 +250,7 @@ namespace SimonsGame.GuiObjects
 			//Level.RemoveGuiObject(this);
 		}
 
-		public override Vector2 GetAim()
+		public override Vector2 GetAimOverride()
 		{
 			PlayerControls playerControls = GameStateManager.GetControlsForPlayer(this);
 			return playerControls.GetAim(this);
@@ -253,6 +258,8 @@ namespace SimonsGame.GuiObjects
 
 		protected override SpriteEffects GetCurrentSpriteEffects()
 		{
+			if (CompletelyStopAllActivity)
+				return CurrentMovement.X > 0 ? SpriteEffects.None : SpriteEffects.FlipHorizontally;
 			return IsMovingRight ? SpriteEffects.None : SpriteEffects.FlipHorizontally;
 		}
 

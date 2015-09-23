@@ -93,7 +93,8 @@ namespace SimonsGame.Menu.InGame
 							{
 								var abilityManager = _parent.Player.AbilityManager;
 								var magics = abilityManager.KnownAbilityIds.Select(id => abilityManager.GetAbilityInfo(id)).Where(pai => pai.KnownAbility != KnownAbility.Jump);
-								abilityManager.SetAbility(magics.ElementAt(_selectedMagicIndex), button);
+								if (magics.Any())
+									abilityManager.SetAbility(magics.ElementAt(_selectedMagicIndex), button);
 							}
 						}
 					}

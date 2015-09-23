@@ -185,7 +185,7 @@ namespace SimonsGame.GuiObjects
 					_ignoredIds.Remove(kv.Key);
 			}
 
-			IEnumerable<MainGuiObject> hitObjects = Level.GetAllUnPassableMovableObjects(Bounds).Where(mgo => mgo.Team != Team || mgo.Team == Team.None);
+			IEnumerable<MainGuiObject> hitObjects = Level.GetAllMovableCharacters(Bounds).Where(mgo => mgo.Team != Team || mgo.Team == Team.None);
 		}
 		public override void PreDraw(GameTime gameTime, Microsoft.Xna.Framework.Graphics.SpriteBatch spriteBatch) { }
 		public override void PostDraw(GameTime gameTime, Microsoft.Xna.Framework.Graphics.SpriteBatch spriteBatch, Player curPlayer) { }

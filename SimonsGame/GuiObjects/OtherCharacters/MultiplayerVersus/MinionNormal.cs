@@ -18,6 +18,7 @@ namespace SimonsGame.GuiObjects
 			MoveLeft,
 			MoveRight
 		}
+		private MainGuiObject _targetedPlayer = null;
 		private MinionNormalAIState AIState;
 		protected Animation _idleAnimation;
 		private bool _overrideJump = false;
@@ -62,9 +63,9 @@ namespace SimonsGame.GuiObjects
 			{
 				if (abilityManager.CurrentAbilities.ContainsKey(attack.Id))
 					return false;
-				bool ret = Math.Abs(Position.X - _previousPosition.X) < (Math.Abs(MaxSpeed.X * AccelerationBase.X) - .0001f);
+				bool ret = _targetedPlayer != null;
+				_targetedPlayer = null;
 				return ret;
-				//return (AIState == MoveCharacterAIState.MoveRight ? -1 : 1) * (_previousPosition.X + GetXMovement()) < Position.X;
 			};
 			_abilityManager.SetAbility(attack, AvailableButtons.RightTrigger);
 
@@ -93,6 +94,8 @@ namespace SimonsGame.GuiObjects
 		public override void SetMovement(GameTime gameTime) { }
 		public override void HitByObject(MainGuiObject mgo, ModifierBase mb)
 		{
+			if (mb == null && mgo != null && mgo.ObjectType == GuiObjectType.Character || mgo.ObjectType == GuiObjectType.Player) // you've hit something
+				_targetedPlayer = mgo;
 			_abilityManager.AddAbility(mb);
 		}
 
@@ -111,7 +114,7 @@ namespace SimonsGame.GuiObjects
 			return AIState == MinionNormalAIState.MoveLeft;
 		}
 
-		public override Vector2 GetAim()
+		public override Vector2 GetAimOverride()
 		{
 			return new Vector2(AIState == MinionNormalAIState.MoveLeft ? -1 : 1, 0);
 		}

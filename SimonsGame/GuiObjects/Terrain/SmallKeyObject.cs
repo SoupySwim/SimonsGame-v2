@@ -36,7 +36,7 @@ namespace SimonsGame.GuiObjects
 
 		public override void Initialize()
 		{
-			var carrier = Level.GetAllCharacterObjects(Bounds).Where(mgo => MainGuiObject.GetIntersectionDepth(Bounds, mgo.Bounds) != Vector2.Zero).FirstOrDefault();
+			var carrier = Level.GetAllMovableCharacters(Bounds).Where(mgo => MainGuiObject.GetIntersectionDepth(Bounds, mgo.Bounds) != Vector2.Zero).FirstOrDefault();
 			if (carrier != null)
 			{
 				carrier.ObtainItem(new SmallKey(_keyType));

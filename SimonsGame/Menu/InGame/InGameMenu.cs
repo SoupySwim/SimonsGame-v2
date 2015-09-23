@@ -121,5 +121,10 @@ namespace SimonsGame.Menu
 		{
 			_manager.TogglePause = true;
 		}
+		public void OpenMenu()
+		{
+			if (_currentMenuScreen != null)
+				_currentMenuScreen.OpenMenu();
+		}
 	}
 }

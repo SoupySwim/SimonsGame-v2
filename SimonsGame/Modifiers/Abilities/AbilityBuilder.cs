@@ -21,6 +21,19 @@ namespace SimonsGame.Modifiers
 			{ "SpeedUp", GetSurroundMiscAbility },
 			{ "Heal", GetSelfHealAbility },
 		};
+
+		public static PlayerAbilityInfo GetDaftAbility(PhysicsObject character)
+		{
+			PlayerAbilityInfo pai = AbilityBuilder.GetBaseLongRangeElementAbility(character, "Test/leaf", 0, 40);
+			pai.Name = "Daft";
+			pai.Cooldown = new TimeSpan(0, 0, 0, 0, 500);
+			pai.Modifier.Speed = 6f;
+			pai.Modifier.Damage = -40;
+			pai.Modifier.Element = new Tuple<Element, float>(Element.Plant, .25f);
+			pai.Modifier.SetSize(new Vector2(30, 30));
+			return pai;
+		}
+
 		public static PlayerAbilityInfo GetJumpAbility(PhysicsObject character, float power, float castAmount = 0)
 		{
 			Player player = character as Player;
@@ -102,7 +115,7 @@ namespace SimonsGame.Modifiers
 			return playerAbility;
 		}
 
-		public static PlayerAbilityInfo GetShortRangeMeleeElementalAbility1(PhysicsObject character, float castAmount = 0)
+		public static PlayerAbilityInfo GetShortRangeMeleeElementalAbility1(PhysicsObject character)
 		{
 			Guid id = Guid.NewGuid();
 			PlayerAbilityInfo playerAbility = new PlayerAbilityInfo(id, "Melee", AbilityAttributes.Pierce)
@@ -114,7 +127,7 @@ namespace SimonsGame.Modifiers
 						return false;
 					return Controls.IsDown(character.Id, manager.AbilityButtonMap[id]);//AvailableButtons.RightTrigger
 				},
-				CastAmount = castAmount,
+				CastAmount = 0,
 				Cooldown = new TimeSpan(0, 0, 0, 0, 500),
 				LayoverTickCount = 0,
 				ReChargeAmount = 0,
@@ -258,7 +271,7 @@ namespace SimonsGame.Modifiers
 				if (!hasNotUsedAll)
 					return false;
 				// Could be cleaned up some.
-				IEnumerable<MainGuiObject> characters = turret.Level.GetAllCharacterObjects(turret.SensorBounds);
+				IEnumerable<MainGuiObject> characters = turret.Level.GetAllMovableCharacters(turret.SensorBounds);
 				//if (characters.Count() > 500)
 				//{
 				//	foreach (var character in characters)

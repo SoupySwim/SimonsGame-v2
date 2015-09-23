@@ -115,7 +115,7 @@ namespace SimonsGame.GuiObjects
 		{
 			return _isTurned;
 		}
-		public override Vector2 GetAim()
+		public override Vector2 GetAimOverride()
 		{
 			return new Vector2(_isTurned ? -1 : 1, 0);
 		}

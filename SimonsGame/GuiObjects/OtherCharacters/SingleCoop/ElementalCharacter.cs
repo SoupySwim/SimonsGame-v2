@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 using SimonsGame.GuiObjects.BaseClasses;
 using SimonsGame.GuiObjects.Zones;
 using SimonsGame.MapEditor;
+using SimonsGame.Dialogue;
 using SimonsGame.Modifiers;
 using SimonsGame.Modifiers.Abilities;
 using SimonsGame.Utility;
@@ -252,7 +253,7 @@ namespace SimonsGame.GuiObjects
 			return canAttack;
 		}
 
-		public override Vector2 GetAim()
+		public override Vector2 GetAimOverride()
 		{
 			if (_targetedObject != null)
 			{
@@ -302,6 +303,10 @@ namespace SimonsGame.GuiObjects
 					_animator.PlayAnimation(_runAnimation);
 			}
 			base.PreDraw(gameTime, spriteBatch);
+		}
+		public override void PostDraw(GameTime gameTime, SpriteBatch spriteBatch, Player curPlayer)
+		{
+			base.PostDraw(gameTime, spriteBatch, curPlayer);
 		}
 
 		protected override SpriteEffects GetCurrentSpriteEffects()

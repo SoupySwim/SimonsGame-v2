@@ -236,7 +236,6 @@ namespace SimonsGame.Test
 			node.ChildNodes.Add(GetHealthUpgrade(node));
 			node.ChildNodes.Add(GetRegenUpgrade(node));
 			node.ChildNodes.Add(GetSpeedUpgrade(node));
-			node.ChildNodes.Add(GetSpeedUpgrade(node));
 
 			return node;
 		}

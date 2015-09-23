@@ -20,7 +20,7 @@ namespace SimonsGame.Modifiers.Abilities
 		{
 			_character = p;
 			IsExpiredFunction = IsExpiredFunc;
-			_length = (int)((p.Level.PlatformDifference * 1.25f) + (p.Size.GetDistance() / 2.0f));
+			_length = (int)((p.Level.PlatformDifference * 1.6f) + (p.Size.GetDistance() / 2.0f));
 		}
 		public bool IsExpiredFunc(GameTime gameTime)
 		{
@@ -44,7 +44,7 @@ namespace SimonsGame.Modifiers.Abilities
 
 			//_character.Level.AddLevelAnimation(new LineAnimation(_character.Level, characterCenter, characterCenter + lineOfVisionBox));
 
-			IEnumerable<MainGuiObject> targetableCharacters = _character.Level.GetAllCharacterObjects(pullBounds);
+			IEnumerable<MainGuiObject> targetableCharacters = _character.Level.GetAllMovableCharacters(pullBounds);
 
 			foreach (MainGuiObject mgo in targetableCharacters)
 			{
@@ -57,10 +57,9 @@ namespace SimonsGame.Modifiers.Abilities
 						isTooFar = false;
 					float angleFromCenter = (float)(Math.Atan2(-distanceVector.Y, distanceVector.X));
 
-					if (!isTooFar && Math.Abs(angleFromCenter - angle) < .27f)
+					if (!isTooFar && Math.Abs(angleFromCenter - angle) < .32f)
 					{
 						mgo.TeleportTo(characterCenter + (_character.Size * characterAim), 10, false);
-
 					}
 				}
 			}

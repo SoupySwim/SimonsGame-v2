@@ -348,14 +348,14 @@ namespace SimonsGame.GuiObjects
 			return returnList.Concat(_movableStaticObjects);
 		}
 
-		public IEnumerable<MainGuiObject> GetAllUnPassableMovableObjects(Vector4 bounds)
+		public IEnumerable<MainGuiObject> GetAllMovableCharacters(Vector4 bounds, bool includePassable = true)
 		{
 			IEnumerable<MainGuiObject> returnList = new List<MainGuiObject>();
 			returnList = _players.Select(pl => pl.Value).ToList();
 			IEnumerable<Guid> allIdEnum = GetObjectHashes(bounds).SelectMany(hash => { HashSet<Guid> outls; _movableDynamicObjects.TryGetValue(hash, out outls); return outls ?? new HashSet<Guid>(); });
 			HashSet<Guid> allIds = new HashSet<Guid>(allIdEnum);
 			returnList = returnList.Concat(allIds.Select(id => { MainGuiObject outMgo; _characterObjects.TryGetValue(id, out outMgo); return outMgo; }).Where(a => a != null));
-			return returnList;
+			return includePassable ? returnList : returnList.Where(a => a.Group != Group.Passable);
 		}
 
 		public List<MainGuiObject> GetAllGuiObjects()
@@ -368,11 +368,6 @@ namespace SimonsGame.GuiObjects
 			foreach (var key in _characterObjects.ToList())
 				returnMap.Add(key.Value);
 			return returnMap;
-		}
-
-		public IEnumerable<MainGuiObject> GetAllCharacterObjects(Vector4 bounds)
-		{
-			return GetAllUnPassableMovableObjects(bounds);// _players.Values.Concat(_characterObjects.Values).Where(mgo => mgo.Group != Group.Passable).ToList();
 		}
 
 		public IEnumerable<MainGuiObject> GetAllStructures()
@@ -398,9 +393,6 @@ namespace SimonsGame.GuiObjects
 
 		private void RemoveEnvironmentObject(MainGuiObject mgo)
 		{
-			if (mgo is Platform)
-			{
-			}
 			_environmentObjects.Remove(mgo.Id);
 			_movableStaticObjects.Remove(mgo);
 			var hashes = GetObjectHashes(mgo.Bounds + new Vector4(-mgo.Size.X, -mgo.Size.Y, mgo.Size.Y * 2, mgo.Size.X * 2));

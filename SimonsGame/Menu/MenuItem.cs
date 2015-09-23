@@ -12,7 +12,7 @@ namespace SimonsGame.Menu
 		public bool IsHighLighted { get; set; }
 		private Action _selectedAcion;
 		public Action SelectedAcion { get { return _selectedAcion; } }
-		public Vector4 Bounds { get; set; }
+		public Vector4 Bounds;
 		public Vector4 TotalBounds { get { return Bounds + new Vector4(-Padding.X / 2, -Padding.Y / 2, Padding.Y, Padding.X); } }
 		public Vector2 Padding { get; set; }
 		public MenuItemButton(Action selectedAcion, Vector4 bounds) : this(selectedAcion, bounds, Vector2.Zero) { }

@@ -69,5 +69,12 @@ namespace SimonsGame.Menu.MenuScreens
 			base.DrawExtra(gameTime, spriteBatch);
 			_inGameStatusMenu.Draw(gameTime, spriteBatch);
 		}
+
+		public override void OpenMenu()
+		{
+			_inGameStatusMenu.AllMagicPane.IsLevelUpMode = false;
+			(_menuLayout[1][0] as TextMenuItemButton).Text = "Restart";
+			(_menuLayout[2][0] as TextMenuItemButton).Text = "Quit Game";
+		}
 	}
 }

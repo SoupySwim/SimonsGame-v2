@@ -60,6 +60,7 @@ namespace SimonsGame.GuiObjects
 		public GuiObjectType ObjectType { get { return _objectType; } }
 
 		public bool IsStunned; // Similar to NotAcceptingControls.  However, broader spectrum and not to do with menus...
+		public bool CompletelyStopAllActivity = false; // This is for story elements.
 
 		// This will be created during initialization of a level.
 		public HashSet<Guid> ZoneIds;
@@ -246,91 +247,101 @@ namespace SimonsGame.GuiObjects
 				CheckGameConditionsOnDeath();
 				return;
 			}
-			// Apply modifiers.
-			ModifierBase modifyAdd = new EmptyModifier(ModifyType.Add, this);
-			ModifierBase modifyMult = new EmptyModifier(ModifyType.Multiply, this);
-			List<ModifierBase> appliedAttacks = AddCustomModifiers(gameTime, modifyAdd);
-			MultiplyCustomModifiers(gameTime, modifyMult);
-			IsStunned = modifyAdd.PreventControls || modifyMult.PreventControls;
-
-			Movement = MovementBase;
-			MaxSpeed = (MaxSpeedBase + modifyAdd.MaxSpeed) * modifyMult.MaxSpeed;
-			KnockBack = (KnockBackBase + modifyAdd.KnockBack) * modifyMult.KnockBack;
-			Acceleration = (AccelerationBase + modifyAdd.Acceleration) * modifyMult.Acceleration * MaxSpeed;
-			Acceleration.X = Math.Abs(Acceleration.X);
-			Acceleration.Y = Math.Abs(Acceleration.Y);
-
-			//CurrentMovement = CurrentMovementBase;
-			_healthCurrent = Math.Min(_healthCurrent + RegenAmount, _healthTotal);
-			float healthPrior = _healthCurrent;
-
-			// The following line only accounts for healing.  Damage is done below this line.
-			_healthCurrent = MathHelper.Clamp(_healthCurrent + modifyAdd.HealthTotal, 0, HealthTotal); // Don't amplify healing... yet!
-
-			float largestDamageDone = 1;
-			foreach (ModifierBase attack in appliedAttacks)
+			if (!CompletelyStopAllActivity)
 			{
-				float damageDone = ApplyDamage(attack);
-				if (damageDone < largestDamageDone) // damage is a negative number to health... remember that!
+				// Apply modifiers.
+				ModifierBase modifyAdd = new EmptyModifier(ModifyType.Add, this);
+				ModifierBase modifyMult = new EmptyModifier(ModifyType.Multiply, this);
+				List<ModifierBase> appliedAttacks = AddCustomModifiers(gameTime, modifyAdd);
+				MultiplyCustomModifiers(gameTime, modifyMult);
+				IsStunned = modifyAdd.PreventControls || modifyMult.PreventControls;
+
+				Movement = MovementBase;
+				MaxSpeed = (MaxSpeedBase + modifyAdd.MaxSpeed) * modifyMult.MaxSpeed;
+				KnockBack = (KnockBackBase + modifyAdd.KnockBack) * modifyMult.KnockBack;
+				Acceleration = (AccelerationBase + modifyAdd.Acceleration) * modifyMult.Acceleration * MaxSpeed;
+				Acceleration.X = Math.Abs(Acceleration.X);
+				Acceleration.Y = Math.Abs(Acceleration.Y);
+
+				//CurrentMovement = CurrentMovementBase;
+				_healthCurrent = Math.Min(_healthCurrent + RegenAmount, _healthTotal);
+				float healthPrior = _healthCurrent;
+
+				// The following line only accounts for healing.  Damage is done below this line.
+				_healthCurrent = MathHelper.Clamp(_healthCurrent + modifyAdd.HealthTotal, 0, HealthTotal); // Don't amplify healing... yet!
+
+				float largestDamageDone = 1;
+				foreach (ModifierBase attack in appliedAttacks)
 				{
-					_lastTargetHitBy = attack.Owner;
-					largestDamageDone = damageDone;
+					float damageDone = ApplyDamage(attack);
+					if (damageDone < largestDamageDone) // damage is a negative number to health... remember that!
+					{
+						_lastTargetHitBy = attack.Owner;
+						largestDamageDone = damageDone;
+					}
+					_healthCurrent = MathHelper.Clamp(_healthCurrent + damageDone, 0, HealthTotal);
 				}
-				_healthCurrent = MathHelper.Clamp(_healthCurrent + damageDone, 0, HealthTotal);
-			}
 
-			_levelAnimationDamage += healthPrior - _healthCurrent;
+				_levelAnimationDamage += healthPrior - _healthCurrent;
 
-			PreUpdate(gameTime);
-			_previousPosition = Position;
-			SetMovement(gameTime);
-			float xCurMove = ((IsStunned ? 0 : GetXMovement()) + modifyAdd.Movement.X) * modifyMult.Movement.X;
-			float yCurMove = ((IsStunned ? 0 : GetYMovement()) + modifyAdd.Movement.Y) * modifyMult.Movement.Y;
-			xCurMove = (xCurMove < 0 ? -1 : 1) * Math.Min(Math.Abs(xCurMove), Acceleration.X);
-			yCurMove = (yCurMove < 0 ? -1 : 1) * Math.Min(Math.Abs(yCurMove), Acceleration.Y);
-			//if (this is Player && xCurMove > 4)
-			//{
-			//}
+				PreUpdate(gameTime);
+				_previousPosition = Position;
+				SetMovement(gameTime);
+				float xCurMove = ((IsStunned ? 0 : GetXMovement()) + modifyAdd.Movement.X) * modifyMult.Movement.X;
+				float yCurMove = ((IsStunned ? 0 : GetYMovement()) + modifyAdd.Movement.Y) * modifyMult.Movement.Y;
+				xCurMove = (xCurMove < 0 ? -1 : 1) * Math.Min(Math.Abs(xCurMove), Acceleration.X);
+				yCurMove = (yCurMove < 0 ? -1 : 1) * Math.Min(Math.Abs(yCurMove), Acceleration.Y);
+				//if (this is Player && xCurMove > 4)
+				//{
+				//}
 
-			// If you're going faster than the max speed, then all we can do is slow down
-			if (Math.Abs(CurrentMovement.X) > Math.Abs(MaxSpeed.X))
-			{
-				CurrentMovement.X += CurrentMovement.X < 0 ? _knockBackRecoveryAcceleration : -_knockBackRecoveryAcceleration; // ? Acceleration.X : -Acceleration.X;
-				if (xCurMove < 0 && CurrentMovement.X > 0 ||
-					xCurMove > 0 && CurrentMovement.X < 0)
-					CurrentMovement.X = CurrentMovement.X + xCurMove;
+				// If you're going faster than the max speed, then all we can do is slow down
+				if (Math.Abs(CurrentMovement.X) > Math.Abs(MaxSpeed.X))
+				{
+					CurrentMovement.X += CurrentMovement.X < 0 ? _knockBackRecoveryAcceleration : -_knockBackRecoveryAcceleration; // ? Acceleration.X : -Acceleration.X;
+					if (xCurMove < 0 && CurrentMovement.X > 0 ||
+						xCurMove > 0 && CurrentMovement.X < 0)
+						CurrentMovement.X = CurrentMovement.X + xCurMove;
+				}
+				else
+				{
+					// If we are moving, but not accelerating, we should decelerate.
+					if (CurrentMovement.X != 0 && xCurMove == 0)
+						xCurMove = xCurMove != 0 ? xCurMove : (CurrentMovement.X < 0 ? -Math.Max(CurrentMovement.X, -Acceleration.X) : -Math.Min(CurrentMovement.X, Acceleration.X));
+					CurrentMovement.X = xCurMove + CurrentMovement.X;
+					CurrentMovement.X = CurrentMovement.X < 0 ? Math.Max(CurrentMovement.X, MaxSpeed.X < 0 ? MaxSpeed.X : -MaxSpeed.X) : Math.Min(CurrentMovement.X, MaxSpeed.X < 0 ? -MaxSpeed.X : MaxSpeed.X);
+				}
+				if (Math.Abs(CurrentMovement.Y) > Math.Abs(MaxSpeed.Y))
+				{
+					CurrentMovement.Y += CurrentMovement.Y < 0 ? _knockBackRecoveryAcceleration : -_knockBackRecoveryAcceleration; //Acceleration.Y : -Acceleration.Y;
+					if (yCurMove < 0 && CurrentMovement.Y > 0 ||
+						yCurMove > 0 && CurrentMovement.Y < 0)
+						CurrentMovement.Y = CurrentMovement.Y + yCurMove;
+				}
+				else
+				{
+					// If we are moving, but not accelerating, we should decelerate.
+					if (CurrentMovement.Y != 0 && yCurMove == 0)
+						yCurMove = yCurMove != 0 ? yCurMove : (CurrentMovement.Y < 0 ? -Math.Max(CurrentMovement.Y, -Acceleration.Y) : -Math.Min(CurrentMovement.Y, Acceleration.Y));
+					CurrentMovement.Y = yCurMove + CurrentMovement.Y;
+					CurrentMovement.Y = CurrentMovement.Y < 0 ? Math.Max(CurrentMovement.Y, MaxSpeed.Y < 0 ? MaxSpeed.Y : -MaxSpeed.Y) : Math.Min(CurrentMovement.Y, MaxSpeed.Y < 0 ? -MaxSpeed.Y : MaxSpeed.Y);
+				}
+				// Only knock back objects that can move.
+				if (IsMovable)
+				{
+					if (KnockBack.X != 0)
+						CurrentMovement.X = (Math.Sign(CurrentMovement.X) == Math.Sign(KnockBack.X) ? CurrentMovement.X : 0) + KnockBack.X;
+					if (KnockBack.Y != 0)
+						CurrentMovement.Y = (Math.Sign(CurrentMovement.Y) == Math.Sign(KnockBack.Y) ? CurrentMovement.Y : 0) + KnockBack.Y;
+				}
 			}
-			else
+			else // if CompletelyStopAllActivity
 			{
-				// If we are moving, but not accelerating, we should decelerate.
-				if (CurrentMovement.X != 0 && xCurMove == 0)
-					xCurMove = xCurMove != 0 ? xCurMove : (CurrentMovement.X < 0 ? -Math.Max(CurrentMovement.X, -Acceleration.X) : -Math.Min(CurrentMovement.X, Acceleration.X));
-				CurrentMovement.X = xCurMove + CurrentMovement.X;
-				CurrentMovement.X = CurrentMovement.X < 0 ? Math.Max(CurrentMovement.X, MaxSpeed.X < 0 ? MaxSpeed.X : -MaxSpeed.X) : Math.Min(CurrentMovement.X, MaxSpeed.X < 0 ? -MaxSpeed.X : MaxSpeed.X);
-			}
-			if (Math.Abs(CurrentMovement.Y) > Math.Abs(MaxSpeed.Y))
-			{
-				CurrentMovement.Y += CurrentMovement.Y < 0 ? _knockBackRecoveryAcceleration : -_knockBackRecoveryAcceleration; //Acceleration.Y : -Acceleration.Y;
-				if (yCurMove < 0 && CurrentMovement.Y > 0 ||
-					yCurMove > 0 && CurrentMovement.Y < 0)
-					CurrentMovement.Y = CurrentMovement.Y + yCurMove;
-			}
-			else
-			{
-				// If we are moving, but not accelerating, we should decelerate.
-				if (CurrentMovement.Y != 0 && yCurMove == 0)
-					yCurMove = yCurMove != 0 ? yCurMove : (CurrentMovement.Y < 0 ? -Math.Max(CurrentMovement.Y, -Acceleration.Y) : -Math.Min(CurrentMovement.Y, Acceleration.Y));
-				CurrentMovement.Y = yCurMove + CurrentMovement.Y;
-				CurrentMovement.Y = CurrentMovement.Y < 0 ? Math.Max(CurrentMovement.Y, MaxSpeed.Y < 0 ? MaxSpeed.Y : -MaxSpeed.Y) : Math.Min(CurrentMovement.Y, MaxSpeed.Y < 0 ? -MaxSpeed.Y : MaxSpeed.Y);
-			}
-
-			// Only knock back objects that can move.
-			if (IsMovable)
-			{
-				if (KnockBack.X != 0)
-					CurrentMovement.X = (Math.Sign(CurrentMovement.X) == Math.Sign(KnockBack.X) ? CurrentMovement.X : 0) + KnockBack.X;
-				if (KnockBack.Y != 0)
-					CurrentMovement.Y = (Math.Sign(CurrentMovement.Y) == Math.Sign(KnockBack.Y) ? CurrentMovement.Y : 0) + KnockBack.Y;
+				if (CurrentMovement.X > -MaxSpeedBase.X
+					&& CurrentMovement.X < MaxSpeedBase.X)
+					CurrentMovement.X = 0;
+				_previousPosition = Position;
+				CurrentMovement.Y = MaxSpeedBase.Y;
 			}
 
 			if (_objState == GuiObjectState.Normal)
@@ -419,7 +430,7 @@ namespace SimonsGame.GuiObjects
 		{
 			if (ObjectType == GuiObjectType.Character && !(this is HealthCreep)) // All characters except health creeps.
 			{
-				if (!Level.GetAllCharacterObjects(Bounds).Any(g => !(g is HealthCreep) && !(g is Player))
+				if (!Level.GetAllMovableCharacters(Bounds).Any(g => !(g is HealthCreep) && !(g is Player))
 					&& Level.GameStateManager.WinCondition == MainFiles.WinCondition.DefeatAllEnemies)
 				{
 					Level.GameStateManager.AddHighLight(new GameHighlight()

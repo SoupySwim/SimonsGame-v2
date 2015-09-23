@@ -28,6 +28,7 @@ namespace SimonsGame.GuiObjects
 		public Dictionary<Orientation, List<MainGuiObject>> PrimaryOverlapObjects { get { return _primaryOverlapObjects; } }
 		protected bool StopGravity { get; set; }
 		public bool VerticalPass { get; protected set; }
+		public Vector2 OverrideAim = Vector2.Zero;
 
 		public float PassiveExperienceGain = 0;
 		public float PassiveExperienceGainMultiplier = 1;
@@ -177,7 +178,7 @@ namespace SimonsGame.GuiObjects
 				return;
 			if (CanPushObjects())
 			{
-				IEnumerable<MainGuiObject> characterObjects = Level.GetAllUnPassableMovableObjects(Bounds).Concat(Level.GetPossiblyHitEnvironmentObjects(Bounds).Where(mgo => mgo.IsMovable));
+				IEnumerable<MainGuiObject> characterObjects = Level.GetAllMovableCharacters(Bounds, false).Concat(Level.GetPossiblyHitEnvironmentObjects(Bounds).Where(mgo => mgo.IsMovable));
 				IEnumerable<Tuple<Vector2, MainGuiObject>> horizontallyHitCharacters = GetHitObjects(GetAllHitCharacterGroups(characterObjects), this.HitBoxBounds, false).Where(tup => tup.Item2.Id != Id && (tup.Item2.Team == Team.None || tup.Item2.Team != this.Team) && !tup.Item2.GetType().IsSubclassOf(typeof(AffectedSpace)));
 				foreach (Tuple<Vector2, MainGuiObject> horizontallyHitCharacterTuple in horizontallyHitCharacters)
 				{
@@ -326,7 +327,11 @@ namespace SimonsGame.GuiObjects
 			return false;
 		}
 
-		public virtual Vector2 GetAim()
+		public Vector2 GetAim()
+		{
+			return OverrideAim == Vector2.Zero ? GetAimOverride() : OverrideAim;
+		}
+		public virtual Vector2 GetAimOverride()
 		{
 			return new Vector2(CurrentMovement.X < 0 ? -1 : 1, 0);
 		}

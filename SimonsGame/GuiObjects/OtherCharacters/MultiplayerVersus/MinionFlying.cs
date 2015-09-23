@@ -152,7 +152,7 @@ namespace SimonsGame.GuiObjects
 			return _AIState == MinionFlyingAIState.MoveLeft;
 		}
 
-		public override Vector2 GetAim()
+		public override Vector2 GetAimOverride()
 		{
 			if (_targetedObject != null)
 			{
@@ -170,7 +170,7 @@ namespace SimonsGame.GuiObjects
 			if (!_canAttack)
 				_canAttackTimer.Update(gameTime);
 
-			_targetedObject = Level.GetAllCharacterObjects(Bounds).Concat(Level.GetPossiblyHitEnvironmentObjects(Bounds + _hitBounds).Where(mgo => mgo.ObjectType == GuiObjectType.Structure && mgo.Team != Team)).Where(c => c.Team != Team && c.Team > Team.Neutral)
+			_targetedObject = Level.GetAllMovableCharacters(Bounds).Concat(Level.GetPossiblyHitEnvironmentObjects(Bounds + _hitBounds).Where(mgo => mgo.ObjectType == GuiObjectType.Structure && mgo.Team != Team)).Where(c => c.Team != Team && c.Team > Team.Neutral)
 				.Select(mgo => new { mgo = mgo, distance = this.DistanceBetween(mgo) })
 				.Where(tup => tup.distance <= _targetDistance).OrderBy(tup => tup.distance).Select(tup => tup.mgo).FirstOrDefault();
 

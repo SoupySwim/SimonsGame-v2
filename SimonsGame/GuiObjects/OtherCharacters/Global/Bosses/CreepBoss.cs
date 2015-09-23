@@ -276,7 +276,7 @@ namespace SimonsGame.GuiObjects
 			return false;
 		}
 
-		public override Vector2 GetAim()
+		public override Vector2 GetAimOverride()
 		{
 			if (_attackBehavior == CreepBossAttackBehavior.CircleAttack)
 			{

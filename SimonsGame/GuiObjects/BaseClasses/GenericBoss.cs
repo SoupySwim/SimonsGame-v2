@@ -68,13 +68,13 @@ namespace SimonsGame.GuiObjects.BaseClasses
 		public override void SetMovement(GameTime gameTime) { }
 		public override void HitByObject(MainGuiObject mgo, ModifierBase mb)
 		{
-			if (mgo != null)
+			if (mgo != null && mgo.ObjectType == GuiObjectType.Character || mgo.ObjectType == GuiObjectType.Player)
 				_targetedObject = mgo;
 
 			_abilityManager.AddAbility(mb);
 		}
 
-		public override Vector2 GetAim()
+		public override Vector2 GetAimOverride()
 		{
 			if (_targetedObject != null)
 			{

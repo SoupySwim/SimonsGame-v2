@@ -80,7 +80,7 @@ namespace SimonsGame.GuiObjects.ElementalMagic
 				hitMgo = hitObjects.FirstOrDefault();
 			else
 			{
-				IEnumerable<MainGuiObject> guiObjects = Level.GetPossiblyHitEnvironmentObjects(this.Bounds).Concat(Level.GetAllUnPassableMovableObjects(Bounds));
+				IEnumerable<MainGuiObject> guiObjects = Level.GetPossiblyHitEnvironmentObjects(this.Bounds).Concat(Level.GetAllMovableCharacters(Bounds));
 				IEnumerable<Tuple<Vector2, MainGuiObject>> hitPlatforms = GetHitObjects(guiObjects, this.HitBoxBounds).Where(tup => tup.Item2.Id != _turret.Id);
 				hitPlatforms = hitPlatforms.Where(hp => hp.Item2.Team != Team);
 				hitMgo = hitPlatforms.Any() ? hitPlatforms.First().Item2 : null;

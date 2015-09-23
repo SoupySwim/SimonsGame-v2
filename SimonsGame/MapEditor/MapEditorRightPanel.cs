@@ -389,9 +389,10 @@ namespace SimonsGame.MapEditor
 			// Other Stuff
 			{GuiObjectClass.SuperSpeed				, ButtonType.Remove | ButtonType.Position | ButtonType.Size | ButtonType.SpecialToggle1 | ButtonType.SpecialToggle2 },
 			{GuiObjectClass.SuperJump				, ButtonType.Remove | ButtonType.Position | ButtonType.Size | ButtonType.SpecialToggle1 | ButtonType.SpecialToggle2 },
-			{GuiObjectClass.AbilityObject			, ButtonType.Remove | ButtonType.Position | ButtonType.Size },
+			{GuiObjectClass.AbilityObject			, ButtonType.Remove | ButtonType.Position | ButtonType.Size | ButtonType.SpecialToggle1 },
 			{GuiObjectClass.JungleCreepZone		, ButtonType.Remove | ButtonType.Position | ButtonType.Size | ButtonType.SpecialToggle1 },
 			{GuiObjectClass.BehaviorZone			, ButtonType.Remove | ButtonType.Position | ButtonType.Size | ButtonType.Team | ButtonType.SpecialToggle1 | ButtonType.SpecialToggle2 },
+			{GuiObjectClass.StoryZone				, ButtonType.Remove | ButtonType.Position | ButtonType.SpecialToggle1 },
 			{GuiObjectClass.GuiFunction			, ButtonType.Remove | ButtonType.Position },
 			{GuiObjectClass.GuiIfClause			, ButtonType.Remove | ButtonType.Position | ButtonType.Size | ButtonType.SpecialToggle1 },
 			{GuiObjectClass.GuiThenClause			, ButtonType.Remove | ButtonType.Position | ButtonType.Size | ButtonType.SpecialToggle1 },

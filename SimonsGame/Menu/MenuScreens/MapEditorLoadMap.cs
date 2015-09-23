@@ -41,26 +41,29 @@ namespace SimonsGame.Menu.MenuScreens
 			_menuLayout[0] = new MenuItemButton[Math.Min(_itemsPerRow, levelsCount - (curXndx * _itemsPerRow))];
 			float curX = 10;
 			float curY = _topPanel.Bounds.Z + 10;
+			int levelCount = levels.Count();
 			//levels.Clear();
 			foreach (LevelFileMetaData metaData in levels)
 			{
 				_menuLayout[curXndx][curYndx] = new MapEditorLevelItem(_manager, metaData, new Vector4(curX, curY, ItemHeight, _itemWidth - 20), Color.Black, Color.White, Vector2.Zero);
-
-				curY += ItemHeight + 10;
-				if (curYndx >= _itemsPerRow - 1) // if (curY + ItemHeight + 9 >= _screenSize.Y)
+				if ((curXndx + 1) * (curYndx + 1) < levelCount)
 				{
-					curXndx++;
-					_menuLayout[curXndx] = new MenuItemButton[Math.Min(_itemsPerRow, levelsCount - (curXndx * _itemsPerRow))];
-					curYndx = 0;
-					curX += _itemWidth;
-					curY = _topPanel.Bounds.Z + 10;
-					if (curXndx >= _itemsPerColumn)
-						break;
-					else
+					curY += ItemHeight + 10;
+					if (curYndx >= _itemsPerRow - 1)
+					{
+						curXndx++;
 						_menuLayout[curXndx] = new MenuItemButton[Math.Min(_itemsPerRow, levelsCount - (curXndx * _itemsPerRow))];
+						curYndx = 0;
+						curX += _itemWidth;
+						curY = _topPanel.Bounds.Z + 10;
+						if (curXndx >= _itemsPerColumn)
+							break;
+						else
+							_menuLayout[curXndx] = new MenuItemButton[Math.Min(_itemsPerRow, levelsCount - (curXndx * _itemsPerRow))];
+					}
+					else
+						curYndx++;
 				}
-				else
-					curYndx++;
 			}
 		}
 		public override void HandleMouseEvent(GameTime gameTime, Vector2 newMousePosition)

@@ -9,6 +9,7 @@ using SimonsGame.Extensions;
 using SimonsGame.Menu;
 using SimonsGame.Menu.MenuScreens;
 using SimonsGame.Menu.InGame;
+using SimonsGame.Story;
 
 namespace SimonsGame.Utility
 {
@@ -100,7 +101,7 @@ namespace SimonsGame.Utility
 			_countdownOverlay.Text = string.Format("Ready?\r\n{0:0.0} seconds", timeLeft.TotalSeconds);
 		}
 
-		public void Draw(GameTime gameTime, SpriteBatch spriteBatch, Level level, GameStateManagerGameState gameState)
+		public void Draw(GameTime gameTime, SpriteBatch spriteBatch, Level level, GameStateManagerGameState gameState, StoryBoard storyBoard)
 		{
 			spriteBatch.GraphicsDevice.Viewport = _viewport;
 			Matrix scaleMatrix = Matrix.CreateScale(_scaledAmount);
@@ -111,8 +112,11 @@ namespace SimonsGame.Utility
 
 			ScrollCamera(_viewportBounds / _scaledAmount);
 			Matrix cameraTransform = Matrix.CreateTranslation(-_cameraPosition.X, -_cameraPosition.Y, 0.0f) * scaleMatrix;
+
 			spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.LinearWrap, DepthStencilState.None, RasterizerState.CullNone, null, cameraTransform);
 			Vector2 keyboardPlayerMousePosition = level.DrawInViewport(gameTime, spriteBatch, _viewportBounds / _scaledAmount, _cameraPosition, _player);
+			if (storyBoard != null)
+				storyBoard.Draw(gameTime, spriteBatch);
 			spriteBatch.End();
 
 			spriteBatch.Begin();
@@ -139,6 +143,7 @@ namespace SimonsGame.Utility
 			// If the player is THE mouse and keyboard player, then show the cursor on the top of everything.
 			if (_player != null && _player.UsesMouseAndKeyboard && keyboardPlayerMousePosition != Vector2.Zero)
 				spriteBatch.Draw(MainGame.Cursor, keyboardPlayerMousePosition - _cameraPosition, Color.Red);
+
 			spriteBatch.End();
 		}
 
@@ -158,6 +163,7 @@ namespace SimonsGame.Utility
 				PlayerControls controls = GameStateManager.GetControlsForPlayer(_player);
 				PlayerControls prevControls = GameStateManager.GetControlsForPlayer(_player);
 				bool toggleMenuState = Controls.PressedDown(_player.Id, AvailableButtons.Start | AvailableButtons.Start2);
+
 				if (toggleMenuState && _playerState == PlayerState.InMenu)
 				{
 					_playerState = PlayerState.PlayGame;
@@ -167,22 +173,26 @@ namespace SimonsGame.Utility
 				{
 					_playerState = PlayerState.InMenu;
 					_player.NotAcceptingControls = true;
+					_menuOverlay.OpenMenu();
 				}
+
 				if (_playerState == PlayerState.PlayGame && Controls.AllControls[_player.Id].OpenShortcutMenu)
 				{
 					_playerState = PlayerState.ShortcutMenu;
-					_shortcutMenu.OpenShortcutMenu();
+					Vector2 centerOfScreen = (_cameraPosition * _scaledAmount) + (_viewportBounds.GetSize() / 2);
+					Vector2 distanceFromMiddle = (_player.Center * _scaledAmount) - centerOfScreen;
+					_shortcutMenu.OpenShortcutMenu(distanceFromMiddle);
 				}
+
 				if (_playerState == PlayerState.ShortcutMenu)
 				{
 					_player.NotAcceptingControls = true;
 					if (!Controls.AllControls[_player.Id].OpenShortcutMenu)
+					{
+						_player.NotAcceptingControls = false;
 						_playerState = PlayerState.PlayGame;
+					}
 					_shortcutMenu.Update(gameTime);
-				}
-				else
-				{
-					_player.NotAcceptingControls = false;
 				}
 			}
 		}

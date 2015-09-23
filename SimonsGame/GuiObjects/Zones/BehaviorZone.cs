@@ -44,7 +44,7 @@ namespace SimonsGame.GuiObjects.Zones
 
 		public override void PreUpdate(GameTime gameTime)
 		{
-			foreach (var character in Level.GetAllCharacterObjects(Bounds).Where(c => c.Team == Team && c.ZoneIds.Contains(Id) && MainGuiObject.GetIntersectionDepth(c.Bounds, Bounds) != Vector2.Zero))
+			foreach (var character in Level.GetAllMovableCharacters(Bounds).Where(c => c.Team == Team && c.ZoneIds.Contains(Id) && MainGuiObject.GetIntersectionDepth(c.Bounds, Bounds) != Vector2.Zero))
 				character.TriggerBehavior(this);
 		}
 

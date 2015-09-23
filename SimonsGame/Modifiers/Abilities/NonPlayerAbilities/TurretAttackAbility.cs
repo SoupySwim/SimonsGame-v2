@@ -32,7 +32,7 @@ namespace SimonsGame.Modifiers.Abilities
 				Vector2 projectileHitbox = new Vector2(18, 18);
 				Vector2 projectilePosition = _turret.Center - (projectileHitbox / 2);
 				//IEnumerable<PhysicsObject> characters = _turret.Level.Players.Values.Where(p => p.Team != _turret.Team);
-				List<MainGuiObject> characters = _turret.Level.GetAllCharacterObjects(new Vector4(projectilePosition, projectileHitbox.X, projectileHitbox.Y)).Where(p => p.Team != _turret.Team && p.Team > Team.Neutral).ToList();
+				List<MainGuiObject> characters = _turret.Level.GetAllMovableCharacters(new Vector4(projectilePosition, projectileHitbox.X, projectileHitbox.Y)).Where(p => p.Team != _turret.Team && p.Team > Team.Neutral).ToList();
 				MainGuiObject targetedCharacter = characters.OrderBy(p => (p.Center - _turret.Center).GetDistance()).FirstOrDefault();
 
 				Vector2 aim = targetedCharacter == null ? _turret.GetAim() : targetedCharacter.Center - _turret.Center;

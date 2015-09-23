@@ -43,7 +43,7 @@ namespace SimonsGame.GuiObjects.ElementalMagic
 		public override void PostUpdate(GameTime gameTime)
 		{
 			base.PostUpdate(gameTime);
-			IEnumerable<Tuple<Vector2, MainGuiObject>> hitPlatforms = GetHitObjects(Level.GetAllUnPassableMovableObjects(Bounds).Concat(Level.GetAllUnPassableEnvironmentObjects(Bounds)), this.HitBoxBounds).Where(tup => tup.Item2.Id != _character.Id);
+			IEnumerable<Tuple<Vector2, MainGuiObject>> hitPlatforms = GetHitObjects(Level.GetAllMovableCharacters(Bounds).Concat(Level.GetAllUnPassableEnvironmentObjects(Bounds)), this.HitBoxBounds).Where(tup => tup.Item2.Id != _character.Id);
 
 			foreach (MainGuiObject mgo in hitPlatforms.Select(tup => tup.Item2).Where(mgo => mgo.Team != Team).ToList())
 			{

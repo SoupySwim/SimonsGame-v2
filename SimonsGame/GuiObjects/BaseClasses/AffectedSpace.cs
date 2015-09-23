@@ -43,7 +43,7 @@ namespace SimonsGame.GuiObjects
 
 		public virtual IEnumerable<Tuple<Vector2, MainGuiObject>> GetAffectedObjects()
 		{
-			return GetHitObjects(Level.GetAllCharacterObjects(Bounds), Bounds).Where(kv => kv.Item2.Id != Id);
+			return GetHitObjects(Level.GetAllMovableCharacters(Bounds), Bounds).Where(kv => kv.Item2.Id != Id);
 		}
 
 		//protected override Dictionary<Group, List<MainGuiObject>> GetAllVerticalPassableGroups(Dictionary<Group, List<MainGuiObject>> guiObjects)

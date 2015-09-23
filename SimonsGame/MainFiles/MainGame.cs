@@ -187,7 +187,7 @@ namespace SimonsGame
 			_gameState = MainGameState.Game;
 			bool didLoadSuccessfully = _gameStateManager.StartNewGame(gameSettings);
 			if (didLoadSuccessfully)// If it loaded, then initialize and start the game already!
-				_gameStateManager.Level.Initialize();
+				_gameStateManager.InitializeLevel();
 			else
 				_gameState = MainGameState.Menu;
 			return didLoadSuccessfully;

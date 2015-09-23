@@ -129,6 +129,8 @@ namespace SimonsGame.Extensions
 					return new JungleCreepZone(Vector2.Zero, Vector2.Zero, level);
 				case GuiObjectClass.BehaviorZone:
 					return new BehaviorZone(Vector2.Zero, Vector2.Zero, level, Team.Team1);
+				case GuiObjectClass.StoryZone:
+					return new StoryZone(Vector2.Zero, level);
 			}
 			return null;
 		}

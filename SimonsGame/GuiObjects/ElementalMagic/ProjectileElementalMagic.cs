@@ -43,12 +43,12 @@ namespace SimonsGame.Modifiers.Abilities
 			if (hitObject != null && !hitMultiple)
 			{
 				foreach (ModifierBase mod in _modifierList)
-					hitObject.HitByObject(this, mod);
-				hitObject.HitByObject(this, this.GetKnockbackAbility(hitObject, _knockbackBase));
+					hitObject.HitByObject(_character, mod);
+				hitObject.HitByObject(_character, this.GetKnockbackAbility(hitObject, _knockbackBase));
 			}
 			else
 			{
-				IEnumerable<MainGuiObject> guiObjects = Level.GetPossiblyHitEnvironmentObjects(HitBoxBounds).Concat(Level.GetAllUnPassableMovableObjects(HitBoxBounds)).Where(tup => tup.Id != _character.Id && tup.Group != Group.Passable); //Level.GetAllGuiObjects().Where(kv => kv.Group != Group.Passable);
+				IEnumerable<MainGuiObject> guiObjects = Level.GetPossiblyHitEnvironmentObjects(HitBoxBounds).Concat(Level.GetAllMovableCharacters(HitBoxBounds)).Where(tup => tup.Id != _character.Id && tup.Group != Group.Passable); //Level.GetAllGuiObjects().Where(kv => kv.Group != Group.Passable);
 				IEnumerable<MainGuiObject> hitPlatforms = GetHitObjects(guiObjects, this.HitBoxBounds).Select(tup => tup.Item2).Concat(PrimaryOverlapObjects.SelectMany(mgos => mgos.Value));
 				if (hitPlatforms.Any()) // Probably apply any effects it would have.
 				{
@@ -86,7 +86,7 @@ namespace SimonsGame.Modifiers.Abilities
 			//{
 			List<MainGuiObject> newGuiObjects = new List<MainGuiObject>();
 			if (!HasAbility(AbilityAttributes.PassCharacters)) // If the magic cannot pass through characters, then stop it on a hit character.
-				newGuiObjects.AddRange(Level.GetAllUnPassableMovableObjects(Bounds).Where(mgo => mgo.Team != Team && mgo.Id != _character.Id));
+				newGuiObjects.AddRange(Level.GetAllMovableCharacters(Bounds).Where(mgo => mgo.Team != Team && mgo.Id != _character.Id));
 			if (!HasAbility(AbilityAttributes.PassWall)) // If the magic cannot pass through walls, then stop it on a hit wall.
 				newGuiObjects.AddRange(Level.GetPossiblyHitEnvironmentObjects(Bounds).Where(mgo => (mgo.Team != Team || Team <= Team.Neutral) && mgo.Group == Group.ImpassableIncludingMagic));
 
