@@ -7,7 +7,7 @@
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
       <Options>None</Options>
-      <Output>E:\Dropbox\SimonsGame-v2\SImonsGame\bin\Debug\Content\Cursor\CursorStar.xnb</Output>
+      <Output>E:\Dropbox\SimonsGame_copy\SImonsGame\SImonsGame\bin\Debug\Content\Cursor\CursorStar.xnb</Output>
       <Time>2014-10-28T20:42:05-05:00</Time>
     </Item>
     <Item>
@@ -16,7 +16,7 @@
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
       <Options>None</Options>
-      <Output>E:\Dropbox\SimonsGame-v2\SImonsGame\bin\Debug\Content\Test\fireball.xnb</Output>
+      <Output>E:\Dropbox\SimonsGame_copy\SImonsGame\SImonsGame\bin\Debug\Content\Test\fireball.xnb</Output>
       <Time>2014-10-29T00:32:53-05:00</Time>
     </Item>
     <Item>
@@ -25,7 +25,7 @@
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
       <Options>None</Options>
-      <Output>E:\Dropbox\SimonsGame-v2\SImonsGame\bin\Debug\Content\Test\bubble.xnb</Output>
+      <Output>E:\Dropbox\SimonsGame_copy\SImonsGame\SImonsGame\bin\Debug\Content\Test\bubble.xnb</Output>
       <Time>2014-10-29T01:23:04-05:00</Time>
     </Item>
     <Item>
@@ -34,7 +34,7 @@
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
       <Options>None</Options>
-      <Output>E:\Dropbox\SimonsGame-v2\SImonsGame\bin\Debug\Content\Test\splash.xnb</Output>
+      <Output>E:\Dropbox\SimonsGame_copy\SImonsGame\SImonsGame\bin\Debug\Content\Test\splash.xnb</Output>
       <Time>2014-10-29T11:53:30-05:00</Time>
     </Item>
     <Item>
@@ -43,7 +43,7 @@
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
       <Options>None</Options>
-      <Output>E:\Dropbox\SimonsGame-v2\SImonsGame\bin\Debug\Content\Test\leaf.xnb</Output>
+      <Output>E:\Dropbox\SimonsGame_copy\SImonsGame\SImonsGame\bin\Debug\Content\Test\leaf.xnb</Output>
       <Time>2014-11-03T20:51:45-06:00</Time>
     </Item>
     <Item>
@@ -52,8 +52,8 @@
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
       <Options>None</Options>
-      <Output>E:\Dropbox\SimonsGame-v2\SImonsGame\bin\Debug\Content\Test\cog.xnb</Output>
-      <Time>2014-12-24T13:05:12-06:00</Time>
+      <Output>E:\Dropbox\SimonsGame_copy\SImonsGame\SImonsGame\bin\Debug\Content\Test\cog.xnb</Output>
+      <Time>2014-12-24T13:05:12.8398002-06:00</Time>
     </Item>
     <Item>
       <Source>Sprites\PlayerSprites\TempPlayer\IdleFull.png</Source>
@@ -61,7 +61,7 @@
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
       <Options>None</Options>
-      <Output>E:\Dropbox\SimonsGame-v2\SImonsGame\bin\Debug\Content\Sprites\PlayerSprites\TempPlayer\IdleFull.xnb</Output>
+      <Output>E:\Dropbox\SimonsGame_copy\SImonsGame\SImonsGame\bin\Debug\Content\Sprites\PlayerSprites\TempPlayer\IdleFull.xnb</Output>
       <Time>2014-09-05T00:06:39-05:00</Time>
     </Item>
     <Item>
@@ -70,7 +70,7 @@
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
       <Options>None</Options>
-      <Output>E:\Dropbox\SimonsGame-v2\SImonsGame\bin\Debug\Content\Sprites\PlayerSprites\TempPlayer\RunFull.xnb</Output>
+      <Output>E:\Dropbox\SimonsGame_copy\SImonsGame\SImonsGame\bin\Debug\Content\Sprites\PlayerSprites\TempPlayer\RunFull.xnb</Output>
       <Time>2014-09-05T00:10:11-05:00</Time>
     </Item>
     <Item>
@@ -79,7 +79,7 @@
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
       <Options>None</Options>
-      <Output>E:\Dropbox\SimonsGame-v2\SImonsGame\bin\Debug\Content\Test\Menu\MapEditor.xnb</Output>
+      <Output>E:\Dropbox\SimonsGame_copy\SImonsGame\SImonsGame\bin\Debug\Content\Test\Menu\MapEditor.xnb</Output>
       <Time>2014-12-27T09:49:07-06:00</Time>
     </Item>
     <Item>
@@ -88,8 +88,8 @@
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
       <Options>None</Options>
-      <Output>E:\Dropbox\SimonsGame-v2\SImonsGame\bin\Debug\Content\Test\Menu\Multiplayer.xnb</Output>
-      <Time>2014-12-27T10:35:41-06:00</Time>
+      <Output>E:\Dropbox\SimonsGame_copy\SImonsGame\SImonsGame\bin\Debug\Content\Test\Menu\Multiplayer.xnb</Output>
+      <Time>2014-12-27T10:35:41.6935044-06:00</Time>
     </Item>
     <Item>
       <Source>Test\Menu\QuickMatch.png</Source>
@@ -97,7 +97,7 @@
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
       <Options>None</Options>
-      <Output>E:\Dropbox\SimonsGame-v2\SImonsGame\bin\Debug\Content\Test\Menu\QuickMatch.xnb</Output>
+      <Output>E:\Dropbox\SimonsGame_copy\SImonsGame\SImonsGame\bin\Debug\Content\Test\Menu\QuickMatch.xnb</Output>
       <Time>2014-12-27T10:06:35-06:00</Time>
     </Item>
     <Item>
@@ -106,8 +106,287 @@
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
       <Options>None</Options>
-      <Output>E:\Dropbox\SimonsGame-v2\SImonsGame\bin\Debug\Content\Test\Menu\SinglePlayer.xnb</Output>
+      <Output>E:\Dropbox\SimonsGame_copy\SImonsGame\SImonsGame\bin\Debug\Content\Test\Menu\SinglePlayer.xnb</Output>
       <Time>2014-12-27T09:51:19-06:00</Time>
+    </Item>
+    <Item>
+      <Source>Test\Menu\RightArrow.png</Source>
+      <Name>Test\Menu\RightArrow</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>E:\Dropbox\SimonsGame_copy\SImonsGame\SImonsGame\bin\Debug\Content\Test\Menu\RightArrow.xnb</Output>
+      <Time>2015-01-05T21:31:22-06:00</Time>
+    </Item>
+    <Item>
+      <Source>Test\Platform.png</Source>
+      <Name>Test\Platform</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>E:\Dropbox\SimonsGame_copy\SImonsGame\SImonsGame\bin\Debug\Content\Test\Platform.xnb</Output>
+      <Time>2015-01-18T01:22:42-06:00</Time>
+    </Item>
+    <Item>
+      <Source>Test\WallRunner.png</Source>
+      <Name>Test\WallRunner</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>E:\Dropbox\SimonsGame_copy\SImonsGame\SImonsGame\bin\Debug\Content\Test\WallRunner.xnb</Output>
+      <Time>2015-01-18T14:07:46-06:00</Time>
+    </Item>
+    <Item>
+      <Source>Test\HealthCreep.png</Source>
+      <Name>Test\HealthCreep</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>E:\Dropbox\SimonsGame_copy\SImonsGame\SImonsGame\bin\Debug\Content\Test\HealthCreep.xnb</Output>
+      <Time>2015-01-18T17:11:06.1838253-06:00</Time>
+    </Item>
+    <Item>
+      <Source>Test\PlayerStill.png</Source>
+      <Name>Test\PlayerStill</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>E:\Dropbox\SimonsGame_copy\SImonsGame\SImonsGame\bin\Debug\Content\Test\PlayerStill.xnb</Output>
+      <Time>2015-01-18T13:33:17-06:00</Time>
+    </Item>
+    <Item>
+      <Source>Test\Mover.png</Source>
+      <Name>Test\Mover</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>E:\Dropbox\SimonsGame_copy\SImonsGame\SImonsGame\bin\Debug\Content\Test\Mover.xnb</Output>
+      <Time>2015-01-18T13:59:35-06:00</Time>
+    </Item>
+    <Item>
+      <Source>Test\PlayerStillAI.png</Source>
+      <Name>Test\PlayerStillAI</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>E:\Dropbox\SimonsGame_copy\SImonsGame\SImonsGame\bin\Debug\Content\Test\PlayerStillAI.xnb</Output>
+      <Time>2015-01-18T22:21:40-06:00</Time>
+    </Item>
+    <Item>
+      <Source>Test\TrashCan.png</Source>
+      <Name>Test\TrashCan</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>E:\Dropbox\SimonsGame_copy\SImonsGame\SImonsGame\bin\Debug\Content\Test\TrashCan.xnb</Output>
+      <Time>2015-01-19T17:37:56-06:00</Time>
+    </Item>
+    <Item>
+      <Source>Test\Turret.png</Source>
+      <Name>Test\Turret</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>E:\Dropbox\SimonsGame_copy\SImonsGame\SImonsGame\bin\Debug\Content\Test\Turret.xnb</Output>
+      <Time>2015-01-21T20:55:45-06:00</Time>
+    </Item>
+    <Item>
+      <Source>Test\Base.png</Source>
+      <Name>Test\Base</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>E:\Dropbox\SimonsGame_copy\SImonsGame\SImonsGame\bin\Debug\Content\Test\Base.xnb</Output>
+      <Time>2015-01-22T20:52:32-06:00</Time>
+    </Item>
+    <Item>
+      <Source>Test\FlagPole.png</Source>
+      <Name>Test\FlagPole</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>E:\Dropbox\SimonsGame_copy\SImonsGame\SImonsGame\bin\Debug\Content\Test\FlagPole.xnb</Output>
+      <Time>2015-02-02T22:01:29.9394679-06:00</Time>
+    </Item>
+    <Item>
+      <Source>Test\Block.png</Source>
+      <Name>Test\Block</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>E:\Dropbox\SimonsGame_copy\SImonsGame\SImonsGame\bin\Debug\Content\Test\Block.xnb</Output>
+      <Time>2015-03-23T18:35:09-05:00</Time>
+    </Item>
+    <Item>
+      <Source>Test\PushingWave.png</Source>
+      <Name>Test\PushingWave</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>E:\Dropbox\SimonsGame_copy\SImonsGame\SImonsGame\bin\Debug\Content\Test\PushingWave.xnb</Output>
+      <Time>2015-03-26T21:09:42-05:00</Time>
+    </Item>
+    <Item>
+      <Source>Test\ObjectSpawnerEmpty.png</Source>
+      <Name>Test\ObjectSpawnerEmpty</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>E:\Dropbox\SimonsGame_copy\SImonsGame\SImonsGame\bin\Debug\Content\Test\ObjectSpawnerEmpty.xnb</Output>
+      <Time>2015-03-27T01:49:56.7392214-05:00</Time>
+    </Item>
+    <Item>
+      <Source>Test\ObjectSpawnerFrame.png</Source>
+      <Name>Test\ObjectSpawnerFrame</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>E:\Dropbox\SimonsGame_copy\SImonsGame\SImonsGame\bin\Debug\Content\Test\ObjectSpawnerFrame.xnb</Output>
+      <Time>2015-03-27T01:04:47-05:00</Time>
+    </Item>
+    <Item>
+      <Source>Test\SingleColor.png</Source>
+      <Name>Test\SingleColor</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>E:\Dropbox\SimonsGame_copy\SImonsGame\SImonsGame\bin\Debug\Content\Test\SingleColor.xnb</Output>
+      <Time>2015-03-30T23:45:57-05:00</Time>
+    </Item>
+    <Item>
+      <Source>Test\Healthpack.png</Source>
+      <Name>Test\Healthpack</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>E:\Dropbox\SimonsGame_copy\SImonsGame\SImonsGame\bin\Debug\Content\Test\Healthpack.xnb</Output>
+      <Time>2015-04-03T16:15:49-05:00</Time>
+    </Item>
+    <Item>
+      <Source>Test\Spikes.png</Source>
+      <Name>Test\Spikes</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>E:\Dropbox\SimonsGame_copy\SImonsGame\SImonsGame\bin\Debug\Content\Test\Spikes.xnb</Output>
+      <Time>2015-04-11T14:07:06-05:00</Time>
+    </Item>
+    <Item>
+      <Source>Test\SmallKey.png</Source>
+      <Name>Test\SmallKey</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>E:\Dropbox\SimonsGame_copy\SImonsGame\SImonsGame\bin\Debug\Content\Test\SmallKey.xnb</Output>
+      <Time>2015-04-12T11:13:20-05:00</Time>
+    </Item>
+    <Item>
+      <Source>Test\NewAbility.png</Source>
+      <Name>Test\NewAbility</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>E:\Dropbox\SimonsGame_copy\SImonsGame\SImonsGame\bin\Debug\Content\Test\NewAbility.xnb</Output>
+      <Time>2015-04-12T17:32:44-05:00</Time>
+    </Item>
+    <Item>
+      <Source>Test\LevelUpButton.png</Source>
+      <Name>Test\LevelUpButton</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>E:\Dropbox\SimonsGame_copy\SImonsGame\SImonsGame\bin\Debug\Content\Test\LevelUpButton.xnb</Output>
+      <Time>2015-04-26T13:23:16-05:00</Time>
+    </Item>
+    <Item>
+      <Source>Test\LargeCreep.png</Source>
+      <Name>Test\LargeCreep</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>E:\Dropbox\SimonsGame_copy\SImonsGame\SImonsGame\bin\Debug\Content\Test\LargeCreep.xnb</Output>
+      <Time>2015-05-04T22:55:49-05:00</Time>
+    </Item>
+    <Item>
+      <Source>Test\BatFly.png</Source>
+      <Name>Test\BatFly</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>E:\Dropbox\SimonsGame_copy\SImonsGame\SImonsGame\bin\Debug\Content\Test\BatFly.xnb</Output>
+      <Time>2015-05-07T23:27:32-05:00</Time>
+    </Item>
+    <Item>
+      <Source>Test\BatIdle.png</Source>
+      <Name>Test\BatIdle</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>E:\Dropbox\SimonsGame_copy\SImonsGame\SImonsGame\bin\Debug\Content\Test\BatIdle.xnb</Output>
+      <Time>2015-05-07T23:13:43-05:00</Time>
+    </Item>
+    <Item>
+      <Source>Test\MinionFlying.png</Source>
+      <Name>Test\MinionFlying</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>E:\Dropbox\SimonsGame_copy\SImonsGame\SImonsGame\bin\Debug\Content\Test\MinionFlying.xnb</Output>
+      <Time>2015-06-14T16:42:06-05:00</Time>
+    </Item>
+    <Item>
+      <Source>Test\MinionFlyingFrame.png</Source>
+      <Name>Test\MinionFlyingFrame</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>E:\Dropbox\SimonsGame_copy\SImonsGame\SImonsGame\bin\Debug\Content\Test\MinionFlyingFrame.xnb</Output>
+      <Time>2015-06-14T16:43:22-05:00</Time>
+    </Item>
+    <Item>
+      <Source>Sprites\PlayerSprites\TempPlayer\Blob.png</Source>
+      <Name>Sprites\PlayerSprites\TempPlayer\Blob</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>E:\Dropbox\SimonsGame_copy\SImonsGame\SImonsGame\bin\Debug\Content\Sprites\PlayerSprites\TempPlayer\Blob.xnb</Output>
+      <Time>2015-06-20T12:34:37-05:00</Time>
+    </Item>
+    <Item>
+      <Source>Test\LightningBolt.png</Source>
+      <Name>Test\LightningBolt</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>E:\Dropbox\SimonsGame_copy\SImonsGame\SImonsGame\bin\Debug\Content\Test\LightningBolt.xnb</Output>
+      <Time>2015-06-21T11:47:32-05:00</Time>
+    </Item>
+    <Item>
+      <Source>Test\Hammer.png</Source>
+      <Name>Test\Hammer</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>E:\Dropbox\SimonsGame_copy\SImonsGame\SImonsGame\bin\Debug\Content\Test\Hammer.xnb</Output>
+      <Time>2015-08-14T11:46:50-05:00</Time>
+    </Item>
+    <Item>
+      <Source>Test\IfClause.png</Source>
+      <Name>Test\IfClause</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>E:\Dropbox\SimonsGame_copy\SImonsGame\SImonsGame\bin\Debug\Content\Test\IfClause.xnb</Output>
+      <Time>2015-08-14T16:39:44-05:00</Time>
+    </Item>
+    <Item>
+      <Source>Test\ThenClause.png</Source>
+      <Name>Test\ThenClause</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>E:\Dropbox\SimonsGame_copy\SImonsGame\SImonsGame\bin\Debug\Content\Test\ThenClause.xnb</Output>
+      <Time>2015-08-14T16:44:52-05:00</Time>
     </Item>
     <Item>
       <Source>Fonts\PlainFont.spritefont</Source>
@@ -115,8 +394,26 @@
       <Importer>FontDescriptionImporter</Importer>
       <Processor>FontDescriptionProcessor</Processor>
       <Options>None</Options>
-      <Output>E:\Dropbox\SimonsGame-v2\SImonsGame\bin\Debug\Content\Fonts\PlainFont.xnb</Output>
-      <Time>2014-06-07T18:48:58-05:00</Time>
+      <Output>E:\Dropbox\SimonsGame_copy\SImonsGame\SImonsGame\bin\Debug\Content\Fonts\PlainFont.xnb</Output>
+      <Time>2015-01-27T20:12:10-06:00</Time>
+    </Item>
+    <Item>
+      <Source>Fonts\PlainFontLarge.spritefont</Source>
+      <Name>Fonts\PlainFontLarge</Name>
+      <Importer>FontDescriptionImporter</Importer>
+      <Processor>FontDescriptionProcessor</Processor>
+      <Options>None</Options>
+      <Output>E:\Dropbox\SimonsGame_copy\SImonsGame\SImonsGame\bin\Debug\Content\Fonts\PlainFontLarge.xnb</Output>
+      <Time>2015-01-27T20:18:20.2928106-06:00</Time>
+    </Item>
+    <Item>
+      <Source>Fonts\PlainFontSmall.spritefont</Source>
+      <Name>Fonts\PlainFontSmall</Name>
+      <Importer>FontDescriptionImporter</Importer>
+      <Processor>FontDescriptionProcessor</Processor>
+      <Options>None</Options>
+      <Output>E:\Dropbox\SimonsGame_copy\SImonsGame\SImonsGame\bin\Debug\Content\Fonts\PlainFontSmall.xnb</Output>
+      <Time>2015-07-23T23:36:42.8614443-05:00</Time>
     </Item>
     <BuildSuccessful>true</BuildSuccessful>
     <Settings>
@@ -125,10 +422,10 @@
       <TargetProfile>HiDef</TargetProfile>
       <BuildConfiguration>Debug</BuildConfiguration>
       <CompressContent>false</CompressContent>
-      <RootDirectory>E:\Dropbox\SimonsGame-v2\SImonsGameContent\</RootDirectory>
-      <LoggerRootDirectory>E:\Dropbox\SimonsGame-v2\SImonsGame\</LoggerRootDirectory>
-      <IntermediateDirectory>E:\Dropbox\SimonsGame-v2\SImonsGame\obj\Debug\</IntermediateDirectory>
-      <OutputDirectory>E:\Dropbox\SimonsGame-v2\SImonsGame\bin\Debug\Content\</OutputDirectory>
+      <RootDirectory>E:\Dropbox\SimonsGame_copy\SImonsGame\SImonsGameContent\</RootDirectory>
+      <LoggerRootDirectory>E:\Dropbox\SimonsGame_copy\SImonsGame\SImonsGame\</LoggerRootDirectory>
+      <IntermediateDirectory>E:\Dropbox\SimonsGame_copy\SImonsGame\SImonsGame\obj\Debug\</IntermediateDirectory>
+      <OutputDirectory>E:\Dropbox\SimonsGame_copy\SImonsGame\SImonsGame\bin\Debug\Content\</OutputDirectory>
     </Settings>
     <Assemblies>
       <Assembly>

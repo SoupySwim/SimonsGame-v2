@@ -16,6 +16,7 @@ using SimonsGame.Menu;
 using SimonsGame.Menu.MenuScreens;
 using SimonsGame.Test;
 using SimonsGame.Story;
+using SimonsGame.LevelMaker;
 
 namespace SimonsGame
 {
@@ -109,10 +110,13 @@ namespace SimonsGame
 			_containsStory = _gameSettings.LevelFileMetaData.ScenarioType == MainFiles.ScenarioType.MultiPlayerChallenge
 				|| _gameSettings.LevelFileMetaData.ScenarioType == MainFiles.ScenarioType.SinglePlayerStory
 				|| _gameSettings.LevelFileMetaData.ScenarioType == MainFiles.ScenarioType.SinglePlayerChallenge;
-
+			_containsStory = false;
 			ExperienceGainIntervals = _gameSettings.ExperienceGainIntervals.ToList();
+
 			//TODO move level to somewhere more meaningful...
-			Level = MapEditorIOManager.DeserializeLevelFromFile(gameSettings.MapName, this);// Test.LevelBuilder.BuildLevel3(MainGame.CurrentWindowSize + new Vector2(MainGame.CurrentWindowSize.X * .8f, MainGame.CurrentWindowSize.Y * .75f), this);
+			Level = gameSettings.IsRandomLevel ? RandomLevelMaker.MakeRandomLevel(this, gameSettings.LevelSettings, 1)
+				: MapEditorIOManager.DeserializeLevelFromFile(gameSettings.MapName, this);// Test.LevelBuilder.BuildLevel3(MainGame.CurrentWindowSize + new Vector2(MainGame.CurrentWindowSize.X * .8f, MainGame.CurrentWindowSize.Y * .75f), this);
+
 			_aiUtilityMap = Level.Players.Where(p => p.Value.IsAi).Select(p => new { key = p.Key, value = new AIUtility(p.Value) }).ToDictionary(p => p.key, p => p.value);
 
 			if (_isMultiplayer && gameSettings.AllowAIScreens)
@@ -144,7 +148,7 @@ namespace SimonsGame
 				var player = Level.Players.Select(kv => kv.Value).Where(p => !p.IsAi).FirstOrDefault() ?? Level.Players.Select(kv => kv.Value).FirstOrDefault();
 				if (player == null)
 					return false;
-				_playerViewports = new Dictionary<Guid, PlayerViewport>() { { player.Id, new PlayerViewport(player, new Vector4(0, 0, MainGame.CurrentWindowSize.Y, MainGame.CurrentWindowSize.X), Level.Size, 1.2945f, this) } };
+				_playerViewports = new Dictionary<Guid, PlayerViewport>() { { player.Id, new PlayerViewport(player, new Vector4(0, 0, MainGame.CurrentWindowSize.Y, MainGame.CurrentWindowSize.X), Level.Size, .25f/*1.2945f*/, this) } };
 			}
 
 			_gameState = _gameSettings.LevelFileMetaData.ScenarioType == MainFiles.ScenarioType.MultiPlayerCompetitive ? GameStateManagerGameState.PreGame : GameStateManagerGameState.StartingGame;

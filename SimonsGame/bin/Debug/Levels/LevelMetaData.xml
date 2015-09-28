@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Levels>
+  <Level LastModifiedOn="2/8/2015 1:32:50 PM" LevelName="Mario1-1" LevelRelativePath="" TeamCount="2" WinCondition="3" ScenarioType="1" X="8800" Y="1920" />
+  <Level LastModifiedOn="1/19/2015 9:01:27 PM" LevelName="Sprint 3 Demo" LevelRelativePath="" TeamCount="2" WinCondition="0" ScenarioType="1" X="2880" Y="2080" />
+  <Level LastModifiedOn="8/9/2015 11:08:28 PM" LevelName="RibbitRipoff" LevelRelativePath="" TeamCount="2" WinCondition="-1" ScenarioType="-1" X="4120" Y="1600" />
+  <Level LastModifiedOn="8/9/2015 11:07:56 PM" LevelName="BigMultiMap" LevelRelativePath="" TeamCount="2" WinCondition="1" ScenarioType="2" X="16000" Y="5040" />
+  <Level LastModifiedOn="1/19/2015 7:20:31 PM" LevelName="Alpha Mario Test" LevelRelativePath="" TeamCount="2" WinCondition="0" ScenarioType="1" X="8000" Y="1920" />
+  <Level LastModifiedOn="2/2/2015 7:58:16 PM" LevelName="Mario1-1 Complete" LevelRelativePath="" TeamCount="2" WinCondition="3" ScenarioType="1" X="8000" Y="1920" />
+  <Level LastModifiedOn="9/26/2015 2:53:00 PM" LevelName="SmallMultiplayer" LevelRelativePath="" TeamCount="3" WinCondition="1" ScenarioType="3" X="7920" Y="2720" />
+  <Level LastModifiedOn="4/13/2015 11:05:02 PM" LevelName="UnfinishedMap" LevelRelativePath="" TeamCount="4" WinCondition="-1" ScenarioType="-1" X="9680" Y="6400" />
+  <Level LastModifiedOn="8/9/2015 11:08:11 PM" LevelName="Big Level" LevelRelativePath="" TeamCount="4" WinCondition="3" ScenarioType="1" X="4840" Y="6400" />
+  <Level LastModifiedOn="9/8/2015 7:53:23 AM" LevelName="MarryStory" LevelRelativePath="" TeamCount="3" WinCondition="-1" ScenarioType="-1" X="1920" Y="960" />
+  <Level LastModifiedOn="8/20/2015 12:28:44 AM" LevelName="ThreePlayerCoopOLD" LevelRelativePath="" TeamCount="1" WinCondition="-1" ScenarioType="-1" X="3360" Y="3360" />
+  <Level LastModifiedOn="8/17/2015 2:17:37 PM" LevelName="SmallSinglePlayer" LevelRelativePath="" TeamCount="2" WinCondition="0" ScenarioType="1" X="3040" Y="2080" />
+  <Level LastModifiedOn="8/15/2015 12:04:41 AM" LevelName="MultiPlayerCoop" LevelRelativePath="" TeamCount="2" WinCondition="3" ScenarioType="2" X="6400" Y="2080" />
+  <Level LastModifiedOn="8/20/2015 8:00:59 PM" LevelName="ThreePlayerCoop" LevelRelativePath="" TeamCount="1" WinCondition="3" ScenarioType="2" X="3360" Y="3360" />
+  <Level LastModifiedOn="9/8/2015 10:22:10 PM" LevelName="ambushStory" LevelRelativePath="" TeamCount="3" WinCondition="-1" ScenarioType="-1" X="1920" Y="960" />
+  <Level LastModifiedOn="8/31/2015 12:16:29 AM" LevelName="ThreePlayerArena" LevelRelativePath="" TeamCount="5" WinCondition="-1" ScenarioType="-1" X="2880" Y="2080" />
+  <Level LastModifiedOn="9/11/2015 12:25:41 AM" LevelName="FullStory" LevelRelativePath="" TeamCount="5" WinCondition="3" ScenarioType="0" X="4960" Y="2080" />
+  <Level LastModifiedOn="9/26/2015 2:50:32 PM" LevelName="TestMapEditor" LevelRelativePath="" TeamCount="0" WinCondition="0" ScenarioType="2" X="2880" Y="2080" />
+</Levels>

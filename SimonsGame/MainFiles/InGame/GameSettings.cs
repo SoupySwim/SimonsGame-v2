@@ -1,4 +1,5 @@
-﻿using SimonsGame.MapEditor;
+﻿using SimonsGame.LevelMaker;
+using SimonsGame.MapEditor;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -33,6 +34,8 @@ namespace SimonsGame.MainFiles
 	{
 		public bool AllowAIScreens { get; set; }
 		public bool PauseStopsGame { get; set; }
+		public bool IsRandomLevel { get; set; }
+		public LevelSettings LevelSettings { get; set; }
 		public string MapName { get; set; }
 		public LevelFileMetaData LevelFileMetaData { get; set; }
 		public List<ExperienceGain> ExperienceGainIntervals { get; set; }
@@ -45,5 +48,6 @@ namespace SimonsGame.MainFiles
 			LevelFileMetaData = new LevelFileMetaData();
 			ExperienceGainIntervals = new List<ExperienceGain>();
 		}
+
 	}
 }

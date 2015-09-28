@@ -58,7 +58,7 @@ namespace SimonsGame.GuiObjects
 		/// Constructor
 		/// </summary>
 		/// <param name="size"> Determines the viewport of the Level (What is displayed on the screen). </param>
-		public Level(Vector2 size, GameStateManager gameStateManager, int baseHeight)
+		public Level(Vector2 size, GameStateManager gameStateManager, int baseHeight = 160)
 		{
 			_environmentObjects = new Dictionary<Guid, MainGuiObject>();
 			_characterObjects = new Dictionary<Guid, MainGuiObject>();

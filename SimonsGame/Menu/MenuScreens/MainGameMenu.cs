@@ -47,7 +47,15 @@ namespace SimonsGame.Menu.MenuScreens
 							new ExperienceGain() { Amount = 69.12f/3600, StartTime = new TimeSpan(0,20,0) },
 						}
 				};
-				settings.LevelFileMetaData = MapEditorIOManager.GetMetadataForLevel(settings.MapName); // get the default map for quick match for now.
+				//settings.LevelFileMetaData = MapEditorIOManager.GetMetadataForLevel(settings.MapName); // get the default map for quick match for now.
+				settings.IsRandomLevel = true;
+				settings.LevelSettings = new LevelMaker.LevelSettings()
+				{
+					FloorDifficulty = 0,
+					RoomDividerLength = 160,
+					SingleRoomDiameter = 160 * 4,
+					TotalRooms = 5
+				};
 				_manager.StartGame(settings);
 			}, QuickMatchTL, new Vector4(_screenSize.X / 2 - buttonSize - 4, _screenSize.Y / 2 - buttonSize - 4, buttonSize, buttonSize), Color.Gray, Color.White, true);
 			_menuLayout[1][1] = new ImageMenuItemButton(() => { _manager.NavigateToScreen(MenuStateManager.ScreenType.SinglePlayerMenu); }, singlePlayerTR, new Vector4(_screenSize.X / 2 + 4, _screenSize.Y / 2 - buttonSize - 4, buttonSize, buttonSize), Color.Gray, Color.White, false);
